@@ -1,0 +1,15 @@
+C:\Code\BTL_LTTQ\QuanLyGym\QuanLyGym.BLL\bin\Debug\net10.0\QuanLyGym.BLL.deps.json
+C:\Code\BTL_LTTQ\QuanLyGym\QuanLyGym.BLL\bin\Debug\net10.0\QuanLyGym.BLL.dll
+C:\Code\BTL_LTTQ\QuanLyGym\QuanLyGym.BLL\bin\Debug\net10.0\QuanLyGym.BLL.pdb
+C:\Code\BTL_LTTQ\QuanLyGym\QuanLyGym.BLL\bin\Debug\net10.0\QuanLyGym.DAL.dll
+C:\Code\BTL_LTTQ\QuanLyGym\QuanLyGym.BLL\bin\Debug\net10.0\QuanLyGym.DAL.pdb
+C:\Code\BTL_LTTQ\QuanLyGym\QuanLyGym.BLL\obj\Debug\net10.0\QuanLyGym.BLL.csproj.AssemblyReference.cache
+C:\Code\BTL_LTTQ\QuanLyGym\QuanLyGym.BLL\obj\Debug\net10.0\QuanLyGym.BLL.GeneratedMSBuildEditorConfig.editorconfig
+C:\Code\BTL_LTTQ\QuanLyGym\QuanLyGym.BLL\obj\Debug\net10.0\QuanLyGym.BLL.AssemblyInfoInputs.cache
+C:\Code\BTL_LTTQ\QuanLyGym\QuanLyGym.BLL\obj\Debug\net10.0\QuanLyGym.BLL.AssemblyInfo.cs
+C:\Code\BTL_LTTQ\QuanLyGym\QuanLyGym.BLL\obj\Debug\net10.0\QuanLyGym.BLL.csproj.CoreCompileInputs.cache
+C:\Code\BTL_LTTQ\QuanLyGym\QuanLyGym.BLL\obj\Debug\net10.0\QuanLyGy.AA676101.Up2Date
+C:\Code\BTL_LTTQ\QuanLyGym\QuanLyGym.BLL\obj\Debug\net10.0\QuanLyGym.BLL.dll
+C:\Code\BTL_LTTQ\QuanLyGym\QuanLyGym.BLL\obj\Debug\net10.0\refint\QuanLyGym.BLL.dll
+C:\Code\BTL_LTTQ\QuanLyGym\QuanLyGym.BLL\obj\Debug\net10.0\QuanLyGym.BLL.pdb
+C:\Code\BTL_LTTQ\QuanLyGym\QuanLyGym.BLL\obj\Debug\net10.0\ref\QuanLyGym.BLL.dll

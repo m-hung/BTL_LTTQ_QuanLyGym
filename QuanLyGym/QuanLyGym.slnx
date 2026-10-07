@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="QuanLyGym.BLL/QuanLyGym.BLL.csproj" />
+  <Project Path="QuanLyGym.DAL/QuanLyGym.DAL.csproj" />
+  <Project Path="QuanLyGym.UI/QuanLyGym.UI.csproj" />
+</Solution>
