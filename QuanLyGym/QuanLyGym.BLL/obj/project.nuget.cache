@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "DWxyfj2Hu5c=",
+  "dgSpecHash": "sTtcGoi0fY0=",
   "success": true,
-  "projectFilePath": "C:\\Code\\BTL_LTTQ\\QuanLyGym\\QuanLyGym.BLL\\QuanLyGym.BLL.csproj",
+  "projectFilePath": "C:\\Code\\BTL_LTTQ_QuanLyGym\\QuanLyGym\\QuanLyGym.BLL\\QuanLyGym.BLL.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\PC\\.nuget\\packages\\azure.core\\1.50.0\\azure.core.1.50.0.nupkg.sha512",
     "C:\\Users\\PC\\.nuget\\packages\\azure.identity\\1.17.1\\azure.identity.1.17.1.nupkg.sha512",

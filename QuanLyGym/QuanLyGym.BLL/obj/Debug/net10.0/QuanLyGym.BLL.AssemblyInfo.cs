@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("QuanLyGym.BLL")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6d08f51208c09f954e1ee974ea6617065ad9334c")]
 [assembly: System.Reflection.AssemblyProductAttribute("QuanLyGym.BLL")]
 [assembly: System.Reflection.AssemblyTitleAttribute("QuanLyGym.BLL")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

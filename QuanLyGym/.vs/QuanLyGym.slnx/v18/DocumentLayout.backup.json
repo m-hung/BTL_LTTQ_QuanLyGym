@@ -1,26 +1,42 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Code\\BTL_LTTQ\\QuanLyGym\\",
+  "WorkspaceRootPath": "C:\\Code\\BTL_LTTQ_QuanLyGym\\QuanLyGym\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{D16A7019-92C6-7997-9A98-BF07FE9951F1}|QuanLyGym.UI\\QuanLyGym.UI.csproj|c:\\code\\btl_lttq\\quanlygym\\quanlygym.ui\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{D16A7019-92C6-7997-9A98-BF07FE9951F1}|QuanLyGym.UI\\QuanLyGym.UI.csproj|solutionrelative:quanlygym.ui\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{54569A28-7D80-E29E-B953-9FEC1A59AF4D}|QuanLyGym.DAL\\QuanLyGym.DAL.csproj|c:\\code\\btl_lttq_quanlygym\\quanlygym\\quanlygym.dal\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{54569A28-7D80-E29E-B953-9FEC1A59AF4D}|QuanLyGym.DAL\\QuanLyGym.DAL.csproj|solutionrelative:quanlygym.dal\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{D16A7019-92C6-7997-9A98-BF07FE9951F1}|QuanLyGym.UI\\QuanLyGym.UI.csproj|c:\\code\\btl_lttq\\quanlygym\\quanlygym.ui\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{D16A7019-92C6-7997-9A98-BF07FE9951F1}|QuanLyGym.UI\\QuanLyGym.UI.csproj|solutionrelative:quanlygym.ui\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+      "AbsoluteMoniker": "D:0:0:{54569A28-7D80-E29E-B953-9FEC1A59AF4D}|QuanLyGym.DAL\\QuanLyGym.DAL.csproj|c:\\code\\btl_lttq_quanlygym\\quanlygym\\quanlygym.dal\\configurations\\progressconfiguration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{54569A28-7D80-E29E-B953-9FEC1A59AF4D}|QuanLyGym.DAL\\QuanLyGym.DAL.csproj|solutionrelative:quanlygym.dal\\configurations\\progressconfiguration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2749F38-CA36-4F5F-AF65-001DEA835BA1}|QuanLyGym.UI\\QuanLyGym.UI.csproj|C:\\Code\\BTL_LTTQ\\QuanLyGym\\quanlygym.ui\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "AbsoluteMoniker": "D:0:0:{54569A28-7D80-E29E-B953-9FEC1A59AF4D}|QuanLyGym.DAL\\QuanLyGym.DAL.csproj|c:\\code\\btl_lttq_quanlygym\\quanlygym\\quanlygym.dal\\configurations\\checkinimageconfiguration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{54569A28-7D80-E29E-B953-9FEC1A59AF4D}|QuanLyGym.DAL\\QuanLyGym.DAL.csproj|solutionrelative:quanlygym.dal\\configurations\\checkinimageconfiguration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{54569A28-7D80-E29E-B953-9FEC1A59AF4D}|QuanLyGym.DAL\\QuanLyGym.DAL.csproj|c:\\code\\btl_lttq_quanlygym\\quanlygym\\quanlygym.dal\\configurations\\checkinconfiguration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{54569A28-7D80-E29E-B953-9FEC1A59AF4D}|QuanLyGym.DAL\\QuanLyGym.DAL.csproj|solutionrelative:quanlygym.dal\\configurations\\checkinconfiguration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{54569A28-7D80-E29E-B953-9FEC1A59AF4D}|QuanLyGym.DAL\\QuanLyGym.DAL.csproj|c:\\code\\btl_lttq_quanlygym\\quanlygym\\quanlygym.dal\\configurations\\scheduleconfiguration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{54569A28-7D80-E29E-B953-9FEC1A59AF4D}|QuanLyGym.DAL\\QuanLyGym.DAL.csproj|solutionrelative:quanlygym.dal\\configurations\\scheduleconfiguration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{54569A28-7D80-E29E-B953-9FEC1A59AF4D}|QuanLyGym.DAL\\QuanLyGym.DAL.csproj|c:\\code\\btl_lttq_quanlygym\\quanlygym\\quanlygym.dal\\configurations\\workingscheduleconfiguration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{54569A28-7D80-E29E-B953-9FEC1A59AF4D}|QuanLyGym.DAL\\QuanLyGym.DAL.csproj|solutionrelative:quanlygym.dal\\configurations\\workingscheduleconfiguration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{54569A28-7D80-E29E-B953-9FEC1A59AF4D}|QuanLyGym.DAL\\QuanLyGym.DAL.csproj|c:\\code\\btl_lttq_quanlygym\\quanlygym\\quanlygym.dal\\configurations\\incidentconfiguration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{54569A28-7D80-E29E-B953-9FEC1A59AF4D}|QuanLyGym.DAL\\QuanLyGym.DAL.csproj|solutionrelative:quanlygym.dal\\configurations\\incidentconfiguration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{54569A28-7D80-E29E-B953-9FEC1A59AF4D}|QuanLyGym.DAL\\QuanLyGym.DAL.csproj|c:\\code\\btl_lttq_quanlygym\\quanlygym\\quanlygym.dal\\entities\\incident.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{54569A28-7D80-E29E-B953-9FEC1A59AF4D}|QuanLyGym.DAL\\QuanLyGym.DAL.csproj|solutionrelative:quanlygym.dal\\entities\\incident.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2749F38-CA36-4F5F-AF65-001DEA835BA1}|QuanLyGym.UI\\QuanLyGym.UI.csproj|C:\\Code\\BTL_LTTQ_QuanLyGym\\QuanLyGym\\quanlygym.ui\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{A2749F38-CA36-4F5F-AF65-001DEA835BA1}|QuanLyGym.UI\\QuanLyGym.UI.csproj|solutionrelative:quanlygym.ui\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{D6E25A20-6FE4-9ED2-10E6-CC87FA53DC01}|QuanLyGym.BLL\\QuanLyGym.BLL.csproj|c:\\code\\btl_lttq\\quanlygym\\quanlygym.bll\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{D6E25A20-6FE4-9ED2-10E6-CC87FA53DC01}|QuanLyGym.BLL\\QuanLyGym.BLL.csproj|solutionrelative:quanlygym.bll\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{54569A28-7D80-E29E-B953-9FEC1A59AF4D}|QuanLyGym.DAL\\QuanLyGym.DAL.csproj|c:\\code\\btl_lttq\\quanlygym\\quanlygym.dal\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{54569A28-7D80-E29E-B953-9FEC1A59AF4D}|QuanLyGym.DAL\\QuanLyGym.DAL.csproj|solutionrelative:quanlygym.dal\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -35,61 +51,115 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "Form1.cs",
-              "DocumentMoniker": "C:\\Code\\BTL_LTTQ\\QuanLyGym\\QuanLyGym.UI\\Form1.cs",
-              "RelativeDocumentMoniker": "QuanLyGym.UI\\Form1.cs",
-              "ToolTip": "C:\\Code\\BTL_LTTQ\\QuanLyGym\\QuanLyGym.UI\\Form1.cs",
-              "RelativeToolTip": "QuanLyGym.UI\\Form1.cs",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAewAsAAABnAAAAAAAAAA==",
+              "Title": "AppDbContext.cs",
+              "DocumentMoniker": "C:\\Code\\BTL_LTTQ_QuanLyGym\\QuanLyGym\\QuanLyGym.DAL\\AppDbContext.cs",
+              "RelativeDocumentMoniker": "QuanLyGym.DAL\\AppDbContext.cs",
+              "ToolTip": "C:\\Code\\BTL_LTTQ_QuanLyGym\\QuanLyGym\\QuanLyGym.DAL\\AppDbContext.cs*",
+              "RelativeToolTip": "QuanLyGym.DAL\\AppDbContext.cs*",
+              "ViewState": "AgIAABcAAAAAAAAAAAAqwB8AAAAYAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-07T08:33:43.55Z",
+              "WhenOpened": "2026-10-09T14:58:13.146Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "Form1.cs [Design]",
-              "DocumentMoniker": "C:\\Code\\BTL_LTTQ\\QuanLyGym\\QuanLyGym.UI\\Form1.cs",
-              "RelativeDocumentMoniker": "QuanLyGym.UI\\Form1.cs",
-              "ToolTip": "C:\\Code\\BTL_LTTQ\\QuanLyGym\\QuanLyGym.UI\\Form1.cs [Design]",
-              "RelativeToolTip": "QuanLyGym.UI\\Form1.cs [Design]",
+              "Title": "ProgressConfiguration.cs",
+              "DocumentMoniker": "C:\\Code\\BTL_LTTQ_QuanLyGym\\QuanLyGym\\QuanLyGym.DAL\\Configurations\\ProgressConfiguration.cs",
+              "RelativeDocumentMoniker": "QuanLyGym.DAL\\Configurations\\ProgressConfiguration.cs",
+              "ToolTip": "C:\\Code\\BTL_LTTQ_QuanLyGym\\QuanLyGym\\QuanLyGym.DAL\\Configurations\\ProgressConfiguration.cs",
+              "RelativeToolTip": "QuanLyGym.DAL\\Configurations\\ProgressConfiguration.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-07T08:30:28.269Z",
-              "EditorCaption": " [Design]"
+              "WhenOpened": "2026-10-09T14:57:38.924Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "CheckInImageConfiguration.cs",
+              "DocumentMoniker": "C:\\Code\\BTL_LTTQ_QuanLyGym\\QuanLyGym\\QuanLyGym.DAL\\Configurations\\CheckInImageConfiguration.cs",
+              "RelativeDocumentMoniker": "QuanLyGym.DAL\\Configurations\\CheckInImageConfiguration.cs",
+              "ToolTip": "C:\\Code\\BTL_LTTQ_QuanLyGym\\QuanLyGym\\QuanLyGym.DAL\\Configurations\\CheckInImageConfiguration.cs",
+              "RelativeToolTip": "QuanLyGym.DAL\\Configurations\\CheckInImageConfiguration.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-09T14:57:24.971Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "Class1.cs",
-              "DocumentMoniker": "C:\\Code\\BTL_LTTQ\\QuanLyGym\\QuanLyGym.BLL\\Class1.cs",
-              "RelativeDocumentMoniker": "QuanLyGym.BLL\\Class1.cs",
-              "ToolTip": "C:\\Code\\BTL_LTTQ\\QuanLyGym\\QuanLyGym.BLL\\Class1.cs",
-              "RelativeToolTip": "QuanLyGym.BLL\\Class1.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Title": "CheckInConfiguration.cs",
+              "DocumentMoniker": "C:\\Code\\BTL_LTTQ_QuanLyGym\\QuanLyGym\\QuanLyGym.DAL\\Configurations\\CheckInConfiguration.cs",
+              "RelativeDocumentMoniker": "QuanLyGym.DAL\\Configurations\\CheckInConfiguration.cs",
+              "ToolTip": "C:\\Code\\BTL_LTTQ_QuanLyGym\\QuanLyGym\\QuanLyGym.DAL\\Configurations\\CheckInConfiguration.cs",
+              "RelativeToolTip": "QuanLyGym.DAL\\Configurations\\CheckInConfiguration.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-06T13:54:44.889Z",
+              "WhenOpened": "2026-10-09T14:56:48.418Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 4,
-              "Title": "Class1.cs",
-              "DocumentMoniker": "C:\\Code\\BTL_LTTQ\\QuanLyGym\\QuanLyGym.DAL\\Class1.cs",
-              "RelativeDocumentMoniker": "QuanLyGym.DAL\\Class1.cs",
-              "ToolTip": "C:\\Code\\BTL_LTTQ\\QuanLyGym\\QuanLyGym.DAL\\Class1.cs",
-              "RelativeToolTip": "QuanLyGym.DAL\\Class1.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Title": "ScheduleConfiguration.cs",
+              "DocumentMoniker": "C:\\Code\\BTL_LTTQ_QuanLyGym\\QuanLyGym\\QuanLyGym.DAL\\Configurations\\ScheduleConfiguration.cs",
+              "RelativeDocumentMoniker": "QuanLyGym.DAL\\Configurations\\ScheduleConfiguration.cs",
+              "ToolTip": "C:\\Code\\BTL_LTTQ_QuanLyGym\\QuanLyGym\\QuanLyGym.DAL\\Configurations\\ScheduleConfiguration.cs",
+              "RelativeToolTip": "QuanLyGym.DAL\\Configurations\\ScheduleConfiguration.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-06T13:53:13.881Z"
+              "WhenOpened": "2026-10-09T14:56:26.729Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 5,
+              "Title": "WorkingScheduleConfiguration.cs",
+              "DocumentMoniker": "C:\\Code\\BTL_LTTQ_QuanLyGym\\QuanLyGym\\QuanLyGym.DAL\\Configurations\\WorkingScheduleConfiguration.cs",
+              "RelativeDocumentMoniker": "QuanLyGym.DAL\\Configurations\\WorkingScheduleConfiguration.cs",
+              "ToolTip": "C:\\Code\\BTL_LTTQ_QuanLyGym\\QuanLyGym\\QuanLyGym.DAL\\Configurations\\WorkingScheduleConfiguration.cs",
+              "RelativeToolTip": "QuanLyGym.DAL\\Configurations\\WorkingScheduleConfiguration.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-09T14:56:10.633Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "IncidentConfiguration.cs",
+              "DocumentMoniker": "C:\\Code\\BTL_LTTQ_QuanLyGym\\QuanLyGym\\QuanLyGym.DAL\\Configurations\\IncidentConfiguration.cs",
+              "RelativeDocumentMoniker": "QuanLyGym.DAL\\Configurations\\IncidentConfiguration.cs",
+              "ToolTip": "C:\\Code\\BTL_LTTQ_QuanLyGym\\QuanLyGym\\QuanLyGym.DAL\\Configurations\\IncidentConfiguration.cs",
+              "RelativeToolTip": "QuanLyGym.DAL\\Configurations\\IncidentConfiguration.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-09T14:55:53.147Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Incident.cs",
+              "DocumentMoniker": "C:\\Code\\BTL_LTTQ_QuanLyGym\\QuanLyGym\\QuanLyGym.DAL\\Entities\\Incident.cs",
+              "RelativeDocumentMoniker": "QuanLyGym.DAL\\Entities\\Incident.cs",
+              "ToolTip": "C:\\Code\\BTL_LTTQ_QuanLyGym\\QuanLyGym\\QuanLyGym.DAL\\Entities\\Incident.cs",
+              "RelativeToolTip": "QuanLyGym.DAL\\Entities\\Incident.cs",
+              "ViewState": "AgIAAA0AAAAAAAAAAAAQwB8AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-08T15:42:53.943Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
               "Title": "Form1.cs [Design]",
-              "DocumentMoniker": "C:\\Code\\BTL_LTTQ\\QuanLyGym\\QuanLyGym.UI\\Form1.cs",
+              "DocumentMoniker": "C:\\Code\\BTL_LTTQ_QuanLyGym\\QuanLyGym\\QuanLyGym.UI\\Form1.cs",
               "RelativeDocumentMoniker": "QuanLyGym.UI\\Form1.cs",
               "ToolTip": "C:\\Code\\BTL_LTTQ\\QuanLyGym\\QuanLyGym.UI\\Form1.cs [Design]",
-              "RelativeToolTip": "QuanLyGym.UI\\Form1.cs [Design]",
+              "RelativeToolTip": "..\\..\\BTL_LTTQ\\QuanLyGym\\QuanLyGym.UI\\Form1.cs [Design]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-10-06T13:40:26.345Z"
             }
