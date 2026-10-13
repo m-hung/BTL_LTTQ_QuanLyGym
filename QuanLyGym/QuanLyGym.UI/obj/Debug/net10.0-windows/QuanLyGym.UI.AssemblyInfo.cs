@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("QuanLyGym.UI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+879a4c01c3aa6387cb4c034bc7deb5658ebf7441")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+af09975185907bde1a7c4ce872704dcb59271d81")]
 [assembly: System.Reflection.AssemblyProductAttribute("QuanLyGym.UI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("QuanLyGym.UI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
