@@ -20,4 +20,11 @@
     <ProjectReference Include="..\QuanLyGym.DAL\QuanLyGym.DAL.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Forms\Admin\" />
+    <Folder Include="Forms\Member\" />
+    <Folder Include="Forms\Common\" />
+    <Folder Include="Forms\PT\" />
+  </ItemGroup>
+
 </Project>
