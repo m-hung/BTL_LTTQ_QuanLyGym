@@ -1,4 +1,5 @@
-using QuanLyGym.UI.Forms.Common;
+using QuanLyGym.UI.Forms.Admin;
+
 namespace QuanLyGym.UI
 {
     internal static class Program
@@ -9,10 +10,8 @@ namespace QuanLyGym.UI
         [STAThread]
         static void Main()
         {
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Application.Run(new frmLogin());
+            Application.Run(new frmAdminMain());
         }
     }
 }
