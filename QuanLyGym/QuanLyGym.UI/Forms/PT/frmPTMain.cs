@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
+﻿using QuanLyGym.UI.Helpers;
 
 namespace QuanLyGym.UI.Forms.PT
 {
@@ -13,6 +7,17 @@ namespace QuanLyGym.UI.Forms.PT
         public frmPTMain()
         {
             InitializeComponent();
+        }
+
+        private void frmPTMain_Load(object? sender, EventArgs e)
+        {
+            lblXinChao.Text = $"Xin chào, {UserSession.DisplayName}";
+            lblTenDangNhap.Text = $"Tên đăng nhập: {UserSession.Username}";
+        }
+
+        private void btnDangXuat_Click(object? sender, EventArgs e)
+        {
+            UserSession.Logout(this);
         }
     }
 }
