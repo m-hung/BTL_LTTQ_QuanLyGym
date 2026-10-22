@@ -8,6 +8,7 @@ using System.IO;
 using System.Text;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
+﻿using QuanLyGym.UI.Helpers;
 
 namespace QuanLyGym.UI.Forms.Admin
 {

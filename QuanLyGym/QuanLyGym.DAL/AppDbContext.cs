@@ -25,7 +25,7 @@ namespace QuanLyGym.DAL
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer(@"Server=.\SQLEXPRESS;Database=QuanLyGymFullDB;Trusted_Connection=True;TrustServerCertificate=True;");
+                optionsBuilder.UseSqlServer(@"Server=ADMIN-PC;Database=QuanLyGymFullDB;Trusted_Connection=True;TrustServerCertificate=True;");
             }
         }
 

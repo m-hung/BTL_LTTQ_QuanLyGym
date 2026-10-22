@@ -1,16 +1,9 @@
-﻿namespace QuanLyGym.UI.Forms.Member
+namespace QuanLyGym.UI.Forms.Member
 {
     partial class frmMemberMain
     {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -22,18 +15,28 @@
 
         #region Windows Form Designer generated code
 
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Text = "frmMemberMain";
+            this.ClientSize = new System.Drawing.Size(1340, 840);
+            this.MinimumSize = new System.Drawing.Size(1150, 720);
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "TITAN FITNESS CLUB - HỆ THỐNG QUẢN LÝ DÀNH CHO HỘI VIÊN";
         }
 
         #endregion
+
+        private Panel pnlHeader;
+        private Label lblAppName;
+        private Label lblXinChao;
+        private Button btnDangXuat;
+        private Panel pnlContent;
+        private Panel pnlCard;
+        private Panel pnlCardTop;
+        private Label lblIcon;
+        private Label lblVaiTro;
+        private Label lblTenDangNhap;
+        private Label lblGhiChu;
     }
 }
