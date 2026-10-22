@@ -1,3 +1,4 @@
+﻿using QuanLyGym.UI.Helpers;
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -222,6 +223,17 @@ namespace QuanLyGym.UI.Forms.PT
             {
                 modal.ShowDialog(this);
             }
+        }
+
+        private void frmPTMain_Load(object? sender, EventArgs e)
+        {
+            lblXinChao.Text = $"Xin chào, {UserSession.DisplayName}";
+            lblTenDangNhap.Text = $"Tên đăng nhập: {UserSession.Username}";
+        }
+
+        private void btnDangXuat_Click(object? sender, EventArgs e)
+        {
+            UserSession.Logout(this);
         }
     }
 }
