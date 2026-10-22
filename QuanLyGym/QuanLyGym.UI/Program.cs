@@ -4,6 +4,7 @@ using QuanLyGym.UI.Forms.Member;
 using QuanLyGym.UI.Forms.PT;
 using QuanLyGym.UI.Helpers;
 
+using QuanLyGym.UI.Forms.Chat;
 namespace QuanLyGym.UI
 {
     internal static class Program
