@@ -26,5 +26,17 @@ namespace QuanLyGym.UI.Forms.Member
         }
 
         #endregion
+
+        private Panel pnlHeader;
+        private Label lblAppName;
+        private Label lblXinChao;
+        private Button btnDangXuat;
+        private Panel pnlContent;
+        private Panel pnlCard;
+        private Panel pnlCardTop;
+        private Label lblIcon;
+        private Label lblVaiTro;
+        private Label lblTenDangNhap;
+        private Label lblGhiChu;
     }
 }

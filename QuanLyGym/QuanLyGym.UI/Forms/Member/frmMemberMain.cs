@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using QuanLyGym.UI.Forms.Member.Views;
 using QuanLyGym.UI.Utils;
+﻿using QuanLyGym.UI.Helpers;
 
 namespace QuanLyGym.UI.Forms.Member
 {
@@ -438,6 +439,17 @@ namespace QuanLyGym.UI.Forms.Member
             view.Dock = DockStyle.Fill;
             pnlContentContainer.Controls.Add(view);
             pnlContentContainer.ResumeLayout(true);
+        }
+
+        private void frmMemberMain_Load(object? sender, EventArgs e)
+        {
+            lblXinChao.Text = $"Xin chào, {UserSession.DisplayName}";
+            lblTenDangNhap.Text = $"Tên đăng nhập: {UserSession.Username}";
+        }
+
+        private void btnDangXuat_Click(object? sender, EventArgs e)
+        {
+            UserSession.Logout(this);
         }
     }
 }
