@@ -3,15 +3,14 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using QuanLyGym.UI.Forms.Member.Views;
+using QuanLyGym.UI.Helpers;
 using QuanLyGym.UI.Utils;
-﻿using QuanLyGym.UI.Helpers;
 
 namespace QuanLyGym.UI.Forms.Member
 {
     public partial class frmMemberMain : Form
     {
         private Panel pnlSidebar = null!;
-        private Panel pnlHeader = null!;
         private Panel pnlContentContainer = null!;
         private Label lblHeaderTitle = null!;
         private Label lblHeaderSubtitle = null!;
@@ -49,6 +48,7 @@ namespace QuanLyGym.UI.Forms.Member
             this.Controls.Add(pnlSidebar);
 
             // 2. Top Header Bar (Dock Top)
+            // pnlHeader được tạo và gán từ hàm CreateHeaderBar
             pnlHeader = CreateHeaderBar();
             this.Controls.Add(pnlHeader);
 
@@ -139,7 +139,7 @@ namespace QuanLyGym.UI.Forms.Member
 
             Label lblUserName = new Label
             {
-                Text = "Trần Văn Hùng",
+                Text = string.IsNullOrEmpty(UserSession.DisplayName) ? "Trần Văn Hùng" : UserSession.DisplayName,
                 Font = UITheme.FontBold,
                 ForeColor = Color.White,
                 Location = new Point(64, 18),
@@ -193,7 +193,7 @@ namespace QuanLyGym.UI.Forms.Member
 
             // 4. Bottom Logout Button
             Panel pnlBottom = new Panel { Dock = DockStyle.Bottom, Height = 80 };
-            Button btnLogout = new Button
+            Button btnLogoutNav = new Button
             {
                 Text = "🚪  Đăng xuất tài khoản",
                 Dock = DockStyle.Top,
@@ -206,13 +206,13 @@ namespace QuanLyGym.UI.Forms.Member
                 TextAlign = ContentAlignment.MiddleLeft,
                 Padding = new Padding(16, 0, 0, 0)
             };
-            btnLogout.FlatAppearance.BorderSize = 0;
-            btnLogout.Click += (s, e) =>
+            btnLogoutNav.FlatAppearance.BorderSize = 0;
+            btnLogoutNav.Click += (s, e) =>
             {
                 var confirm = MessageBox.Show("Bạn có muốn đăng xuất khỏi hệ thống?", "Xác nhận đăng xuất", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 if (confirm == DialogResult.Yes)
                 {
-                    this.Close();
+                    UserSession.Logout(this);
                 }
             };
 
@@ -225,7 +225,7 @@ namespace QuanLyGym.UI.Forms.Member
                 Height = 24,
                 TextAlign = ContentAlignment.MiddleCenter
             };
-            pnlBottom.Controls.Add(btnLogout);
+            pnlBottom.Controls.Add(btnLogoutNav);
             pnlBottom.Controls.Add(lblVer);
 
             sidebar.Controls.Add(pnlMenu);
@@ -439,17 +439,6 @@ namespace QuanLyGym.UI.Forms.Member
             view.Dock = DockStyle.Fill;
             pnlContentContainer.Controls.Add(view);
             pnlContentContainer.ResumeLayout(true);
-        }
-
-        private void frmMemberMain_Load(object? sender, EventArgs e)
-        {
-            lblXinChao.Text = $"Xin chào, {UserSession.DisplayName}";
-            lblTenDangNhap.Text = $"Tên đăng nhập: {UserSession.Username}";
-        }
-
-        private void btnDangXuat_Click(object? sender, EventArgs e)
-        {
-            UserSession.Logout(this);
         }
     }
 }

@@ -227,8 +227,8 @@ namespace QuanLyGym.UI.Forms.PT
 
         private void frmPTMain_Load(object? sender, EventArgs e)
         {
-            lblXinChao.Text = $"Xin chào, {UserSession.DisplayName}";
-            lblTenDangNhap.Text = $"Tên đăng nhập: {UserSession.Username}";
+            //lblXinChao.Text = $"Xin chào, {UserSession.DisplayName}";
+            //lblTenDangNhap.Text = $"Tên đăng nhập: {UserSession.Username}";
         }
 
         private void btnDangXuat_Click(object? sender, EventArgs e)

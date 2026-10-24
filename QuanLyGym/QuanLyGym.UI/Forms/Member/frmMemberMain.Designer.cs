@@ -17,26 +17,23 @@ namespace QuanLyGym.UI.Forms.Member
 
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1340, 840);
-            this.MinimumSize = new System.Drawing.Size(1150, 720);
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "TITAN FITNESS CLUB - HỆ THỐNG QUẢN LÝ DÀNH CHO HỘI VIÊN";
+            SuspendLayout();
+            // 
+            // frmMemberMain
+            // 
+            AutoScaleDimensions = new SizeF(10F, 25F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(1340, 840);
+            MinimumSize = new Size(1150, 720);
+            Name = "frmMemberMain";
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "TITAN FITNESS CLUB - HỆ THỐNG QUẢN LÝ DÀNH CHO HỘI VIÊN";
+            ResumeLayout(false);
         }
 
         #endregion
 
-        private Panel pnlHeader;
-        private Label lblAppName;
-        private Label lblXinChao;
-        private Button btnDangXuat;
-        private Panel pnlContent;
-        private Panel pnlCard;
-        private Panel pnlCardTop;
-        private Label lblIcon;
-        private Label lblVaiTro;
-        private Label lblTenDangNhap;
-        private Label lblGhiChu;
+        // Khai báo pnlHeader dùng chung cho partial class
+        private System.Windows.Forms.Panel pnlHeader;
     }
 }
