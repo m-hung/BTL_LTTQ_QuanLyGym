@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using QuanLyGym.DAL.Entities;
 
 namespace QuanLyGym.DAL
@@ -21,11 +21,80 @@ namespace QuanLyGym.DAL
         public DbSet<CheckInImage> CheckInImages { get; set; }
         public DbSet<Progress> Progresses { get; set; }
 
+        private static string? _resolvedConnectionString;
+        private static readonly object _lock = new object();
+
+        public static string GetResolvedConnectionString()
+        {
+            if (_resolvedConnectionString != null)
+                return _resolvedConnectionString;
+
+            lock (_lock)
+            {
+                if (_resolvedConnectionString != null)
+                    return _resolvedConnectionString;
+
+                // 1. Kiểm tra file dbconfig.txt (nếu người dùng muốn cấu hình server riêng)
+                try
+                {
+                    string configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "dbconfig.txt");
+                    if (File.Exists(configPath))
+                    {
+                        string customServer = File.ReadAllText(configPath).Trim();
+                        if (!string.IsNullOrWhiteSpace(customServer))
+                        {
+                            string customConnStr = customServer.Contains(";")
+                                ? customServer
+                                : $@"Server={customServer};Database=QuanLyGymFullDB;Trusted_Connection=True;TrustServerCertificate=True;";
+
+                            using var conn = new Microsoft.Data.SqlClient.SqlConnection(customConnStr + ";Connect Timeout=2;");
+                            conn.Open();
+                            _resolvedConnectionString = customConnStr;
+                            return _resolvedConnectionString;
+                        }
+                    }
+                }
+                catch
+                {
+                    // Tiếp tục thử dò tự động nếu file cấu hình không hợp lệ
+                }
+
+                // 2. Danh sách các instance phổ biến trên máy tính cá nhân
+                string[] candidateServers = {
+                    @".\SQLEXPRESS",
+                    @".",
+                    @"localhost",
+                    @"(localdb)\mssqllocaldb",
+                    @"127.0.0.1"
+                };
+
+                foreach (var server in candidateServers)
+                {
+                    string testConnStr = $@"Server={server};Database=QuanLyGymFullDB;Trusted_Connection=True;TrustServerCertificate=True;Connect Timeout=2;";
+                    try
+                    {
+                        using var conn = new Microsoft.Data.SqlClient.SqlConnection(testConnStr);
+                        conn.Open();
+                        _resolvedConnectionString = $@"Server={server};Database=QuanLyGymFullDB;Trusted_Connection=True;TrustServerCertificate=True;";
+                        return _resolvedConnectionString;
+                    }
+                    catch
+                    {
+                        // Thử tiếp server khác
+                    }
+                }
+
+                // 3. Fallback mặc định
+                _resolvedConnectionString = @"Server=.\SQLEXPRESS;Database=QuanLyGymFullDB;Trusted_Connection=True;TrustServerCertificate=True;";
+                return _resolvedConnectionString;
+            }
+        }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer(@"Server=ADMIN-PC;Database=QuanLyGymFullDB;Trusted_Connection=True;TrustServerCertificate=True;");
+                optionsBuilder.UseSqlServer(GetResolvedConnectionString());
             }
         }
 

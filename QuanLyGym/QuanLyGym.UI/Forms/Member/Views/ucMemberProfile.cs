@@ -25,6 +25,7 @@ namespace QuanLyGym.UI.Forms.Member.Views
         private void InitializeComponent()
         {
             this.SuspendLayout();
+            this.AutoScaleMode = AutoScaleMode.None;
             this.BackColor = UITheme.Background;
             this.Dock = DockStyle.Fill;
             this.AutoScroll = true;
@@ -32,7 +33,7 @@ namespace QuanLyGym.UI.Forms.Member.Views
             Panel pnlMain = new Panel
             {
                 Dock = DockStyle.Top,
-                AutoSize = true,
+                Height = 690,
                 Padding = new Padding(24, 20, 24, 30),
                 BackColor = UITheme.Background
             };
@@ -54,19 +55,21 @@ namespace QuanLyGym.UI.Forms.Member.Views
             {
                 ColumnCount = 2,
                 RowCount = 1,
-                AutoSize = true,
+                Height = 580,
                 Dock = DockStyle.Top,
                 Padding = new Padding(0, 10, 0, 10)
             };
             pnlCols.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50f));
             pnlCols.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50f));
+            pnlCols.RowStyles.Clear();
+            pnlCols.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
 
             RoundedPanel cardInfo = CreateProfileInfoCard();
-            cardInfo.Dock = DockStyle.Top;
+            cardInfo.Dock = DockStyle.Fill;
             cardInfo.Margin = new Padding(0, 0, 10, 0);
 
             RoundedPanel cardSecurity = CreateSecurityCard();
-            cardSecurity.Dock = DockStyle.Top;
+            cardSecurity.Dock = DockStyle.Fill;
             cardSecurity.Margin = new Padding(10, 0, 0, 0);
 
             pnlCols.Controls.Add(cardInfo, 0, 0);
@@ -76,7 +79,7 @@ namespace QuanLyGym.UI.Forms.Member.Views
             pnlMain.Controls.Add(pnlHeader);
 
             this.Controls.Add(pnlMain);
-            this.ResumeLayout(false);
+            this.ResumeLayout(true);
         }
 
         private RoundedPanel CreateProfileInfoCard()
