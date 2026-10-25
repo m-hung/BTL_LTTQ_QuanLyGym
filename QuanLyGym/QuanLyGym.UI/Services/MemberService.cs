@@ -14,6 +14,22 @@ namespace QuanLyGym.UI.Services
 
         public int CurrentMemberId { get; set; } = 1; // Default demo member
 
+        /// <summary>
+        /// Gán CurrentMemberId theo tài khoản đang đăng nhập (AccountID -> MemberID).
+        /// Trả về false nếu tài khoản chưa có hồ sơ hội viên.
+        /// </summary>
+        public bool LoadCurrentMemberByAccount(int accountId)
+        {
+            using var db = new AppDbContext();
+            var memberId = db.Members
+                .Where(m => m.AccountID == accountId)
+                .Select(m => (int?)m.MemberID)
+                .FirstOrDefault();
+
+            CurrentMemberId = memberId ?? 0;
+            return memberId.HasValue;
+        }
+
         public Member? GetCurrentMember()
         {
             try

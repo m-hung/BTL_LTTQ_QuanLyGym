@@ -34,6 +34,11 @@ namespace QuanLyGym.UI.Forms.Admin
         private void frmAdminMain_Load(object sender, EventArgs e)
         {
             SetActiveNav(btnNavOverview);
+
+            // Hiển thị tài khoản đang đăng nhập
+            lblUserName.Text = UserSession.DisplayName;
+            lblUserRole.Text = "Quản trị viên";
+
             tmrClock.Start();
             tmrClock_Tick(this, EventArgs.Empty);
 
@@ -202,8 +207,7 @@ namespace QuanLyGym.UI.Forms.Admin
 
         private void btnLogout_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Bạn đã đăng xuất khỏi hệ thống thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            this.Close();
+            UserSession.Logout(this); // Hỏi xác nhận -> quay lại form đăng nhập
         }
 
         private void InitializeCustomControls()
