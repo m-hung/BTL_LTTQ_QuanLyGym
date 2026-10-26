@@ -18,6 +18,7 @@ namespace QuanLyGym.UI.Forms.Member.Views
         private void InitializeComponent()
         {
             this.SuspendLayout();
+            this.AutoScaleMode = AutoScaleMode.None;
             this.BackColor = UITheme.Background;
             this.Dock = DockStyle.Fill;
             this.AutoScroll = true;
@@ -26,7 +27,7 @@ namespace QuanLyGym.UI.Forms.Member.Views
             Panel pnlMain = new Panel
             {
                 Dock = DockStyle.Top,
-                AutoSize = true,
+                Height = 940,
                 Padding = new Padding(24, 20, 24, 30),
                 BackColor = UITheme.Background
             };
@@ -50,7 +51,7 @@ namespace QuanLyGym.UI.Forms.Member.Views
             pnlMain.Controls.Add(pnlBanner);
 
             this.Controls.Add(pnlMain);
-            this.ResumeLayout(false);
+            this.ResumeLayout(true);
         }
 
         private RoundedPanel CreateWelcomeBanner()
@@ -125,6 +126,8 @@ namespace QuanLyGym.UI.Forms.Member.Views
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25f));
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25f));
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25f));
+            table.RowStyles.Clear();
+            table.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
 
             // Card 1: Gói tập hiện tại
             var card1 = CreateCardWidget("GÓI TẬP HỘI VIÊN", "VIP Diamond", "12 / 60 buổi (Hạn: 31/12/2026)", "💎", Color.FromArgb(79, 70, 229), 20);
@@ -237,16 +240,18 @@ namespace QuanLyGym.UI.Forms.Member.Views
             {
                 ColumnCount = 2,
                 RowCount = 1,
-                AutoSize = true,
+                Height = 650,
                 Dock = DockStyle.Top,
                 Padding = new Padding(0, 10, 0, 10)
             };
 
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 67f)); // Left column: Workouts & Check-ins
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33f)); // Right column: PT & InBody & Tips
+            table.RowStyles.Clear();
+            table.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
 
             // --- LEFT COLUMN ---
-            Panel pnlLeft = new Panel { Dock = DockStyle.Top, AutoSize = true, Margin = new Padding(0, 0, 10, 0) };
+            Panel pnlLeft = new Panel { Dock = DockStyle.Fill, Margin = new Padding(0, 0, 10, 0) };
 
             // 1. Upcoming Workouts Card
             RoundedPanel cardSchedule = CreateUpcomingScheduleCard();
@@ -261,7 +266,7 @@ namespace QuanLyGym.UI.Forms.Member.Views
             pnlLeft.Controls.Add(cardSchedule);
 
             // --- RIGHT COLUMN ---
-            Panel pnlRight = new Panel { Dock = DockStyle.Top, AutoSize = true, Margin = new Padding(6, 0, 0, 0) };
+            Panel pnlRight = new Panel { Dock = DockStyle.Fill, Margin = new Padding(6, 0, 0, 0) };
 
             // 1. Personal Trainer Card
             RoundedPanel cardPT = CreateTrainerCard();

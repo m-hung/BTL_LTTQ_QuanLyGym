@@ -28,6 +28,7 @@ namespace QuanLyGym.UI.Forms.Member.Views
         private void InitializeComponent()
         {
             this.SuspendLayout();
+            this.AutoScaleMode = AutoScaleMode.None;
             this.BackColor = UITheme.Background;
             this.Dock = DockStyle.Fill;
             this.AutoScroll = true;
@@ -35,7 +36,7 @@ namespace QuanLyGym.UI.Forms.Member.Views
             Panel pnlMain = new Panel
             {
                 Dock = DockStyle.Top,
-                AutoSize = true,
+                Height = 860,
                 Padding = new Padding(24, 20, 24, 30),
                 BackColor = UITheme.Background
             };
@@ -62,19 +63,21 @@ namespace QuanLyGym.UI.Forms.Member.Views
             {
                 ColumnCount = 2,
                 RowCount = 1,
-                AutoSize = true,
+                Height = 650,
                 Dock = DockStyle.Top,
                 Padding = new Padding(0, 10, 0, 10)
             };
             pnlCols.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 46f));
             pnlCols.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 54f));
+            pnlCols.RowStyles.Clear();
+            pnlCols.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
 
             RoundedPanel cardForm = CreateRecordFormCard();
-            cardForm.Dock = DockStyle.Top;
+            cardForm.Dock = DockStyle.Fill;
             cardForm.Margin = new Padding(0, 0, 10, 0);
 
             RoundedPanel cardHistory = CreateHistoryCard();
-            cardHistory.Dock = DockStyle.Top;
+            cardHistory.Dock = DockStyle.Fill;
             cardHistory.Margin = new Padding(10, 0, 0, 0);
 
             pnlCols.Controls.Add(cardForm, 0, 0);
@@ -85,7 +88,7 @@ namespace QuanLyGym.UI.Forms.Member.Views
             pnlMain.Controls.Add(pnlHeader);
 
             this.Controls.Add(pnlMain);
-            this.ResumeLayout(false);
+            this.ResumeLayout(true);
         }
 
         private TableLayoutPanel CreateTopMetrics()
@@ -98,6 +101,8 @@ namespace QuanLyGym.UI.Forms.Member.Views
                 Dock = DockStyle.Top
             };
             for (int i = 0; i < 5; i++) table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20f));
+            table.RowStyles.Clear();
+            table.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
 
             table.Controls.Add(CreateStatPill("CÂN NẶNG HIỆN TẠI", "68.0 kg", "Mục tiêu: 66 kg", UITheme.Primary), 0, 0);
             table.Controls.Add(CreateStatPill("CHIỀU CAO", "172 cm", "Chuẩn", UITheme.TextDark), 1, 0);

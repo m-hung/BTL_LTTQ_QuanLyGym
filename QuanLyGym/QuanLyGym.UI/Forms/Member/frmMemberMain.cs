@@ -32,6 +32,13 @@ namespace QuanLyGym.UI.Forms.Member
 
         public frmMemberMain()
         {
+            // Gắn dữ liệu hội viên theo tài khoản đang đăng nhập (trước khi tạo các view)
+            if (!QuanLyGym.UI.Services.MemberService.Instance.LoadCurrentMemberByAccount(UserSession.AccountID))
+            {
+                MessageBox.Show("Tài khoản này chưa có hồ sơ hội viên.", "Thông báo",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+
             InitializeComponent();
             SetupModernDashboardLayout();
             NavigateTo("Dashboard");
@@ -39,7 +46,7 @@ namespace QuanLyGym.UI.Forms.Member
 
         private void SetupModernDashboardLayout()
         {
-            this.SuspendLayout();
+            this.AutoScaleMode = AutoScaleMode.None;
             this.BackColor = UITheme.Background;
             this.Font = UITheme.FontRegular;
 
@@ -57,7 +64,7 @@ namespace QuanLyGym.UI.Forms.Member
             {
                 Dock = DockStyle.Fill,
                 BackColor = UITheme.Background,
-                AutoScroll = true
+                AutoScroll = false // Let each hosted UserControl manage its own scroll
             };
             this.Controls.Add(pnlContentContainer);
 
@@ -209,11 +216,7 @@ namespace QuanLyGym.UI.Forms.Member
             btnLogoutNav.FlatAppearance.BorderSize = 0;
             btnLogoutNav.Click += (s, e) =>
             {
-                var confirm = MessageBox.Show("Bạn có muốn đăng xuất khỏi hệ thống?", "Xác nhận đăng xuất", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                if (confirm == DialogResult.Yes)
-                {
-                    UserSession.Logout(this);
-                }
+                UserSession.Logout(this); // Logout() đã tự hỏi xác nhận
             };
 
             Label lblVer = new Label
@@ -418,7 +421,14 @@ namespace QuanLyGym.UI.Forms.Member
 
             // Get or create view
             UserControl view;
-            if (forceReload || !viewCache.TryGetValue(viewKey, out view!))
+            if (forceReload && viewCache.TryGetValue(viewKey, out var oldView))
+            {
+                pnlContentContainer.Controls.Remove(oldView);
+                oldView.Dispose();
+                viewCache.Remove(viewKey);
+            }
+
+            if (!viewCache.TryGetValue(viewKey, out view!))
             {
                 view = viewKey switch
                 {
@@ -430,15 +440,23 @@ namespace QuanLyGym.UI.Forms.Member
                     "Profile" => new ucMemberProfile(),
                     _ => new ucMemberDashboard(key => NavigateTo(key))
                 };
+                view.AutoScaleMode = AutoScaleMode.None;
+                view.Dock = DockStyle.Fill;
                 viewCache[viewKey] = view;
+                pnlContentContainer.Controls.Add(view);
             }
 
-            // Switch view
+            // Switch view by toggling visibility - prevents WinForms AutoScale rescale bug on re-adding controls
             pnlContentContainer.SuspendLayout();
-            pnlContentContainer.Controls.Clear();
-            view.Dock = DockStyle.Fill;
-            pnlContentContainer.Controls.Add(view);
+            foreach (Control c in pnlContentContainer.Controls)
+            {
+                c.Visible = (c == view);
+            }
+            view.BringToFront();
+            view.AutoScrollPosition = new Point(0, 0);
             pnlContentContainer.ResumeLayout(true);
+            view.PerformLayout();
+            view.Invalidate(true);
         }
     }
 }
