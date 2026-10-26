@@ -205,18 +205,6 @@ namespace QuanLyGym.UI.Services
                     Note = note
                 };
                 db.Progresses.Add(progress);
-
-                // Also update current member record
-                var member = db.Members.Find(CurrentMemberId);
-                if (member != null)
-                {
-                    member.Height = height;
-                    member.Weight = weight;
-                    member.BodyFat = bodyFat;
-                    member.MuscleMass = muscle;
-                    member.BMI = bmi;
-                }
-
                 db.SaveChanges();
                 return true;
             }
