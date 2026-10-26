@@ -16,6 +16,7 @@ namespace QuanLyGym.UI.Forms.Member.Views
         private void InitializeComponent()
         {
             this.SuspendLayout();
+            this.AutoScaleMode = AutoScaleMode.None;
             this.BackColor = UITheme.Background;
             this.Dock = DockStyle.Fill;
             this.AutoScroll = true;
@@ -23,7 +24,7 @@ namespace QuanLyGym.UI.Forms.Member.Views
             Panel pnlMain = new Panel
             {
                 Dock = DockStyle.Top,
-                AutoSize = true,
+                Height = 930,
                 Padding = new Padding(24, 20, 24, 30),
                 BackColor = UITheme.Background
             };
@@ -45,12 +46,14 @@ namespace QuanLyGym.UI.Forms.Member.Views
             {
                 ColumnCount = 2,
                 RowCount = 1,
-                Height = 265,
+                Height = 320,
                 Dock = DockStyle.Top,
                 Padding = new Padding(0, 4, 0, 16)
             };
             pnlTopCols.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 44f));
             pnlTopCols.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 56f));
+            pnlTopCols.RowStyles.Clear();
+            pnlTopCols.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
 
             RoundedPanel cardDigital = CreateDigitalCard();
             cardDigital.Dock = DockStyle.Fill;
@@ -78,14 +81,14 @@ namespace QuanLyGym.UI.Forms.Member.Views
             pnlMain.Controls.Add(pnlHeader);
 
             this.Controls.Add(pnlMain);
-            this.ResumeLayout(false);
+            this.ResumeLayout(true);
         }
 
         private RoundedPanel CreateDigitalCard()
         {
             RoundedPanel card = new RoundedPanel
             {
-                Height = 220,
+                Height = 320,
                 CornerRadius = 16,
                 BackColor = Color.FromArgb(20, 24, 33),          // Metallic Dark Gold / Slate
                 GradientEndColor = Color.FromArgb(45, 55, 72),
@@ -101,7 +104,7 @@ namespace QuanLyGym.UI.Forms.Member.Views
                 Font = new Font("Segoe UI", 12f, FontStyle.Bold),
                 ForeColor = Color.FromArgb(251, 191, 36), // Gold
                 AutoSize = true,
-                Location = new Point(22, 18)
+                Location = new Point(22, 22)
             };
 
             Label lblBadge = new Label
@@ -113,15 +116,15 @@ namespace QuanLyGym.UI.Forms.Member.Views
                 Padding = new Padding(8, 3, 8, 3),
                 AutoSize = true,
                 Anchor = AnchorStyles.Top | AnchorStyles.Right,
-                Location = new Point(card.Width - 130, 18)
+                Location = new Point(card.Width - 130, 22)
             };
 
             // Chip icon simulation
             Panel chip = new Panel
             {
-                Size = new Size(36, 28),
+                Size = new Size(38, 30),
                 BackColor = Color.FromArgb(245, 158, 11),
-                Location = new Point(24, 58)
+                Location = new Point(24, 72)
             };
 
             Label lblCardNumber = new Label
@@ -130,26 +133,26 @@ namespace QuanLyGym.UI.Forms.Member.Views
                 Font = new Font("Consolas", 14f, FontStyle.Bold),
                 ForeColor = Color.FromArgb(241, 245, 249),
                 AutoSize = true,
-                Location = new Point(22, 110)
+                Location = new Point(22, 138)
             };
 
             Label lblMemberName = new Label
             {
                 Text = "TRẦN VĂN HÙNG",
-                Font = new Font("Segoe UI", 11f, FontStyle.Bold),
+                Font = new Font("Segoe UI", 11.5f, FontStyle.Bold),
                 ForeColor = Color.White,
                 AutoSize = true,
-                Location = new Point(22, 155)
+                Location = new Point(22, 210)
             };
 
             Label lblExpiry = new Label
             {
                 Text = "HẠN DÙNG: 31/12/2026",
-                Font = new Font("Segoe UI", 8.5f, FontStyle.Bold),
+                Font = new Font("Segoe UI", 9f, FontStyle.Bold),
                 ForeColor = Color.FromArgb(203, 213, 225),
                 AutoSize = true,
                 Anchor = AnchorStyles.Bottom | AnchorStyles.Right,
-                Location = new Point(card.Width - 180, 160)
+                Location = new Point(card.Width - 195, 210)
             };
 
             card.Controls.Add(lblLogo);
@@ -161,8 +164,8 @@ namespace QuanLyGym.UI.Forms.Member.Views
 
             card.Resize += (s, e) =>
             {
-                lblBadge.Location = new Point(card.Width - 130, 18);
-                lblExpiry.Location = new Point(card.Width - 180, 160);
+                lblBadge.Location = new Point(card.Width - 130, 22);
+                lblExpiry.Location = new Point(card.Width - 195, 210);
             };
 
             return card;
@@ -172,7 +175,7 @@ namespace QuanLyGym.UI.Forms.Member.Views
         {
             RoundedPanel card = new RoundedPanel
             {
-                Height = 165,
+                Height = 200,
                 CornerRadius = 12,
                 BackColor = UITheme.CardBg,
                 BorderColor = UITheme.Border,
@@ -185,7 +188,7 @@ namespace QuanLyGym.UI.Forms.Member.Views
                 Font = UITheme.FontSection,
                 ForeColor = UITheme.TextDark,
                 Dock = DockStyle.Top,
-                Height = 28
+                Height = 30
             };
 
             string[] benefits = new string[]
@@ -203,7 +206,7 @@ namespace QuanLyGym.UI.Forms.Member.Views
                 Dock = DockStyle.Fill,
                 ColumnCount = 2,
                 RowCount = 3,
-                Padding = new Padding(0, 4, 0, 0)
+                Padding = new Padding(0, 8, 0, 0)
             };
             pnlList.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50f));
             pnlList.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50f));
@@ -228,6 +231,7 @@ namespace QuanLyGym.UI.Forms.Member.Views
 
             card.Controls.Add(pnlList);
             card.Controls.Add(lblTitle);
+            lblTitle.SendToBack();
 
             return card;
         }
@@ -236,11 +240,11 @@ namespace QuanLyGym.UI.Forms.Member.Views
         {
             RoundedPanel card = new RoundedPanel
             {
-                Height = 265,
+                Height = 320,
                 CornerRadius = 12,
                 BackColor = UITheme.CardBg,
                 BorderColor = UITheme.Border,
-                Padding = new Padding(20, 16, 20, 14)
+                Padding = new Padding(22, 16, 22, 14)
             };
 
             Label lblTitle = new Label
@@ -249,19 +253,21 @@ namespace QuanLyGym.UI.Forms.Member.Views
                 Font = UITheme.FontSection,
                 ForeColor = UITheme.TextDark,
                 Dock = DockStyle.Top,
-                Height = 28
+                Height = 30
             };
 
             TableLayoutPanel grid = new TableLayoutPanel
             {
                 Dock = DockStyle.Top,
-                Height = 135,
+                Height = 190,
                 ColumnCount = 2,
                 RowCount = 4,
                 Padding = new Padding(0, 4, 0, 0)
             };
             grid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50f));
             grid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50f));
+            grid.RowStyles.Clear();
+            for (int r = 0; r < 4; r++) grid.RowStyles.Add(new RowStyle(SizeType.Percent, 25f));
 
             grid.Controls.Add(CreateInfoRow("Gói tập:", "VIP Diamond 12 Tháng"), 0, 0);
             grid.Controls.Add(CreateInfoRow("Trạng thái:", "● Đang hoạt động (Active)"), 1, 0);
@@ -281,14 +287,14 @@ namespace QuanLyGym.UI.Forms.Member.Views
                 Maximum = 100,
                 ProgressColor = UITheme.Primary,
                 ProgressColor2 = UITheme.Secondary,
-                Margin = new Padding(0, 6, 0, 10)
+                Margin = new Padding(0, 6, 0, 8)
             };
 
             // Buttons
             FlowLayoutPanel pnlButtons = new FlowLayoutPanel
             {
                 Dock = DockStyle.Bottom,
-                Height = 40,
+                Height = 38,
                 FlowDirection = FlowDirection.LeftToRight
             };
 
@@ -313,7 +319,8 @@ namespace QuanLyGym.UI.Forms.Member.Views
                 BackColor = UITheme.PrimaryLight,
                 ForeColor = UITheme.Primary,
                 FlatStyle = FlatStyle.Flat,
-                Cursor = Cursors.Hand
+                Cursor = Cursors.Hand,
+                Margin = new Padding(10, 0, 0, 0)
             };
             btnUpgrade.FlatAppearance.BorderSize = 0;
             btnUpgrade.Click += (s, e) => MessageBox.Show("Đặc quyền Black Card: Kèm 30 buổi PT 1-1, Locker cá nhân vĩnh viễn và đồ uống cao cấp không giới hạn.", "Nâng cấp gói", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -332,8 +339,8 @@ namespace QuanLyGym.UI.Forms.Member.Views
         private Panel CreateInfoRow(string label, string val)
         {
             Panel pnl = new Panel { Dock = DockStyle.Fill, Margin = new Padding(0, 1, 0, 1) };
-            Label l = new Label { Text = label, Font = UITheme.FontSmall, ForeColor = UITheme.TextMuted, Location = new Point(0, 0), AutoSize = true };
-            Label v = new Label { Text = val, Font = UITheme.FontBold, ForeColor = UITheme.TextDark, Location = new Point(0, 16), AutoSize = true };
+            Label l = new Label { Text = label, Font = UITheme.FontSmall, ForeColor = UITheme.TextMuted, Location = new Point(0, 1), AutoSize = true };
+            Label v = new Label { Text = val, Font = UITheme.FontBold, ForeColor = UITheme.TextDark, Location = new Point(0, 21), AutoSize = true };
             if (val.Contains("Đang hoạt động")) v.ForeColor = UITheme.Success;
             pnl.Controls.Add(l);
             pnl.Controls.Add(v);
@@ -391,6 +398,7 @@ namespace QuanLyGym.UI.Forms.Member.Views
 
             card.Controls.Add(dgv);
             card.Controls.Add(lblTitle);
+            lblTitle.SendToBack();
 
             return card;
         }

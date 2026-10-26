@@ -24,6 +24,7 @@ namespace QuanLyGym.UI.Forms.Member.Views
         private void InitializeComponent()
         {
             this.SuspendLayout();
+            this.AutoScaleMode = AutoScaleMode.None;
             this.BackColor = UITheme.Background;
             this.Dock = DockStyle.Fill;
             this.AutoScroll = true;
@@ -31,7 +32,7 @@ namespace QuanLyGym.UI.Forms.Member.Views
             Panel pnlMain = new Panel
             {
                 Dock = DockStyle.Top,
-                AutoSize = true,
+                Height = 880,
                 Padding = new Padding(24, 20, 24, 30),
                 BackColor = UITheme.Background
             };
@@ -58,19 +59,21 @@ namespace QuanLyGym.UI.Forms.Member.Views
             {
                 ColumnCount = 2,
                 RowCount = 1,
-                AutoSize = true,
+                Height = 650,
                 Dock = DockStyle.Top,
                 Padding = new Padding(0, 10, 0, 10)
             };
             pnlCols.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 38f)); // Left: Check-in & Photo Upload
             pnlCols.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 62f)); // Right: Approval History
+            pnlCols.RowStyles.Clear();
+            pnlCols.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
 
             RoundedPanel cardForm = CreateUploadCheckInCard();
-            cardForm.Dock = DockStyle.Top;
+            cardForm.Dock = DockStyle.Fill;
             cardForm.Margin = new Padding(0, 0, 10, 0);
 
             RoundedPanel cardHistory = CreateHistoryCard();
-            cardHistory.Dock = DockStyle.Top;
+            cardHistory.Dock = DockStyle.Fill;
             cardHistory.Margin = new Padding(10, 0, 0, 0);
 
             pnlCols.Controls.Add(cardForm, 0, 0);
@@ -81,7 +84,7 @@ namespace QuanLyGym.UI.Forms.Member.Views
             pnlMain.Controls.Add(pnlHeader);
 
             this.Controls.Add(pnlMain);
-            this.ResumeLayout(false);
+            this.ResumeLayout(true);
 
             // Start Live Clock
             timerClock = new System.Windows.Forms.Timer { Interval = 1000 };
@@ -106,6 +109,8 @@ namespace QuanLyGym.UI.Forms.Member.Views
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25f));
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25f));
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25f));
+            table.RowStyles.Clear();
+            table.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
 
             table.Controls.Add(CreateStatPill("TỔNG BUỔI ĐIỂM DANH", "15 Buổi", UITheme.Primary), 0, 0);
             table.Controls.Add(CreateStatPill("PT ĐÃ DUYỆT", "14 Buổi", UITheme.Success), 1, 0);
@@ -326,6 +331,8 @@ namespace QuanLyGym.UI.Forms.Member.Views
             card.Controls.Add(pnlForm);
             card.Controls.Add(lblClock);
             card.Controls.Add(lblTitle);
+            lblClock.SendToBack();
+            lblTitle.SendToBack();
 
             // Responsive auto resize
             card.Resize += (s, e) =>
@@ -415,6 +422,7 @@ namespace QuanLyGym.UI.Forms.Member.Views
 
             card.Controls.Add(dgvHistory);
             card.Controls.Add(lblTitle);
+            lblTitle.SendToBack();
 
             return card;
         }
