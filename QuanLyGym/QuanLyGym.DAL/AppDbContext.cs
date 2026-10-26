@@ -94,7 +94,10 @@ namespace QuanLyGym.DAL
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer(GetResolvedConnectionString());
+                optionsBuilder.UseSqlServer(
+                    GetResolvedConnectionString(),
+                    sqlServerOptions => sqlServerOptions.CommandTimeout(180) // Tăng thời gian chờ lên 180 giây
+                );
             }
         }
 
