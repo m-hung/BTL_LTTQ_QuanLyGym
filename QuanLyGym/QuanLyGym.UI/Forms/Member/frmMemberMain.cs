@@ -32,6 +32,13 @@ namespace QuanLyGym.UI.Forms.Member
 
         public frmMemberMain()
         {
+            // Gắn dữ liệu hội viên theo tài khoản đang đăng nhập (trước khi tạo các view)
+            if (!QuanLyGym.UI.Services.MemberService.Instance.LoadCurrentMemberByAccount(UserSession.AccountID))
+            {
+                MessageBox.Show("Tài khoản này chưa có hồ sơ hội viên.", "Thông báo",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+
             InitializeComponent();
             SetupModernDashboardLayout();
             NavigateTo("Dashboard");
@@ -209,11 +216,7 @@ namespace QuanLyGym.UI.Forms.Member
             btnLogoutNav.FlatAppearance.BorderSize = 0;
             btnLogoutNav.Click += (s, e) =>
             {
-                var confirm = MessageBox.Show("Bạn có muốn đăng xuất khỏi hệ thống?", "Xác nhận đăng xuất", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                if (confirm == DialogResult.Yes)
-                {
-                    UserSession.Logout(this);
-                }
+                UserSession.Logout(this); // Logout() đã tự hỏi xác nhận
             };
 
             Label lblVer = new Label
