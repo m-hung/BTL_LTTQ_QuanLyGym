@@ -20,8 +20,8 @@ namespace QuanLyGym.DAL.Configurations
                 new Account { AccountID = 6, Username = "pt_hoanglong", PasswordHash = "123456", Role = "PT", Status = true, CreatedAt = new DateTime(2026, 1, 1) },
 
                 // 10 Members
-                new Account { AccountID = 7, Username = "member_hung", PasswordHash = "123456", Role = "Member", Status = true, CreatedAt = new DateTime(2026, 1, 1) },
-                new Account { AccountID = 8, Username = "member_lan", PasswordHash = "123456", Role = "Member", Status = true, CreatedAt = new DateTime(2026, 1, 1) },
+                new Account { AccountID = 7, Username = "member_khanhhung", PasswordHash = "123456", Role = "Member", Status = true, CreatedAt = new DateTime(2026, 1, 1) },
+                new Account { AccountID = 8, Username = "member_minhhung", PasswordHash = "123456", Role = "Member", Status = true, CreatedAt = new DateTime(2026, 1, 1) },
                 new Account { AccountID = 9, Username = "member_hoa", PasswordHash = "123456", Role = "Member", Status = true, CreatedAt = new DateTime(2026, 1, 1) },
                 new Account { AccountID = 10, Username = "member_dung", PasswordHash = "123456", Role = "Member", Status = true, CreatedAt = new DateTime(2026, 1, 1) },
                 new Account { AccountID = 11, Username = "member_phuong", PasswordHash = "123456", Role = "Member", Status = true, CreatedAt = new DateTime(2026, 1, 1) },

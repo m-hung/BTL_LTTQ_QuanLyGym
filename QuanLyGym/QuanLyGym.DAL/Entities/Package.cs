@@ -17,7 +17,7 @@ namespace QuanLyGym.DAL.Entities
         [Column(TypeName = "decimal(18,2)")]
         public decimal Price { get; set; }
 
-        public int TotalSessions { get; set; }
+        public int TotalPTSessions { get; set; }
 
         public bool IsPTPackage { get; set; } = false; // 1 (True): Gói tập với PT, 0 (False): Gói tập tự do
 

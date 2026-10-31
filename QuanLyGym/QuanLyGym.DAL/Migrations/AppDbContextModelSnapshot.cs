@@ -117,7 +117,7 @@ namespace QuanLyGym.DAL.Migrations
                             PasswordHash = "123456",
                             Role = "Member",
                             Status = true,
-                            Username = "member_hung"
+                            Username = "member_khanhhung"
                         },
                         new
                         {
@@ -126,7 +126,7 @@ namespace QuanLyGym.DAL.Migrations
                             PasswordHash = "123456",
                             Role = "Member",
                             Status = true,
-                            Username = "member_lan"
+                            Username = "member_minhhung"
                         },
                         new
                         {
@@ -1155,8 +1155,8 @@ namespace QuanLyGym.DAL.Migrations
                             BranchID = 1,
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DateOfBirth = new DateTime(2000, 10, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Email = "hung.tran@gmail.com",
-                            FullName = "Trần Văn Hùng",
+                            Email = "nguyenkhanhhung2512@gmail.com",
+                            FullName = "Nguyễn Khánh Hưng",
                             Gender = "Nam",
                             Phone = "0977777777"
                         },
@@ -1169,9 +1169,9 @@ namespace QuanLyGym.DAL.Migrations
                             BranchID = 1,
                             CreatedAt = new DateTime(2026, 1, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DateOfBirth = new DateTime(1999, 4, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Email = "lan.le@gmail.com",
-                            FullName = "Lê Thị Lan",
-                            Gender = "Nữ",
+                            Email = "minhhungthai7@gmail.com",
+                            FullName = "Thái Trần Minh Hưng",
+                            Gender = "Nam",
                             Phone = "0912345678"
                         },
                         new
@@ -1314,6 +1314,9 @@ namespace QuanLyGym.DAL.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<decimal>("PriceAtPurchase")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<DateTime>("RegisterDate")
                         .HasColumnType("datetime2");
 
@@ -1325,7 +1328,7 @@ namespace QuanLyGym.DAL.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<int>("UsedSessions")
+                    b.Property<int>("UsedPTSessions")
                         .HasColumnType("int");
 
                     b.HasKey("MembershipID");
@@ -1348,10 +1351,11 @@ namespace QuanLyGym.DAL.Migrations
                             MemberID = 1,
                             PackageID = 4,
                             Price = 12500000m,
+                            PriceAtPurchase = 12500000m,
                             RegisterDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             StartDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "Active",
-                            UsedSessions = 25
+                            UsedPTSessions = 25
                         },
                         new
                         {
@@ -1362,10 +1366,11 @@ namespace QuanLyGym.DAL.Migrations
                             MemberID = 2,
                             PackageID = 3,
                             Price = 5800000m,
+                            PriceAtPurchase = 5800000m,
                             RegisterDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             StartDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "Active",
-                            UsedSessions = 18
+                            UsedPTSessions = 18
                         },
                         new
                         {
@@ -1376,10 +1381,11 @@ namespace QuanLyGym.DAL.Migrations
                             MemberID = 3,
                             PackageID = 2,
                             Price = 2800000m,
+                            PriceAtPurchase = 2800000m,
                             RegisterDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             StartDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "Active",
-                            UsedSessions = 10
+                            UsedPTSessions = 10
                         },
                         new
                         {
@@ -1390,10 +1396,11 @@ namespace QuanLyGym.DAL.Migrations
                             MemberID = 4,
                             PackageID = 1,
                             Price = 500000m,
+                            PriceAtPurchase = 500000m,
                             RegisterDate = new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             StartDate = new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "Active",
-                            UsedSessions = 14
+                            UsedPTSessions = 14
                         },
                         new
                         {
@@ -1404,10 +1411,11 @@ namespace QuanLyGym.DAL.Migrations
                             MemberID = 5,
                             PackageID = 1,
                             Price = 500000m,
+                            PriceAtPurchase = 500000m,
                             RegisterDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             StartDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "Active",
-                            UsedSessions = 12
+                            UsedPTSessions = 12
                         },
                         new
                         {
@@ -1418,10 +1426,11 @@ namespace QuanLyGym.DAL.Migrations
                             MemberID = 6,
                             PackageID = 1,
                             Price = 500000m,
+                            PriceAtPurchase = 500000m,
                             RegisterDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             StartDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "Active",
-                            UsedSessions = 8
+                            UsedPTSessions = 8
                         },
                         new
                         {
@@ -1432,10 +1441,11 @@ namespace QuanLyGym.DAL.Migrations
                             MemberID = 7,
                             PackageID = 1,
                             Price = 500000m,
+                            PriceAtPurchase = 500000m,
                             RegisterDate = new DateTime(2026, 2, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             StartDate = new DateTime(2026, 2, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "Active",
-                            UsedSessions = 6
+                            UsedPTSessions = 6
                         },
                         new
                         {
@@ -1446,10 +1456,11 @@ namespace QuanLyGym.DAL.Migrations
                             MemberID = 8,
                             PackageID = 1,
                             Price = 500000m,
+                            PriceAtPurchase = 500000m,
                             RegisterDate = new DateTime(2026, 2, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             StartDate = new DateTime(2026, 2, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "Active",
-                            UsedSessions = 15
+                            UsedPTSessions = 15
                         },
                         new
                         {
@@ -1460,10 +1471,11 @@ namespace QuanLyGym.DAL.Migrations
                             MemberID = 9,
                             PackageID = 1,
                             Price = 500000m,
+                            PriceAtPurchase = 500000m,
                             RegisterDate = new DateTime(2026, 2, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             StartDate = new DateTime(2026, 2, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "Active",
-                            UsedSessions = 9
+                            UsedPTSessions = 9
                         },
                         new
                         {
@@ -1474,10 +1486,11 @@ namespace QuanLyGym.DAL.Migrations
                             MemberID = 10,
                             PackageID = 1,
                             Price = 500000m,
+                            PriceAtPurchase = 500000m,
                             RegisterDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             StartDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "Active",
-                            UsedSessions = 5
+                            UsedPTSessions = 5
                         });
                 });
 
@@ -1648,7 +1661,7 @@ namespace QuanLyGym.DAL.Migrations
                     b.Property<bool>("Status")
                         .HasColumnType("bit");
 
-                    b.Property<int>("TotalSessions")
+                    b.Property<int>("TotalPTSessions")
                         .HasColumnType("int");
 
                     b.HasKey("PackageID");
@@ -1661,54 +1674,54 @@ namespace QuanLyGym.DAL.Migrations
                         new
                         {
                             PackageID = 1,
-                            Benefits = "Tập tự do không giới hạn các khung giờ, tủ đồ cá nhân",
+                            Benefits = "Tập không giới hạn khung giờ, Sử dụng đầy đủ máy tạ & Cardio, Tủ đồ cá nhân",
                             BranchID = 1,
-                            Description = "Gói tập tự do tiêu chuẩn",
+                            Description = "Gói tập tự do tiêu chuẩn dành cho hội viên muốn duy trì rèn luyện hàng ngày.",
                             Duration = 30,
                             IsPTPackage = false,
                             PackageName = "Classic",
                             Price = 500000m,
                             Status = true,
-                            TotalSessions = 30
+                            TotalPTSessions = 0
                         },
                         new
                         {
                             PackageID = 2,
-                            Benefits = "Kèm PT 1-1 (12 buổi PT), kiểm tra chỉ số InBody định kỳ",
+                            Benefits = "12 buổi tập 1-1 với HLV, Thiết lập lộ trình cá nhân hóa, Kiểm tra chỉ số InBody hàng tháng",
                             BranchID = 1,
-                            Description = "Gói tập rèn luyện chuyên sâu cùng HLV cá nhân",
+                            Description = "Gói rèn luyện chuyên sâu 3 tháng cùng HLV, phù hợp người mới bắt đầu cần định hướng.",
                             Duration = 90,
                             IsPTPackage = true,
                             PackageName = "Silver",
                             Price = 2800000m,
                             Status = true,
-                            TotalSessions = 24
+                            TotalPTSessions = 12
                         },
                         new
                         {
                             PackageID = 3,
-                            Benefits = "Kèm PT 1-1 (36 buổi PT), đo InBody định kỳ, phòng xông hơi Sauna",
+                            Benefits = "24 buổi tập 1-1 với HLV, Tư vấn dinh dưỡng chuyên sâu, Đo InBody định kỳ, Sử dụng phòng xông hơi Sauna",
                             BranchID = 1,
-                            Description = "Gói tập Gold cao cấp toàn diện",
-                            Duration = 180,
+                            Description = "Gói nâng cao toàn diện giúp cải thiện thể hình nhanh chóng và thư giãn sau giờ tập.",
+                            Duration = 90,
                             IsPTPackage = true,
                             PackageName = "Gold",
                             Price = 5800000m,
                             Status = true,
-                            TotalSessions = 48
+                            TotalPTSessions = 24
                         },
                         new
                         {
                             PackageID = 4,
-                            Benefits = "Kèm PT 1-1 không giới hạn, full dịch vụ VIP Sauna, khăn tập & locker riêng",
+                            Benefits = "36 buổi tập 1-1 với HLV cao cấp, Full dịch vụ Sauna & VIP Locker, Miễn phí khăn tập & nước uống mỗi buổi",
                             BranchID = 1,
-                            Description = "Gói tập thượng lưu VIP Diamond đẳng cấp nhất",
-                            Duration = 365,
+                            Description = "Gói tập thượng lưu cao cấp nhất, cam kết kết quả và trải nghiệm dịch vụ chuẩn 5 sao.",
+                            Duration = 90,
                             IsPTPackage = true,
                             PackageName = "VIP Diamond",
                             Price = 12500000m,
                             Status = true,
-                            TotalSessions = 100
+                            TotalPTSessions = 36
                         });
                 });
 
@@ -2123,7 +2136,7 @@ namespace QuanLyGym.DAL.Migrations
                             PTID = 1,
                             RoomID = 1,
                             StartTime = new TimeSpan(0, 8, 30, 0, 0),
-                            Status = "Confirmed",
+                            Status = "Completed",
                             TrainingDate = new DateTime(2026, 10, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TrainingType = "Tập Ngực & Tay Sau (Hypertrophy)"
                         },
@@ -2133,11 +2146,11 @@ namespace QuanLyGym.DAL.Migrations
                             BranchID = 1,
                             EndTime = new TimeSpan(0, 15, 30, 0, 0),
                             MemberID = 2,
-                            Note = "Đốt calo cường độ cao, theo dõi nhịp tim",
+                            Note = "Đốt calo cường độ cao, đã hoàn thành",
                             PTID = 1,
                             RoomID = 2,
                             StartTime = new TimeSpan(0, 14, 0, 0, 0),
-                            Status = "Confirmed",
+                            Status = "Completed",
                             TrainingDate = new DateTime(2026, 10, 27, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TrainingType = "Cardio HIIT & Đốt Mỡ Chuyên Sâu"
                         },
@@ -2151,7 +2164,7 @@ namespace QuanLyGym.DAL.Migrations
                             PTID = 1,
                             RoomID = 1,
                             StartTime = new TimeSpan(0, 9, 0, 0, 0),
-                            Status = "Scheduled",
+                            Status = "Completed",
                             TrainingDate = new DateTime(2026, 10, 29, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TrainingType = "Tập Lưng Xô & Tay Trước"
                         },
@@ -2165,7 +2178,7 @@ namespace QuanLyGym.DAL.Migrations
                             PTID = 1,
                             RoomID = 1,
                             StartTime = new TimeSpan(0, 15, 0, 0, 0),
-                            Status = "Scheduled",
+                            Status = "Confirmed",
                             TrainingDate = new DateTime(2026, 10, 31, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TrainingType = "Tập Chân Mông & Giãn Cơ"
                         },
@@ -2179,7 +2192,7 @@ namespace QuanLyGym.DAL.Migrations
                             PTID = 1,
                             RoomID = 1,
                             StartTime = new TimeSpan(0, 8, 30, 0, 0),
-                            Status = "Scheduled",
+                            Status = "Confirmed",
                             TrainingDate = new DateTime(2026, 11, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TrainingType = "Tập Vai & Bụng Core"
                         },
@@ -2193,7 +2206,7 @@ namespace QuanLyGym.DAL.Migrations
                             PTID = 1,
                             RoomID = 1,
                             StartTime = new TimeSpan(0, 14, 0, 0, 0),
-                            Status = "Scheduled",
+                            Status = "Confirmed",
                             TrainingDate = new DateTime(2026, 11, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TrainingType = "Tập Ngực & Tay Sau Nâng Cao"
                         },
@@ -2207,7 +2220,7 @@ namespace QuanLyGym.DAL.Migrations
                             PTID = 1,
                             RoomID = 1,
                             StartTime = new TimeSpan(0, 9, 0, 0, 0),
-                            Status = "Scheduled",
+                            Status = "Confirmed",
                             TrainingDate = new DateTime(2026, 11, 6, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TrainingType = "Full Body Functional Training"
                         },
@@ -2231,11 +2244,11 @@ namespace QuanLyGym.DAL.Migrations
                             BranchID = 1,
                             EndTime = new TimeSpan(0, 15, 30, 0, 0),
                             MemberID = 3,
-                            Note = "Dùng đai hỗ trợ lưng",
+                            Note = "Hội viên báo bận lịch tác nghiệp công tác",
                             PTID = 1,
                             RoomID = 1,
                             StartTime = new TimeSpan(0, 14, 0, 0, 0),
-                            Status = "Scheduled",
+                            Status = "Cancelled",
                             TrainingDate = new DateTime(2026, 11, 11, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TrainingType = "Tập Lưng Xô & Bắp Tay"
                         },
@@ -2255,6 +2268,90 @@ namespace QuanLyGym.DAL.Migrations
                         },
                         new
                         {
+                            ScheduleID = 27,
+                            BranchID = 1,
+                            EndTime = new TimeSpan(0, 10, 0, 0, 0),
+                            MemberID = 1,
+                            Note = "Tập trung ép ngực với tạ đơn",
+                            PTID = 1,
+                            RoomID = 1,
+                            StartTime = new TimeSpan(0, 8, 30, 0, 0),
+                            Status = "Scheduled",
+                            TrainingDate = new DateTime(2026, 11, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            TrainingType = "Tập Ngực Chuyên Sâu & Flyes"
+                        },
+                        new
+                        {
+                            ScheduleID = 28,
+                            BranchID = 1,
+                            EndTime = new TimeSpan(0, 15, 30, 0, 0),
+                            MemberID = 2,
+                            Note = "Chú ý kiểm soát nhịp tim",
+                            PTID = 1,
+                            RoomID = 2,
+                            StartTime = new TimeSpan(0, 14, 0, 0, 0),
+                            Status = "Scheduled",
+                            TrainingDate = new DateTime(2026, 11, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            TrainingType = "HIIT Tabata & Bụng Dưới"
+                        },
+                        new
+                        {
+                            ScheduleID = 29,
+                            BranchID = 1,
+                            EndTime = new TimeSpan(0, 10, 30, 0, 0),
+                            MemberID = 1,
+                            Note = "Kiểm tra kỹ thuật siết lưng",
+                            PTID = 1,
+                            RoomID = 1,
+                            StartTime = new TimeSpan(0, 9, 0, 0, 0),
+                            Status = "Scheduled",
+                            TrainingDate = new DateTime(2026, 11, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            TrainingType = "Tập Lưng Dày & Deadlift"
+                        },
+                        new
+                        {
+                            ScheduleID = 30,
+                            BranchID = 1,
+                            EndTime = new TimeSpan(0, 10, 0, 0, 0),
+                            MemberID = 1,
+                            Note = "Hội viên mới gửi yêu cầu đặt lịch",
+                            PTID = 1,
+                            RoomID = 1,
+                            StartTime = new TimeSpan(0, 8, 30, 0, 0),
+                            Status = "Pending",
+                            TrainingDate = new DateTime(2026, 11, 23, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            TrainingType = "Tập Vai & Tay Sau (Super-set)"
+                        },
+                        new
+                        {
+                            ScheduleID = 31,
+                            BranchID = 1,
+                            EndTime = new TimeSpan(0, 15, 30, 0, 0),
+                            MemberID = 3,
+                            Note = "Leg Press & Leg Extension",
+                            PTID = 1,
+                            RoomID = 1,
+                            StartTime = new TimeSpan(0, 14, 0, 0, 0),
+                            Status = "Scheduled",
+                            TrainingDate = new DateTime(2026, 11, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            TrainingType = "Tập Chân & Đùi Trước"
+                        },
+                        new
+                        {
+                            ScheduleID = 32,
+                            BranchID = 1,
+                            EndTime = new TimeSpan(0, 10, 30, 0, 0),
+                            MemberID = 1,
+                            Note = "Đo lại các vòng và chỉ số mỡ",
+                            PTID = 1,
+                            RoomID = 1,
+                            StartTime = new TimeSpan(0, 9, 0, 0, 0),
+                            Status = "Pending",
+                            TrainingDate = new DateTime(2026, 11, 27, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            TrainingType = "Tổng Kết Tiến Độ & Giãn Cơ Sauna"
+                        },
+                        new
+                        {
                             ScheduleID = 11,
                             BranchID = 1,
                             EndTime = new TimeSpan(0, 17, 30, 0, 0),
@@ -2263,7 +2360,7 @@ namespace QuanLyGym.DAL.Migrations
                             PTID = 2,
                             RoomID = 1,
                             StartTime = new TimeSpan(0, 16, 0, 0, 0),
-                            Status = "Confirmed",
+                            Status = "Completed",
                             TrainingDate = new DateTime(2026, 10, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TrainingType = "Tư Thế Squat & Cơ Đùi Nữ"
                         },
@@ -2277,7 +2374,7 @@ namespace QuanLyGym.DAL.Migrations
                             PTID = 2,
                             RoomID = 1,
                             StartTime = new TimeSpan(0, 17, 30, 0, 0),
-                            Status = "Confirmed",
+                            Status = "Completed",
                             TrainingDate = new DateTime(2026, 10, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TrainingType = "Tập Mông Quả Đào & Thon Gọn Eo"
                         },
@@ -2291,7 +2388,7 @@ namespace QuanLyGym.DAL.Migrations
                             PTID = 2,
                             RoomID = 2,
                             StartTime = new TimeSpan(0, 16, 0, 0, 0),
-                            Status = "Scheduled",
+                            Status = "Completed",
                             TrainingDate = new DateTime(2026, 10, 30, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TrainingType = "Pilates Dẻo Dai & Cột Sống"
                         },
@@ -2305,7 +2402,7 @@ namespace QuanLyGym.DAL.Migrations
                             PTID = 2,
                             RoomID = 1,
                             StartTime = new TimeSpan(0, 17, 0, 0, 0),
-                            Status = "Scheduled",
+                            Status = "Confirmed",
                             TrainingDate = new DateTime(2026, 11, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TrainingType = "Cardio Giảm Cân & Bụng Dưới"
                         },
@@ -2319,7 +2416,7 @@ namespace QuanLyGym.DAL.Migrations
                             PTID = 2,
                             RoomID = 1,
                             StartTime = new TimeSpan(0, 16, 0, 0, 0),
-                            Status = "Scheduled",
+                            Status = "Confirmed",
                             TrainingDate = new DateTime(2026, 11, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TrainingType = "Tập Vai Nữ & Lưng Tự Tin"
                         },
@@ -2333,7 +2430,7 @@ namespace QuanLyGym.DAL.Migrations
                             PTID = 2,
                             RoomID = 2,
                             StartTime = new TimeSpan(0, 17, 30, 0, 0),
-                            Status = "Scheduled",
+                            Status = "Confirmed",
                             TrainingDate = new DateTime(2026, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TrainingType = "Kéo Giãn Cơ & Thư Giãn Toàn Thân"
                         },
@@ -2367,6 +2464,62 @@ namespace QuanLyGym.DAL.Migrations
                         },
                         new
                         {
+                            ScheduleID = 33,
+                            BranchID = 1,
+                            EndTime = new TimeSpan(0, 17, 30, 0, 0),
+                            MemberID = 3,
+                            Note = "Sumo Squat & Cable Abduction",
+                            PTID = 2,
+                            RoomID = 1,
+                            StartTime = new TimeSpan(0, 16, 0, 0, 0),
+                            Status = "Scheduled",
+                            TrainingDate = new DateTime(2026, 11, 17, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            TrainingType = "Tập Mông & Đùi Trong Nữ"
+                        },
+                        new
+                        {
+                            ScheduleID = 34,
+                            BranchID = 1,
+                            EndTime = new TimeSpan(0, 18, 30, 0, 0),
+                            MemberID = 2,
+                            Note = "Chú ý nhịp thở khi gập bụng",
+                            PTID = 2,
+                            RoomID = 2,
+                            StartTime = new TimeSpan(0, 17, 0, 0, 0),
+                            Status = "Scheduled",
+                            TrainingDate = new DateTime(2026, 11, 19, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            TrainingType = "Tập Cốt Lõi (Core & Abs)"
+                        },
+                        new
+                        {
+                            ScheduleID = 35,
+                            BranchID = 1,
+                            EndTime = new TimeSpan(0, 17, 30, 0, 0),
+                            MemberID = 3,
+                            Note = "Đang chờ HLV xác nhận ca",
+                            PTID = 2,
+                            RoomID = 1,
+                            StartTime = new TimeSpan(0, 16, 0, 0, 0),
+                            Status = "Pending",
+                            TrainingDate = new DateTime(2026, 11, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            TrainingType = "Pilates Thể Lực & Dáng Đẹp"
+                        },
+                        new
+                        {
+                            ScheduleID = 36,
+                            BranchID = 1,
+                            EndTime = new TimeSpan(0, 18, 30, 0, 0),
+                            MemberID = 2,
+                            Note = "Thư giãn các cơ sau chu kỳ tập nặng",
+                            PTID = 2,
+                            RoomID = 1,
+                            StartTime = new TimeSpan(0, 17, 0, 0, 0),
+                            Status = "Scheduled",
+                            TrainingDate = new DateTime(2026, 11, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            TrainingType = "Kéo Giãn Sâu & Yoga Gym"
+                        },
+                        new
+                        {
                             ScheduleID = 19,
                             BranchID = 2,
                             EndTime = new TimeSpan(0, 9, 30, 0, 0),
@@ -2375,7 +2528,7 @@ namespace QuanLyGym.DAL.Migrations
                             PTID = 3,
                             RoomID = 3,
                             StartTime = new TimeSpan(0, 8, 0, 0, 0),
-                            Status = "Confirmed",
+                            Status = "Completed",
                             TrainingDate = new DateTime(2026, 10, 27, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TrainingType = "Powerlifting Deadlift & Lưng Dày"
                         },
@@ -2389,7 +2542,7 @@ namespace QuanLyGym.DAL.Migrations
                             PTID = 3,
                             RoomID = 3,
                             StartTime = new TimeSpan(0, 10, 0, 0, 0),
-                            Status = "Scheduled",
+                            Status = "Completed",
                             TrainingDate = new DateTime(2026, 10, 29, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TrainingType = "Bench Press Chuẩn Thi Đấu"
                         },
@@ -2403,7 +2556,7 @@ namespace QuanLyGym.DAL.Migrations
                             PTID = 3,
                             RoomID = 3,
                             StartTime = new TimeSpan(0, 8, 30, 0, 0),
-                            Status = "Scheduled",
+                            Status = "Confirmed",
                             TrainingDate = new DateTime(2026, 10, 31, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TrainingType = "Squat Nặng & Phục Hồi Khớp"
                         },
@@ -2417,7 +2570,7 @@ namespace QuanLyGym.DAL.Migrations
                             PTID = 3,
                             RoomID = 3,
                             StartTime = new TimeSpan(0, 9, 0, 0, 0),
-                            Status = "Scheduled",
+                            Status = "Confirmed",
                             TrainingDate = new DateTime(2026, 11, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TrainingType = "Kỹ Thuật Cử Tạ Olympic Cơ Bản"
                         },
@@ -2431,7 +2584,7 @@ namespace QuanLyGym.DAL.Migrations
                             PTID = 3,
                             RoomID = 4,
                             StartTime = new TimeSpan(0, 10, 0, 0, 0),
-                            Status = "Scheduled",
+                            Status = "Confirmed",
                             TrainingDate = new DateTime(2026, 11, 6, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TrainingType = "Conditioning & Thể Lực Đỉnh Cao"
                         },
@@ -2476,6 +2629,62 @@ namespace QuanLyGym.DAL.Migrations
                             Status = "Scheduled",
                             TrainingDate = new DateTime(2026, 11, 14, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TrainingType = "HIIT & Sức Bền Tim Mạch"
+                        },
+                        new
+                        {
+                            ScheduleID = 37,
+                            BranchID = 2,
+                            EndTime = new TimeSpan(0, 10, 0, 0, 0),
+                            MemberID = 1,
+                            Note = "Nâng mức tạ thử nghiệm 110kg",
+                            PTID = 3,
+                            RoomID = 3,
+                            StartTime = new TimeSpan(0, 8, 30, 0, 0),
+                            Status = "Scheduled",
+                            TrainingDate = new DateTime(2026, 11, 17, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            TrainingType = "Deadlift Sumo & Kỹ Thuật Siết Lưng"
+                        },
+                        new
+                        {
+                            ScheduleID = 38,
+                            BranchID = 2,
+                            EndTime = new TimeSpan(0, 11, 30, 0, 0),
+                            MemberID = 2,
+                            Note = "Tập vai đẩy thanh đòn đứng",
+                            PTID = 3,
+                            RoomID = 4,
+                            StartTime = new TimeSpan(0, 10, 0, 0, 0),
+                            Status = "Scheduled",
+                            TrainingDate = new DateTime(2026, 11, 19, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            TrainingType = "Overhead Press & Khớp Vai"
+                        },
+                        new
+                        {
+                            ScheduleID = 39,
+                            BranchID = 2,
+                            EndTime = new TimeSpan(0, 10, 0, 0, 0),
+                            MemberID = 1,
+                            Note = "Lịch đăng ký mới cuối tháng",
+                            PTID = 3,
+                            RoomID = 3,
+                            StartTime = new TimeSpan(0, 8, 30, 0, 0),
+                            Status = "Pending",
+                            TrainingDate = new DateTime(2026, 11, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            TrainingType = "Powerlifting Complete Day"
+                        },
+                        new
+                        {
+                            ScheduleID = 40,
+                            BranchID = 2,
+                            EndTime = new TimeSpan(0, 10, 30, 0, 0),
+                            MemberID = 3,
+                            Note = "Bài tập giải mỏi toàn thân",
+                            PTID = 3,
+                            RoomID = 4,
+                            StartTime = new TimeSpan(0, 9, 0, 0, 0),
+                            Status = "Scheduled",
+                            TrainingDate = new DateTime(2026, 11, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            TrainingType = "Cardio Thể Lực & Phục Hồi Co Cơ"
                         });
                 });
 

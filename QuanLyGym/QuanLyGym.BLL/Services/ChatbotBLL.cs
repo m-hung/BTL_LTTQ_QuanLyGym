@@ -371,7 +371,7 @@ namespace QuanLyGym.BLL.Services
                 {
                     sb.AppendLine($"{idx++}. {pkg.PackageName.ToUpper()}");
                     sb.AppendLine($"   • Giá: {pkg.Price:N0} VNĐ");
-                    sb.AppendLine($"   • Thời hạn: {pkg.Duration} ngày ({pkg.TotalSessions} buổi tập)");
+                    sb.AppendLine($"   • Thời hạn: {pkg.Duration} ngày ({pkg.TotalPTSessions} buổi tập)");
                     if (!string.IsNullOrEmpty(pkg.Benefits))
                     {
                         sb.AppendLine($"   • Quyền lợi: {pkg.Benefits}");
