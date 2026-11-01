@@ -1,0 +1,20 @@
+﻿# ============================================================
+#  Cấu hình gửi email (quên mật khẩu / quên tên đăng nhập)
+#
+#  CÁCH DÙNG:
+#   1. Sao chép file này thành "mail.config" (cùng thư mục, bỏ đuôi .example).
+#   2. Điền User và Password bên dưới.
+#   3. File mail.config chứa mật khẩu nên đã được .gitignore, KHÔNG đưa lên git.
+#
+#  VỚI GMAIL:
+#   - Bật "Xác minh 2 bước" cho tài khoản Google.
+#   - Tạo "Mật khẩu ứng dụng" (App Password) tại https://myaccount.google.com/apppasswords
+#   - Dán App Password 16 ký tự vào Password (KHÔNG dùng mật khẩu đăng nhập Gmail).
+# ============================================================
+
+Host=smtp.gmail.com
+Port=587
+EnableSsl=true
+User=Email
+Password=appPassword (16 ký tự)
+FromName=Gym Manager
