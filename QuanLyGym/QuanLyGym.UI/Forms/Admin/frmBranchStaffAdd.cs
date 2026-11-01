@@ -2,20 +2,10 @@ using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using QuanLyGym.BLL.Models;
 
 namespace QuanLyGym.UI.Forms.Admin
 {
-    public class BranchStaffItem
-    {
-        public string StaffId { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
-        public string Role { get; set; } = "PT";
-        public string Phone { get; set; } = string.Empty;
-        public string Shift { get; set; } = "Ca sáng (06:00 - 14:00)";
-        public string JoinDate { get; set; } = DateTime.Now.ToString("dd/MM/yyyy");
-        public bool IsWorking { get; set; } = true;
-    }
-
     public sealed class frmBranchStaffAdd : Form
     {
         [DllImport("user32.dll")]

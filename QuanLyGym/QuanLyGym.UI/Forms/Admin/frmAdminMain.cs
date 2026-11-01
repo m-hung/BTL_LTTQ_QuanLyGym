@@ -5,10 +5,13 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
-﻿using QuanLyGym.UI.Helpers;
+using QuanLyGym.BLL.Models;
+using QuanLyGym.BLL.Services;
+using QuanLyGym.UI.Helpers;
 
 namespace QuanLyGym.UI.Forms.Admin
 {
@@ -83,11 +86,11 @@ namespace QuanLyGym.UI.Forms.Admin
 
             // Khởi tạo ToolTip tuỳ chỉnh và gắn hiệu ứng hover cho các biểu đồ
             InitChartToolTip();
-            AttachChartHover(chartRevenue, pt => $"Tháng {pt.AxisLabel}\nDoanh thu: {pt.YValues[0]:N0} triệu VNĐ");
-            AttachChartHover(chartBranch, pt => $"Chi nhánh {pt.AxisLabel}\nDoanh thu: {pt.YValues[0]:N0} triệu VNĐ");
+            AttachChartHover(chartRevenue, pt => $"Tháng {pt.AxisLabel}\nDoanh thu: {pt.YValues[0]:N1} triệu VNĐ");
+            AttachChartHover(chartBranch, pt => $"Chi nhánh {pt.AxisLabel}\nDoanh thu: {pt.YValues[0]:N1} triệu VNĐ");
             AttachChartHover(chartNewMember, pt => $"Tháng {pt.AxisLabel}\nHội viên mới: {pt.YValues[0]:N0} người");
 
-            // Nạp dữ liệu mẫu
+            // Nạp dữ liệu thực tế từ Database
             LoadAllChartsAndData();
         }
 
@@ -112,22 +115,69 @@ namespace QuanLyGym.UI.Forms.Admin
 
         private void frmAdminMain_Shown(object sender, EventArgs e)
         {
-            // Đảm bảo khi form hiển thị hoàn toàn thì biểu đồ render lại chuẩn kích thước
+            // Đảm bảo khi form hiển thị hoàn toàn thì nạp và render lại dữ liệu chuẩn kích thước
             LoadAllChartsAndData();
         }
 
-        private void LoadAllChartsAndData()
+        public void LoadAllChartsAndData()
         {
+            UpdateRevenueKpis();
             DrawRevenueChart();
             DrawBranchChart();
             DrawNewMemberChart();
-            LoadExpiringSample();
+            LoadExpiringMemberships();
+        }
+
+        /// <summary>
+        /// Cập nhật 4 thẻ KPI chỉ số doanh thu và quy mô từ Database
+        /// </summary>
+        private void UpdateRevenueKpis()
+        {
+            try
+            {
+                int currentYear = DateTime.Now.Year;
+                var summary = RevenueService.Instance.GetRevenueSummary(currentYear);
+                if (summary.TotalRevenue == 0)
+                {
+                    summary = RevenueService.Instance.GetRevenueSummary(null);
+                }
+
+                lblKpiRevenueTitle.Text = $"TỔNG DOANH THU ({currentYear})";
+                if (summary.TotalRevenue >= 1_000_000_000m)
+                    lblKpiRevenueValue.Text = $"{(summary.TotalRevenue / 1_000_000_000m):N2} tỷ đ";
+                else if (summary.TotalRevenue >= 1_000_000m)
+                    lblKpiRevenueValue.Text = $"{(summary.TotalRevenue / 1_000_000m):N1} triệu đ";
+                else
+                    lblKpiRevenueValue.Text = $"{summary.TotalRevenue:N0} đ";
+
+                lblKpiRevenueSub.Text = $"Cập nhật T{DateTime.Now.Month}/{currentYear}";
+
+                lblKpiMemberTitle.Text = "TỔNG HỘI VIÊN";
+                lblKpiMemberValue.Text = summary.TotalMembers.ToString("N0");
+                lblKpiMemberSub.Text = $"{summary.ActiveMembers} đang hoạt động";
+
+                lblKpiBranchTitle.Text = "CHI NHÁNH";
+                lblKpiBranchValue.Text = summary.TotalBranches.ToString("N0");
+                lblKpiBranchSub.Text = $"{summary.ActiveBranches} đang hoạt động";
+
+                lblKpiStaffTitle.Text = "NHÂN VIÊN";
+                lblKpiStaffValue.Text = summary.TotalStaff.ToString("N0");
+                lblKpiStaffSub.Text = "Toàn hệ thống";
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[frmAdminMain.UpdateRevenueKpis] Error: {ex.Message}");
+            }
         }
 
         private void ShowPage(Button btn)
         {
             // Trang Tổng quan chỉ hiện khi bấm "Tổng quan"
             pnlContent.Visible = (btn == btnNavOverview);
+            if (btn == btnNavOverview)
+            {
+                LoadAllChartsAndData();
+            }
 
             // Trang Chi nhánh
             if (btn == btnNavBranch)
@@ -139,6 +189,7 @@ namespace QuanLyGym.UI.Forms.Admin
                     _ucBranch.BringToFront();
                 }
                 _ucBranch.Visible = true;
+                _ucBranch.ReloadFromDatabase();
             }
             else if (_ucBranch != null)
             {
@@ -152,7 +203,7 @@ namespace QuanLyGym.UI.Forms.Admin
                 {
                     _ucStaff = new ucAdminStaff { Dock = DockStyle.Fill };
                     Controls.Add(_ucStaff);
-                    _ucStaff.BringToFront();   // bắt buộc, để không đè lên header và thanh menu
+                    _ucStaff.BringToFront();
                 }
                 _ucStaff.Visible = true;
             }
@@ -193,6 +244,7 @@ namespace QuanLyGym.UI.Forms.Admin
                 _ucAccount.Visible = false;
             }
         }
+
         private void tmrClock_Tick(object sender, EventArgs e)
         {
             lblDateTime.Text = DateTime.Now.ToString("dd/MM/yyyy — HH:mm");
@@ -207,7 +259,7 @@ namespace QuanLyGym.UI.Forms.Admin
 
         private void btnLogout_Click(object sender, EventArgs e)
         {
-            UserSession.Logout(this); // Hỏi xác nhận -> quay lại form đăng nhập
+            UserSession.Logout(this);
         }
 
         private void InitializeCustomControls()
@@ -226,14 +278,14 @@ namespace QuanLyGym.UI.Forms.Admin
             }
 
             // Cấu hình 4 thẻ chỉ số KPI
-            SetupKpiPanel(pnlKpiRevenue, lblKpiRevenueTitle, lblKpiRevenueValue, lblKpiRevenueSub, "TỔNG DOANH THU (2026)", "6.009 triệu đ", "Cập nhật T9/2026", Orange);
-            SetupKpiPanel(pnlKpiMember, lblKpiMemberTitle, lblKpiMemberValue, lblKpiMemberSub, "TỔNG HỘI VIÊN", "12", "11 đang hoạt động", Blue);
-            SetupKpiPanel(pnlKpiBranch, lblKpiBranchTitle, lblKpiBranchValue, lblKpiBranchSub, "CHI NHÁNH", "5", "1 đang bảo trì", Color.FromArgb(34, 197, 94));
-            SetupKpiPanel(pnlKpiStaff, lblKpiStaffTitle, lblKpiStaffValue, lblKpiStaffSub, "NHÂN VIÊN", "15", "5 PT, 4 thu ngân", Color.FromArgb(168, 85, 247));
+            SetupKpiPanel(pnlKpiRevenue, lblKpiRevenueTitle, lblKpiRevenueValue, lblKpiRevenueSub, "TỔNG DOANH THU", "0 đ", "Đang tải...", Orange);
+            SetupKpiPanel(pnlKpiMember, lblKpiMemberTitle, lblKpiMemberValue, lblKpiMemberSub, "TỔNG HỘI VIÊN", "0", "0 đang hoạt động", Blue);
+            SetupKpiPanel(pnlKpiBranch, lblKpiBranchTitle, lblKpiBranchValue, lblKpiBranchSub, "CHI NHÁNH", "0", "0 đang hoạt động", Color.FromArgb(34, 197, 94));
+            SetupKpiPanel(pnlKpiStaff, lblKpiStaffTitle, lblKpiStaffValue, lblKpiStaffSub, "NHÂN VIÊN", "0", "Toàn hệ thống", Color.FromArgb(168, 85, 247));
 
             // Cấu hình 4 thẻ Card biểu đồ & danh sách
-            SetupCard(pnlCardRevenue, lblRevenueTitle, "DOANH THU CÁC THÁNG (2026)", chartRevenue);
-            SetupCard(pnlCardExpiring, lblExpiringTitle, "HỘI VIÊN SẮP HẾT HẠN (7 NGÀY TỚI)", lvExpiring);
+            SetupCard(pnlCardRevenue, lblRevenueTitle, $"DOANH THU CÁC THÁNG ({DateTime.Now.Year})", chartRevenue);
+            SetupCard(pnlCardExpiring, lblExpiringTitle, "HỘI VIÊN SẮP HẾT HẠN (30 NGÀY TỚI)", lvExpiring);
             SetupCard(pnlCardBranchRevenue, lblBranchTitle, "DOANH THU THEO CHI NHÁNH (TRIỆU Đ)", chartBranch);
             SetupCard(pnlCardNewMember, lblNewMemberTitle, "HỘI VIÊN MỚI THEO THÁNG", chartNewMember);
 
@@ -316,77 +368,18 @@ namespace QuanLyGym.UI.Forms.Admin
             {
                 using (SaveFileDialog sfd = new SaveFileDialog())
                 {
-                    sfd.Title = "Xuất báo cáo tổng quan GymFit";
+                    sfd.Title = "Xuất báo cáo tổng quan GymFit từ Database";
                     sfd.Filter = "CSV (Phân cách bằng dấu phẩy) (*.csv)|*.csv|Tập tin văn bản (*.txt)|*.txt";
                     sfd.FileName = $"BaoCao_TongQuan_GymFit_{DateTime.Now:yyyyMMdd_HHmm}.csv";
 
                     if (sfd.ShowDialog() == DialogResult.OK)
                     {
-                        var sb = new StringBuilder();
-                        sb.AppendLine("GYMFIT - BÁO CÁO TỔNG QUAN HỆ THỐNG");
-                        sb.AppendLine($"Thời gian xuất báo cáo,{DateTime.Now:dd/MM/yyyy HH:mm:ss}");
-                        sb.AppendLine("Người thực hiện,Nguyễn Quản Trị (Super Admin)");
-                        sb.AppendLine();
-
-                        sb.AppendLine("=== 1. CHỈ SỐ HOẠT ĐỘNG CHÍNH (KPI) ===");
-                        sb.AppendLine("Chỉ số,Giá trị,Ghi chú");
-                        sb.AppendLine("Tổng doanh thu (2026),6.009 triệu đ,Cập nhật T9/2026");
-                        sb.AppendLine("Tổng hội viên,12,11 đang hoạt động");
-                        sb.AppendLine("Chi nhánh,5,1 đang bảo trì");
-                        sb.AppendLine("Nhân viên,15,5 PT - 4 thu ngân");
-                        sb.AppendLine();
-
-                        sb.AppendLine("=== 2. DOANH THU THEO THÁNG (2026) ===");
-                        sb.AppendLine("Tháng,Doanh thu (triệu VNĐ)");
-                        string[] revMonths = { "T1/26", "T2/26", "T3/26", "T4/26", "T5/26", "T6/26", "T7/26", "T8/26", "T9/26" };
-                        double[] revVals = { 480, 520, 610, 580, 690, 740, 700, 830, 870 };
-                        double revTotal = 0;
-                        for (int i = 0; i < revMonths.Length; i++)
-                        {
-                            sb.AppendLine($"{revMonths[i]},{revVals[i]:N0}");
-                            revTotal += revVals[i];
-                        }
-                        sb.AppendLine($"Tổng cộng,{revTotal:N0}");
-                        sb.AppendLine();
-
-                        sb.AppendLine("=== 3. DOANH THU THEO CHI NHÁNH ===");
-                        sb.AppendLine("Chi nhánh,Doanh thu (triệu VNĐ)");
-                        string[] branches = { "Quận 1", "Hoàn Kiếm", "Cầu Giấy", "Bình Thạnh", "Hải Châu" };
-                        double[] branchVals = { 380, 285, 190, 165, 140 };
-                        double branchTotal = 0;
-                        for (int i = 0; i < branches.Length; i++)
-                        {
-                            sb.AppendLine($"{branches[i]},{branchVals[i]:N0}");
-                            branchTotal += branchVals[i];
-                        }
-                        sb.AppendLine($"Tổng cộng,{branchTotal:N0}");
-                        sb.AppendLine();
-
-                        sb.AppendLine("=== 4. HỘI VIÊN MỚI THEO THÁNG ===");
-                        sb.AppendLine("Tháng,Số lượng hội viên mới");
-                        string[] memberMonths = { "T4", "T5", "T6", "T7", "T8", "T9" };
-                        double[] memberVals = { 28, 36, 43, 39, 52, 46 };
-                        double memberTotal = 0;
-                        for (int i = 0; i < memberMonths.Length; i++)
-                        {
-                            sb.AppendLine($"{memberMonths[i]},{memberVals[i]:N0}");
-                            memberTotal += memberVals[i];
-                        }
-                        sb.AppendLine($"Tổng cộng,{memberTotal:N0}");
-                        sb.AppendLine();
-
-                        sb.AppendLine("=== 5. DANH SÁCH HỘI VIÊN SẮP HẾT HẠN GÓI TẬP ===");
-                        sb.AppendLine("Họ và tên,Chi nhánh,Thời hạn còn lại");
-                        sb.AppendLine("Trần Quốc Khánh,Bình Thạnh,1 ngày");
-                        sb.AppendLine("Nguyễn Thị Ích,Hoàn Kiếm,3 ngày");
-                        sb.AppendLine("Lê Minh Cường,Cầu Giấy,5 ngày");
-                        sb.AppendLine("Vũ Thị Phương,Hải Châu,8 ngày");
-                        sb.AppendLine("Phạm Thị Dung,Bình Thạnh,12 ngày");
-
-                        File.WriteAllText(sfd.FileName, sb.ToString(), new UTF8Encoding(true));
+                        int currentYear = DateTime.Now.Year;
+                        string csvContent = RevenueService.Instance.GenerateRevenueReportCsv(currentYear);
+                        File.WriteAllText(sfd.FileName, csvContent, new UTF8Encoding(true));
 
                         DialogResult dr = MessageBox.Show(
-                            $"Xuất báo cáo tổng quan thành công!\n\nĐường dẫn: {sfd.FileName}\n\nBạn có muốn mở tệp ngay bây giờ không?",
+                            $"Xuất báo cáo tổng quan thành công từ Database!\n\nĐường dẫn: {sfd.FileName}\n\nBạn có muốn mở tệp ngay bây giờ không?",
                             "Xuất báo cáo thành công",
                             MessageBoxButtons.YesNo,
                             MessageBoxIcon.Information);
@@ -469,35 +462,111 @@ namespace QuanLyGym.UI.Forms.Admin
             chart.Series.Add(s);
         }
 
+        /// <summary>
+        /// Vẽ biểu đồ doanh thu theo tháng từ Database (bảng Memberships, cột PriceAtPurchase)
+        /// </summary>
         private void DrawRevenueChart()
         {
-            string[] months = { "T1/26", "T2/26", "T3/26", "T4/26", "T5/26", "T6/26", "T7/26", "T8/26", "T9/26" };
-            double[] values = { 480, 520, 610, 580, 690, 740, 700, 830, 870 };
-            // Biểu đồ dạng sóng mềm mại (SplineArea)
-            PrepareChart(chartRevenue, SeriesChartType.SplineArea, Color.FromArgb(70, Orange), months, values, 1000, 250);
-            chartRevenue.Series[0].BorderColor = Orange;
-            chartRevenue.Series[0].BorderWidth = 3;
-            chartRevenue.Series[0].MarkerStyle = MarkerStyle.Circle;
-            chartRevenue.Series[0].MarkerSize = 7;
-            chartRevenue.Series[0].MarkerColor = Orange;
-            chartRevenue.Series[0].MarkerBorderColor = Color.FromArgb(24, 24, 27);
-            chartRevenue.Series[0].MarkerBorderWidth = 2;
+            try
+            {
+                int currentYear = DateTime.Now.Year;
+                var monthly = RevenueService.Instance.GetMonthlyRevenue(currentYear);
+
+                var labels = monthly.Select(m => m.Label).ToArray();
+                var values = monthly.Select(m => m.RevenueInMillions).ToArray();
+
+                double maxVal = values.Length > 0 ? values.Max() : 0;
+                double maxAxis = Math.Max(10, Math.Ceiling(maxVal * 1.25 / 10) * 10);
+                double interval = Math.Max(1, Math.Round(maxAxis / 4));
+
+                PrepareChart(chartRevenue, SeriesChartType.SplineArea, Color.FromArgb(70, Orange), labels, values, maxAxis, interval);
+                if (chartRevenue.Series.Count > 0)
+                {
+                    chartRevenue.Series[0].BorderColor = Orange;
+                    chartRevenue.Series[0].BorderWidth = 3;
+                    chartRevenue.Series[0].MarkerStyle = MarkerStyle.Circle;
+                    chartRevenue.Series[0].MarkerSize = 7;
+                    chartRevenue.Series[0].MarkerColor = Orange;
+                    chartRevenue.Series[0].MarkerBorderColor = Color.FromArgb(24, 24, 27);
+                    chartRevenue.Series[0].MarkerBorderWidth = 2;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[DrawRevenueChart] Error: {ex.Message}");
+            }
         }
 
+        /// <summary>
+        /// Vẽ biểu đồ doanh thu theo từng chi nhánh từ Database (bảng Branches & Memberships, cột BranchID & PriceAtPurchase)
+        /// </summary>
         private void DrawBranchChart()
         {
-            string[] branches = { "Hoàn Kiếm", "Cầu Giấy", "Quận 1", "Bình Thạnh", "Hải Châu" };
-            double[] values = { 285, 190, 380, 165, 140 };
-            PrepareChart(chartBranch, SeriesChartType.Column, Orange, branches, values, 400, 95);
-            chartBranch.Series[0]["PointWidth"] = "0.45";
+            try
+            {
+                var branches = RevenueService.Instance.GetRevenueByBranch();
+                if (branches.Count == 0)
+                {
+                    PrepareChart(chartBranch, SeriesChartType.Column, Orange, new[] { "Chưa có dữ liệu" }, new double[] { 0 }, 10, 5);
+                    return;
+                }
+
+                var labels = branches.Select(b => b.ShortName).ToArray();
+                var values = branches.Select(b => b.RevenueInMillions).ToArray();
+
+                double maxVal = values.Length > 0 ? values.Max() : 0;
+                double maxAxis = Math.Max(10, Math.Ceiling(maxVal * 1.3 / 10) * 10);
+                double interval = Math.Max(1, Math.Round(maxAxis / 4));
+
+                PrepareChart(chartBranch, SeriesChartType.Column, Orange, labels, values, maxAxis, interval);
+                if (chartBranch.Series.Count > 0)
+                {
+                    chartBranch.Series[0]["PointWidth"] = "0.45";
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[DrawBranchChart] Error: {ex.Message}");
+            }
         }
 
+        /// <summary>
+        /// Vẽ biểu đồ hội viên mới đăng ký theo tháng từ Database
+        /// </summary>
         private void DrawNewMemberChart()
         {
-            string[] months = { "T4", "T5", "T6", "T7", "T8", "T9" };
-            double[] values = { 28, 36, 43, 39, 52, 46 };
-            PrepareChart(chartNewMember, SeriesChartType.Column, Blue, months, values, 60, 15);
-            chartNewMember.Series[0]["PointWidth"] = "0.45";
+            try
+            {
+                int currentYear = DateTime.Now.Year;
+                var list = RevenueService.Instance.GetNewMembersByMonth(currentYear);
+
+                var recentList = list.Where(x => x.Month <= DateTime.Now.Month).ToList();
+                if (recentList.Count < 6)
+                {
+                    recentList = list.Take(6).ToList();
+                }
+                else if (recentList.Count > 6)
+                {
+                    recentList = recentList.Skip(recentList.Count - 6).ToList();
+                }
+
+                var labels = recentList.Select(x => x.Label).ToArray();
+                var values = recentList.Select(x => (double)x.Count).ToArray();
+
+                double maxVal = values.Length > 0 ? values.Max() : 0;
+                double maxAxis = Math.Max(10, Math.Ceiling(maxVal * 1.3 / 5) * 5);
+                double interval = Math.Max(1, Math.Round(maxAxis / 4));
+
+                PrepareChart(chartNewMember, SeriesChartType.Column, Blue, labels, values, maxAxis, interval);
+                if (chartNewMember.Series.Count > 0)
+                {
+                    chartNewMember.Series[0]["PointWidth"] = "0.45";
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[DrawNewMemberChart] Error: {ex.Message}");
+            }
         }
 
         private void InitChartToolTip()
@@ -667,14 +736,49 @@ namespace QuanLyGym.UI.Forms.Admin
             pt.MarkerBorderWidth = 1;
         }
 
-        private void LoadExpiringSample()
+        /// <summary>
+        /// Nạp danh sách hội viên sắp hết hạn thẻ tập từ Database (trong vòng 30 ngày tới)
+        /// </summary>
+        private void LoadExpiringMemberships()
         {
-            lvExpiring.Items.Clear();
-            AddExpiring("Trần Quốc Khánh", "Bình Thạnh", "1 ngày", Color.FromArgb(239, 68, 68));
-            AddExpiring("Nguyễn Thị Ích", "Hoàn Kiếm", "3 ngày", Color.FromArgb(239, 68, 68));
-            AddExpiring("Lê Minh Cường", "Cầu Giấy", "5 ngày", Orange);
-            AddExpiring("Vũ Thị Phương", "Hải Châu", "8 ngày", Orange);
-            AddExpiring("Phạm Thị Dung", "Bình Thạnh", "12 ngày", Color.FromArgb(234, 179, 8));
+            try
+            {
+                lvExpiring.Items.Clear();
+                var list = RevenueService.Instance.GetExpiringMemberships(30);
+
+                if (list.Count == 0)
+                {
+                    ListViewItem empty = new ListViewItem("Không có hội viên sắp hết hạn (30 ngày tới)");
+                    empty.SubItems.Add("");
+                    empty.SubItems.Add("");
+                    empty.ForeColor = MutedColor;
+                    lvExpiring.Items.Add(empty);
+                    return;
+                }
+
+                foreach (var item in list)
+                {
+                    Color remainColor;
+                    if (item.DaysRemaining <= 3)
+                    {
+                        remainColor = Color.FromArgb(239, 68, 68); // Đỏ khẩn cấp
+                    }
+                    else if (item.DaysRemaining <= 7)
+                    {
+                        remainColor = Orange; // Cam cảnh báo
+                    }
+                    else
+                    {
+                        remainColor = Color.FromArgb(234, 179, 8); // Vàng
+                    }
+
+                    AddExpiring(item.MemberName, item.BranchName, $"{item.DaysRemaining} ngày", remainColor);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[LoadExpiringMemberships] Error: {ex.Message}");
+            }
         }
 
         private void AddExpiring(string name, string branch, string remain, Color remainColor)
@@ -692,10 +796,10 @@ namespace QuanLyGym.UI.Forms.Admin
         {
 
         }
+
         private ucAdminStaff? _ucStaff;
         private ucAdminBranch? _ucBranch;
         private ucAdminMember? _ucMember;
         private ucAdminAccount? _ucAccount;
-
     }
 }
