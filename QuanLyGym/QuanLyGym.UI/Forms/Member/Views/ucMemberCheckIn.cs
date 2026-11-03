@@ -1,13 +1,22 @@
 using System;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
+using QuanLyGym.UI.Services;
 using QuanLyGym.UI.Utils;
 
 namespace QuanLyGym.UI.Forms.Member.Views
 {
     public class ucMemberCheckIn : UserControl
     {
+        private class CheckInPtItem
+        {
+            public string Text { get; set; } = "";
+            public int? Value { get; set; }
+            public override string ToString() => Text;
+        }
+
         private PictureBox picPreview = null!;
         private TextBox txtCheckInNote = null!;
         private ComboBox cboCheckInPT = null!;
@@ -15,10 +24,19 @@ namespace QuanLyGym.UI.Forms.Member.Views
         private Label lblClock = null!;
         private System.Windows.Forms.Timer? timerClock;
         private string? selectedImagePath = null;
+        private Label lblPlaceholder = null!;
+
+        // Stat Labels
+        private Label lblTotalVal = null!;
+        private Label lblApprovedVal = null!;
+        private Label lblPendingVal = null!;
+        private Label lblRateVal = null!;
 
         public ucMemberCheckIn()
         {
             InitializeComponent();
+            LoadCheckInHistory();
+            RefreshStatSummary();
         }
 
         private void InitializeComponent()
@@ -28,62 +46,56 @@ namespace QuanLyGym.UI.Forms.Member.Views
             this.BackColor = UITheme.Background;
             this.Dock = DockStyle.Fill;
             this.AutoScroll = true;
+            this.AutoScrollMinSize = new Size(1000, 640);
 
-            Panel pnlMain = new Panel
+            float scale = Math.Max(1.0f, (float)this.DeviceDpi / 96f);
+
+            // Root TableLayoutPanel: 2 rows — Stats (Row 0), Fill content (Row 1)
+            TableLayoutPanel pnlRoot = new TableLayoutPanel
             {
-                Dock = DockStyle.Top,
-                Height = 880,
-                Padding = new Padding(24, 20, 24, 30),
+                Dock = DockStyle.Fill,
+                ColumnCount = 1,
+                RowCount = 2,
+                Padding = new Padding((int)(16 * scale), (int)(12 * scale), (int)(16 * scale), (int)(14 * scale)),
                 BackColor = UITheme.Background
             };
+            pnlRoot.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
+            int statHeight = (int)Math.Round(110f * scale);
+            pnlRoot.RowStyles.Add(new RowStyle(SizeType.Absolute, statHeight)); // Row 0: Stat cards
+            pnlRoot.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));        // Row 1: Content
 
-            // Header Title
-            Panel pnlHeader = new Panel { Dock = DockStyle.Top, Height = 50 };
-            Label lblTitle = new Label
-            {
-                Text = "📸 ĐIỂM DANH & TẢI ẢNH CHECK-IN (PT DUYỆT)",
-                Font = UITheme.FontTitle,
-                ForeColor = UITheme.TextDark,
-                AutoSize = true,
-                Location = new Point(0, 8)
-            };
-            pnlHeader.Controls.Add(lblTitle);
+            // Row 0: Stat Cards Row
+            TableLayoutPanel pnlStats = CreateStatSummary(scale);
+            pnlStats.Dock = DockStyle.Fill;
+            pnlStats.Margin = new Padding(0, 0, 0, (int)(8 * scale));
+            pnlRoot.Controls.Add(pnlStats, 0, 0);
 
-            // Stat Cards Row
-            TableLayoutPanel pnlStats = CreateStatSummary();
-            pnlStats.Dock = DockStyle.Top;
-            pnlStats.Margin = new Padding(0, 0, 0, 16);
-
-            // Two Column Layout (38% Form, 62% History Table)
+            // Row 1: Two Column Layout (38% Form, 62% History Table)
             TableLayoutPanel pnlCols = new TableLayoutPanel
             {
                 ColumnCount = 2,
                 RowCount = 1,
-                Height = 650,
-                Dock = DockStyle.Top,
-                Padding = new Padding(0, 10, 0, 10)
+                Dock = DockStyle.Fill,
+                Padding = new Padding(0)
             };
-            pnlCols.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 38f)); // Left: Check-in & Photo Upload
-            pnlCols.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 62f)); // Right: Approval History
+            pnlCols.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 38f));
+            pnlCols.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 62f));
             pnlCols.RowStyles.Clear();
             pnlCols.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
 
-            RoundedPanel cardForm = CreateUploadCheckInCard();
+            RoundedPanel cardForm = CreateUploadCheckInCard(scale);
             cardForm.Dock = DockStyle.Fill;
-            cardForm.Margin = new Padding(0, 0, 10, 0);
+            cardForm.Margin = new Padding(0, 0, (int)(8 * scale), 0);
 
-            RoundedPanel cardHistory = CreateHistoryCard();
+            RoundedPanel cardHistory = CreateHistoryCard(scale);
             cardHistory.Dock = DockStyle.Fill;
-            cardHistory.Margin = new Padding(10, 0, 0, 0);
+            cardHistory.Margin = new Padding((int)(8 * scale), 0, 0, 0);
 
             pnlCols.Controls.Add(cardForm, 0, 0);
             pnlCols.Controls.Add(cardHistory, 1, 0);
+            pnlRoot.Controls.Add(pnlCols, 0, 1);
 
-            pnlMain.Controls.Add(pnlCols);
-            pnlMain.Controls.Add(pnlStats);
-            pnlMain.Controls.Add(pnlHeader);
-
-            this.Controls.Add(pnlMain);
+            this.Controls.Add(pnlRoot);
             this.ResumeLayout(true);
 
             // Start Live Clock
@@ -96,14 +108,13 @@ namespace QuanLyGym.UI.Forms.Member.Views
             timerClock.Start();
         }
 
-        private TableLayoutPanel CreateStatSummary()
+        private TableLayoutPanel CreateStatSummary(float scale)
         {
             TableLayoutPanel table = new TableLayoutPanel
             {
                 ColumnCount = 4,
                 RowCount = 1,
-                Height = 90,
-                Dock = DockStyle.Top
+                Dock = DockStyle.Fill
             };
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25f));
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25f));
@@ -112,15 +123,15 @@ namespace QuanLyGym.UI.Forms.Member.Views
             table.RowStyles.Clear();
             table.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
 
-            table.Controls.Add(CreateStatPill("TỔNG BUỔI ĐIỂM DANH", "15 Buổi", UITheme.Primary), 0, 0);
-            table.Controls.Add(CreateStatPill("PT ĐÃ DUYỆT", "14 Buổi", UITheme.Success), 1, 0);
-            table.Controls.Add(CreateStatPill("ĐANG CHỜ DUYỆT", "1 Buổi", UITheme.Warning), 2, 0);
-            table.Controls.Add(CreateStatPill("TỶ LỆ CHUYÊN CẦN", "92% (Rất tốt)", UITheme.Secondary), 3, 0);
+            table.Controls.Add(CreateStatPill("TỔNG BUỔI ĐIỂM DANH", "0 Buổi", UITheme.Primary, scale, out lblTotalVal), 0, 0);
+            table.Controls.Add(CreateStatPill("PT ĐÃ DUYỆT", "0 Buổi", UITheme.Success, scale, out lblApprovedVal), 1, 0);
+            table.Controls.Add(CreateStatPill("ĐANG CHỜ DUYỆT", "0 Buổi", UITheme.Warning, scale, out lblPendingVal), 2, 0);
+            table.Controls.Add(CreateStatPill("TỶ LỆ CHUYÊN CẦN", "100%", UITheme.Secondary, scale, out lblRateVal), 3, 0);
 
             return table;
         }
 
-        private RoundedPanel CreateStatPill(string label, string val, Color color)
+        private RoundedPanel CreateStatPill(string label, string val, Color color, float scale, out Label outValLabel)
         {
             RoundedPanel card = new RoundedPanel
             {
@@ -128,123 +139,134 @@ namespace QuanLyGym.UI.Forms.Member.Views
                 CornerRadius = 10,
                 BackColor = UITheme.CardBg,
                 BorderColor = UITheme.Border,
-                Margin = new Padding(6),
-                Padding = new Padding(14, 10, 14, 10)
+                Margin = new Padding((int)(4 * scale)),
+                Padding = new Padding((int)(12 * scale), (int)(10 * scale), (int)(12 * scale), (int)(8 * scale))
             };
 
-            Label lbl = new Label { Text = label, Font = UITheme.FontSmallBold, ForeColor = UITheme.TextMuted, Location = new Point(14, 10), AutoSize = true };
-            Label v = new Label { Text = val, Font = new Font("Segoe UI", 13f, FontStyle.Bold), ForeColor = color, Location = new Point(14, 30), AutoSize = true };
+            FlowLayoutPanel flow = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                FlowDirection = FlowDirection.TopDown,
+                WrapContents = false,
+                BackColor = Color.Transparent
+            };
 
-            card.Controls.Add(lbl);
-            card.Controls.Add(v);
+            Label lbl = new Label { Text = label, Font = UITheme.FontSmallBold, ForeColor = UITheme.TextMuted, AutoSize = true, Margin = new Padding(0, 0, 0, (int)(2 * scale)), UseMnemonic = false };
+            outValLabel = new Label { Text = val, Font = new Font("Segoe UI", 13.5f, FontStyle.Bold), ForeColor = color, AutoSize = true, Margin = new Padding(0), UseMnemonic = false };
+
+            flow.Controls.Add(lbl);
+            flow.Controls.Add(outValLabel);
+            card.Controls.Add(flow);
             return card;
         }
 
-        private RoundedPanel CreateUploadCheckInCard()
+        private RoundedPanel CreateUploadCheckInCard(float scale)
         {
             RoundedPanel card = new RoundedPanel
             {
-                Height = 630,
                 CornerRadius = 12,
                 BackColor = UITheme.CardBg,
                 BorderColor = UITheme.Border,
-                Padding = new Padding(22)
+                Padding = new Padding((int)(18 * scale))
             };
 
             Label lblTitle = new Label
             {
-                Text = "📌 ĐIỂM DANH & TẢI ẢNH CHECK-IN",
+                Text = "📸 CHECK-IN & XÁC NHẬN BUỔI TẬP",
                 Font = UITheme.FontSection,
                 ForeColor = UITheme.TextDark,
                 Dock = DockStyle.Top,
-                Height = 28
+                Height = (int)(28 * scale),
+                UseMnemonic = false
             };
 
             lblClock = new Label
             {
                 Text = "🕒 Thời gian hiện tại: " + DateTime.Now.ToString("HH:mm:ss - dd/MM/yyyy"),
-                Font = UITheme.FontBold,
+                Font = UITheme.FontSmallBold,
                 ForeColor = UITheme.Primary,
                 Dock = DockStyle.Top,
-                Height = 24
+                Height = (int)(24 * scale),
+                UseMnemonic = false
             };
 
-            Panel pnlForm = new Panel { Dock = DockStyle.Fill, AutoScroll = true, Padding = new Padding(0, 10, 0, 0) };
+            TableLayoutPanel pnlForm = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                ColumnCount = 1,
+                RowCount = 8,
+                AutoScroll = true,
+                Padding = new Padding(0, (int)(6 * scale), 0, 0)
+            };
+            pnlForm.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
 
-            int y = 6;
-            int defaultW = 340;
-
-            // 1. Huấn luyện viên duyệt
-            Label lblPT = new Label { Text = "Huấn luyện viên duyệt (PT):", Font = UITheme.FontSmallBold, ForeColor = UITheme.TextDark, Location = new Point(4, y), AutoSize = true };
-            y += 22;
+            // 1. PT
+            Label lblPT = new Label { Text = "Hình thức tập & Huấn luyện viên (PT):", Font = UITheme.FontSmallBold, ForeColor = UITheme.TextDark, AutoSize = true, Margin = new Padding(0, 0, 0, (int)(2 * scale)), UseMnemonic = false };
             cboCheckInPT = new ComboBox
             {
                 DropDownStyle = ComboBoxStyle.DropDownList,
-                Location = new Point(4, y),
-                Width = defaultW,
+                Dock = DockStyle.Top,
+                Height = (int)(30 * scale),
                 Font = UITheme.FontRegular
             };
-            cboCheckInPT.Items.AddRange(new object[] {
-                "HLV Nguyễn Văn Nam (PT chính)",
-                "HLV Lê Thu Hà",
-                "HLV Trần Minh Đức",
-                "Quản lý ca trực / Lễ tân"
-            });
+
+            // Populate PT dropdown
+            cboCheckInPT.Items.Add(new CheckInPtItem { Text = "Tập tự do (Không kèm PT - Tự động duyệt)", Value = null });
+            var pts = MemberService.Instance.GetAllPTs();
+            foreach (var pt in pts)
+            {
+                cboCheckInPT.Items.Add(new CheckInPtItem { Text = $"HLV {pt.FullName} ({pt.Specialization})", Value = pt.PTID });
+            }
             cboCheckInPT.SelectedIndex = 0;
-            pnlForm.Controls.Add(lblPT);
-            pnlForm.Controls.Add(cboCheckInPT);
-            y += 38;
 
-            // 2. Upload Ảnh Minh Chứng (Selfie / Phòng tập)
-            Label lblPhoto = new Label { Text = "Ảnh chụp check-in tại phòng tập (Selfie/Phòng):", Font = UITheme.FontSmallBold, ForeColor = UITheme.TextDark, Location = new Point(4, y), AutoSize = true };
-            y += 22;
-
-            // Image Preview Box
+            // 2. Photo Label & Preview
+            Label lblPhoto = new Label { Text = "Ảnh chụp check-in tại phòng tập:", Font = UITheme.FontSmallBold, ForeColor = UITheme.TextDark, AutoSize = true, Margin = new Padding(0, (int)(6 * scale), 0, (int)(2 * scale)), UseMnemonic = false };
             picPreview = new PictureBox
             {
-                Size = new Size(defaultW, 155),
-                Location = new Point(4, y),
+                Dock = DockStyle.Top,
+                Height = (int)(130 * scale),
                 BackColor = Color.FromArgb(241, 245, 249),
                 BorderStyle = BorderStyle.FixedSingle,
                 SizeMode = PictureBoxSizeMode.Zoom
             };
-            Label lblPlaceholder = new Label
+            lblPlaceholder = new Label
             {
                 Text = "📷 Chưa chọn ảnh\nBấm nút bên dưới để tải ảnh từ máy tính",
                 Font = UITheme.FontSmall,
                 ForeColor = UITheme.TextMuted,
                 Dock = DockStyle.Fill,
-                TextAlign = ContentAlignment.MiddleCenter
+                TextAlign = ContentAlignment.MiddleCenter,
+                UseMnemonic = false
             };
             picPreview.Controls.Add(lblPlaceholder);
-            pnlForm.Controls.Add(lblPhoto);
-            pnlForm.Controls.Add(picPreview);
-            y += 165;
 
-            // Buttons to select / clear image
+            // Buttons select / clear
             FlowLayoutPanel pnlImgBtns = new FlowLayoutPanel
             {
-                Location = new Point(4, y),
-                Size = new Size(defaultW, 36),
-                FlowDirection = FlowDirection.LeftToRight
+                Dock = DockStyle.Top,
+                Height = (int)(38 * scale),
+                FlowDirection = FlowDirection.LeftToRight,
+                Margin = new Padding(0, (int)(4 * scale), 0, (int)(4 * scale)),
+                BackColor = Color.Transparent
             };
 
             Button btnChooseImg = new Button
             {
                 Text = "📁 Chọn tệp ảnh...",
                 Font = UITheme.FontSmallBold,
-                Size = new Size(140, 32),
+                Size = new Size((int)(140 * scale), (int)(32 * scale)),
                 BackColor = UITheme.PrimaryLight,
                 ForeColor = UITheme.Primary,
                 FlatStyle = FlatStyle.Flat,
-                Cursor = Cursors.Hand
+                Cursor = Cursors.Hand,
+                UseMnemonic = false
             };
             btnChooseImg.FlatAppearance.BorderSize = 0;
             btnChooseImg.Click += (s, e) =>
             {
                 using OpenFileDialog ofd = new OpenFileDialog
                 {
-                    Filter = "Image Files (*.jpg;*.jpeg;*.png)|*.jpg;*.jpeg;*.png",
+                    Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp",
                     Title = "Chọn ảnh check-in"
                 };
                 if (ofd.ShowDialog() == DialogResult.OK)
@@ -266,11 +288,12 @@ namespace QuanLyGym.UI.Forms.Member.Views
             {
                 Text = "🗑️ Xóa ảnh",
                 Font = UITheme.FontSmallBold,
-                Size = new Size(95, 32),
+                Size = new Size((int)(95 * scale), (int)(32 * scale)),
                 BackColor = Color.FromArgb(241, 245, 249),
                 ForeColor = UITheme.TextMuted,
                 FlatStyle = FlatStyle.Flat,
-                Cursor = Cursors.Hand
+                Cursor = Cursors.Hand,
+                UseMnemonic = false
             };
             btnClearImg.FlatAppearance.BorderSize = 0;
             btnClearImg.Click += (s, e) =>
@@ -282,81 +305,84 @@ namespace QuanLyGym.UI.Forms.Member.Views
 
             pnlImgBtns.Controls.Add(btnChooseImg);
             pnlImgBtns.Controls.Add(btnClearImg);
-            pnlForm.Controls.Add(pnlImgBtns);
-            y += 44;
 
-            // 3. Ghi chú buổi tập (Enlarged and expanded as requested)
-            Label lblNote = new Label { Text = "Ghi chú buổi tập & Cảm nhận thể lực:", Font = UITheme.FontSmallBold, ForeColor = UITheme.TextDark, Location = new Point(4, y), AutoSize = true };
-            y += 22;
+            // 3. Note
+            Label lblNote = new Label { Text = "Ghi chú buổi tập & Cảm nhận thể lực:", Font = UITheme.FontSmallBold, ForeColor = UITheme.TextDark, AutoSize = true, Margin = new Padding(0, (int)(4 * scale), 0, (int)(2 * scale)), UseMnemonic = false };
             txtCheckInNote = new TextBox
             {
                 Multiline = true,
-                Height = 100,
-                Width = defaultW,
-                Location = new Point(4, y),
+                Dock = DockStyle.Top,
+                Height = (int)(75 * scale),
                 Font = UITheme.FontRegular,
                 ScrollBars = ScrollBars.Vertical,
-                Text = "Buổi tập Lưng xô và Cardio 30 phút, hoàn thành tốt giáo án PT giao. Cảm nhận cơ bắp đáp ứng rất tốt."
+                Text = "Hoàn thành buổi tập luyện tự do tại phòng gym."
             };
-            pnlForm.Controls.Add(lblNote);
-            pnlForm.Controls.Add(txtCheckInNote);
-            y += 112;
 
-            // 4. Submit Button
+            // 4. Submit
             Button btnSubmitCheckIn = new Button
             {
-                Text = "🚀 GỬI YÊU CẦU ĐIỂM DANH CHO PT DUYỆT",
+                Text = "🚀 GỬI YÊU CẦU ĐIỂM DANH CHECK-IN",
                 Font = UITheme.FontBold,
-                Height = 44,
-                Width = defaultW,
-                Location = new Point(4, y),
+                Height = (int)(42 * scale),
+                Dock = DockStyle.Top,
+                Margin = new Padding(0, (int)(8 * scale), 0, 0),
                 BackColor = Color.FromArgb(16, 185, 129), // Emerald
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                Cursor = Cursors.Hand
+                Cursor = Cursors.Hand,
+                UseMnemonic = false
             };
             btnSubmitCheckIn.FlatAppearance.BorderSize = 0;
             btnSubmitCheckIn.Click += (s, e) =>
             {
-                string timeNow = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
-                string ptName = cboCheckInPT.Text.Split('(')[0].Trim();
+                int? ptId = (cboCheckInPT.SelectedItem as CheckInPtItem)?.Value;
+                string ptName = (cboCheckInPT.SelectedItem as CheckInPtItem)?.Text ?? "Cổng tự do";
                 string note = txtCheckInNote.Text.Trim();
-                string code = "#CK-" + new Random().Next(110, 999);
 
-                dgvHistory.Rows.Insert(0, code, timeNow, ptName, note, "Chờ duyệt");
-                MessageBox.Show($"Đã gửi yêu cầu điểm danh thành công!\nHLV {ptName} sẽ kiểm tra và phê duyệt buổi tập cho bạn.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                bool ok = MemberService.Instance.SaveCheckIn(ptId, note, selectedImagePath);
+                if (ok)
+                {
+                    LoadCheckInHistory();
+                    RefreshStatSummary();
+                    MessageBox.Show(
+                        ptId.HasValue
+                            ? $"Đã gửi yêu cầu điểm danh thành công!\n{ptName} sẽ kiểm tra và phê duyệt buổi tập cho bạn."
+                            : "Điểm danh vào cửa thành công! Chúc bạn có buổi rèn luyện hiệu quả.",
+                        "Thông báo",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information
+                    );
+                }
+                else
+                {
+                    MessageBox.Show("Không thể lưu thông tin điểm danh vào cơ sở dữ liệu.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             };
+
+            pnlForm.Controls.Add(lblPT);
+            pnlForm.Controls.Add(cboCheckInPT);
+            pnlForm.Controls.Add(lblPhoto);
+            pnlForm.Controls.Add(picPreview);
+            pnlForm.Controls.Add(pnlImgBtns);
+            pnlForm.Controls.Add(lblNote);
+            pnlForm.Controls.Add(txtCheckInNote);
             pnlForm.Controls.Add(btnSubmitCheckIn);
 
             card.Controls.Add(pnlForm);
             card.Controls.Add(lblClock);
             card.Controls.Add(lblTitle);
-            lblClock.SendToBack();
-            lblTitle.SendToBack();
-
-            // Responsive auto resize
-            card.Resize += (s, e) =>
-            {
-                int w = Math.Max(260, pnlForm.ClientSize.Width - 14);
-                cboCheckInPT.Width = w;
-                picPreview.Width = w;
-                pnlImgBtns.Width = w;
-                txtCheckInNote.Width = w;
-                btnSubmitCheckIn.Width = w;
-            };
 
             return card;
         }
 
-        private RoundedPanel CreateHistoryCard()
+        private RoundedPanel CreateHistoryCard(float scale)
         {
             RoundedPanel card = new RoundedPanel
             {
-                Height = 630,
                 CornerRadius = 12,
                 BackColor = UITheme.CardBg,
                 BorderColor = UITheme.Border,
-                Padding = new Padding(20)
+                Padding = new Padding((int)(18 * scale))
             };
 
             Label lblTitle = new Label
@@ -365,26 +391,20 @@ namespace QuanLyGym.UI.Forms.Member.Views
                 Font = UITheme.FontSection,
                 ForeColor = UITheme.TextDark,
                 Dock = DockStyle.Top,
-                Height = 34
+                Height = (int)(32 * scale),
+                UseMnemonic = false
             };
 
             dgvHistory = new DataGridView { Dock = DockStyle.Fill };
             UITheme.StyleDataGridView(dgvHistory);
+            dgvHistory.RowTemplate.Height = (int)Math.Round(36f * scale);
+            dgvHistory.ColumnHeadersHeight = (int)Math.Round(34f * scale);
 
-            var colCode = new DataGridViewTextBoxColumn { Name = "Code", HeaderText = "Mã", Width = 85, AutoSizeMode = DataGridViewAutoSizeColumnMode.None };
-            var colTime = new DataGridViewTextBoxColumn { Name = "Time", HeaderText = "Thời gian", Width = 145, AutoSizeMode = DataGridViewAutoSizeColumnMode.None };
-            var colPT = new DataGridViewTextBoxColumn { Name = "PT", HeaderText = "HLV Phê duyệt", Width = 160, AutoSizeMode = DataGridViewAutoSizeColumnMode.None };
-            var colNote = new DataGridViewTextBoxColumn { Name = "Note", HeaderText = "Ghi chú buổi tập", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill, MinimumWidth = 160 };
-            var colStatus = new DataGridViewTextBoxColumn { Name = "Status", HeaderText = "Trạng thái", Width = 125, AutoSizeMode = DataGridViewAutoSizeColumnMode.None };
-
-            dgvHistory.Columns.AddRange(colCode, colTime, colPT, colNote, colStatus);
-
-            dgvHistory.Rows.Add("#CK-426", "17/10/2026 09:49", "HLV Nguyễn Văn Nam", "Khởi động & Cardio 30p", "Chờ duyệt");
-            dgvHistory.Rows.Add("#CK-109", "15/10/2026 18:05", "HLV Nguyễn Văn Nam", "Buổi tập Chân & Vai (Có ảnh)", "Đã duyệt");
-            dgvHistory.Rows.Add("#CK-108", "13/10/2026 18:12", "HLV Nguyễn Văn Nam", "Cardio 45 phút + Bụng (Có ảnh)", "Đã duyệt");
-            dgvHistory.Rows.Add("#CK-107", "11/10/2026 17:58", "HLV Nguyễn Văn Nam", "Lưng xô & Tay sau (Có ảnh)", "Đã duyệt");
-            dgvHistory.Rows.Add("#CK-106", "09/10/2026 18:00", "HLV Nguyễn Văn Nam", "Ngực & Tay trước (Có ảnh)", "Đã duyệt");
-            dgvHistory.Rows.Add("#CK-105", "06/10/2026 18:20", "HLV Nguyễn Văn Nam", "Leg day cường độ cao (Có ảnh)", "Đã duyệt");
+            dgvHistory.Columns.Add(UITheme.CreateFillColumn("CheckInID", "Mã", 13f, 75));
+            dgvHistory.Columns.Add(UITheme.CreateFillColumn("Time", "Thời gian", 18f, 105));
+            dgvHistory.Columns.Add(UITheme.CreateFillColumn("PT", "Hình thức / HLV", 24f, 130));
+            dgvHistory.Columns.Add(UITheme.CreateFillColumn("Note", "Ghi chú buổi tập", 29f, 130));
+            dgvHistory.Columns.Add(UITheme.CreateFillColumn("Status", "Trạng thái", 16f, 95));
 
             dgvHistory.CellFormatting += (s, e) =>
             {
@@ -396,7 +416,7 @@ namespace QuanLyGym.UI.Forms.Member.Views
                         e.CellStyle.ForeColor = UITheme.Success;
                         e.CellStyle.Font = UITheme.FontBold;
                     }
-                    else if (status.Contains("Chờ"))
+                    else if (status.Contains("Chờ duyệt"))
                     {
                         e.CellStyle.ForeColor = UITheme.Warning;
                         e.CellStyle.Font = UITheme.FontBold;
@@ -404,27 +424,59 @@ namespace QuanLyGym.UI.Forms.Member.Views
                 }
             };
 
-            // Double click to view details
-            dgvHistory.CellDoubleClick += (s, e) =>
-            {
-                if (e.RowIndex >= 0)
-                {
-                    var row = dgvHistory.Rows[e.RowIndex];
-                    string code = row.Cells["Code"].Value?.ToString() ?? "";
-                    string time = row.Cells["Time"].Value?.ToString() ?? "";
-                    string pt = row.Cells["PT"].Value?.ToString() ?? "";
-                    string status = row.Cells["Status"].Value?.ToString() ?? "";
-                    string note = row.Cells["Note"].Value?.ToString() ?? "";
-
-                    MessageBox.Show($"Mã điểm danh: {code}\nThời gian: {time}\nHLV duyệt: {pt}\nTrạng thái: {status}\nGhi chú: {note}\n\nNhận xét từ HLV: 'Thực hiện đúng kỹ thuật, tinh thần tập luyện rất tốt.'", "Chi tiết điểm danh", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-            };
-
             card.Controls.Add(dgvHistory);
             card.Controls.Add(lblTitle);
-            lblTitle.SendToBack();
 
             return card;
+        }
+
+        private void LoadCheckInHistory()
+        {
+            if (dgvHistory == null) return;
+            dgvHistory.Rows.Clear();
+
+            try
+            {
+                var checkIns = MemberService.Instance.GetRecentCheckIns();
+                if (checkIns.Count > 0)
+                {
+                    foreach (var c in checkIns)
+                    {
+                        string code = $"#CK-{c.CheckInID:D3}";
+                        string timeStr = c.CheckInTime.ToString("dd/MM/yyyy HH:mm");
+                        string ptName = c.PT?.FullName ?? (c.PTID == null ? "Cổng tự do (Quẹt thẻ)" : "Quầy lễ tân");
+                        string note = !string.IsNullOrEmpty(c.Note) ? c.Note : "Check-in tập luyện";
+                        string status = c.Status == "Approved" ? "Đã duyệt" : (c.Status == "Pending" ? "Chờ duyệt" : c.Status);
+                        dgvHistory.Rows.Add(code, timeStr, ptName, note, status);
+                    }
+                }
+                else
+                {
+                    dgvHistory.Rows.Add("#--", "--", "Chưa có lượt điểm danh", "Hãy check-in khi đến phòng tập", "--");
+                }
+            }
+            catch
+            {
+                dgvHistory.Rows.Add("#--", "--", "Lỗi tải lịch sử check-in từ CSDL", "--", "--");
+            }
+        }
+
+        private void RefreshStatSummary()
+        {
+            try
+            {
+                var list = MemberService.Instance.GetRecentCheckIns();
+                int total = list.Count;
+                int approved = list.Count(c => c.Status == "Approved");
+                int pending = list.Count(c => c.Status == "Pending");
+                int rate = total > 0 ? (int)Math.Round((double)approved / total * 100) : 100;
+
+                if (lblTotalVal != null) lblTotalVal.Text = $"{total} Buổi";
+                if (lblApprovedVal != null) lblApprovedVal.Text = $"{approved} Buổi";
+                if (lblPendingVal != null) lblPendingVal.Text = $"{pending} Buổi";
+                if (lblRateVal != null) lblRateVal.Text = $"{rate}% (Chuyên cần)";
+            }
+            catch { }
         }
     }
 }
