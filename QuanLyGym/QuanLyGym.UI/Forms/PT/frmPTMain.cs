@@ -10,15 +10,16 @@ namespace QuanLyGym.UI.Forms.PT
         private ucLichTap? _viewLichTap;
         private ucHoiVien? _viewHoiVien;
         private ucTheoDoiTheChat? _viewTheoDoiTheChat;
-        private int _currentTabIndex = 0; // 0: Lịch làm việc, 1: Hội viên, 2: Thể chất
+        private int _currentTabIndex = 0; // 0: Lịch làm việc, 1: Nhật ký HV đã dạy, 2: InBody
+        private int _pendingBookingCount = 3; // Số lượng thông báo đặt lịch chờ xác nhận
 
         public frmPTMain()
         {
             InitializeComponent();
             this.DoubleBuffered = true;
             this.StartPosition = FormStartPosition.CenterScreen;
-            this.MinimumSize = new Size(1280, 800);
-            this.Size = new Size(1440, 880);
+            this.MinimumSize = new Size(1100, 680);
+            this.Size = new Size(1380, 840);
             this.BackColor = PTUITheme.BgDark;
 
             SetupSidebar();
@@ -33,18 +34,45 @@ namespace QuanLyGym.UI.Forms.PT
             pnlPTProfile.Paint += PnlPTProfile_Paint;
             pnlTopHeader.Paint += PnlTopHeader_Paint;
 
-            btnCreateSession.MouseEnter += (s, e) => { btnCreateSession.BackColor = PTUITheme.LimeHover; btnCreateSession.Invalidate(); };
-            btnCreateSession.MouseLeave += (s, e) => { btnCreateSession.BackColor = PTUITheme.PrimaryLime; btnCreateSession.Invalidate(); };
-            btnCreateSession.Paint += (s, pe) =>
+            // Nút Chuông Thông Báo
+            btnNotificationBell.MouseEnter += (s, e) => { btnNotificationBell.BackColor = Color.FromArgb(36, 44, 62); btnNotificationBell.Invalidate(); };
+            btnNotificationBell.MouseLeave += (s, e) => { btnNotificationBell.BackColor = Color.FromArgb(24, 28, 40); btnNotificationBell.Invalidate(); };
+            btnNotificationBell.Paint += (s, pe) =>
             {
                 pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                Rectangle br = btnCreateSession.ClientRectangle;
-                using (SolidBrush sb = new SolidBrush(btnCreateSession.BackColor))
+                pe.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                Rectangle br = btnNotificationBell.ClientRectangle;
+
+                PTUITheme.DrawCard(pe.Graphics, new Rectangle(br.X, br.Y, br.Width - 1, br.Height - 1), radius: 11,
+                    customBg: btnNotificationBell.BackColor, customBorder: Color.FromArgb(55, 68, 96));
+
+                int bellSize = 28;
+                Rectangle bellRect = new Rectangle(br.X + (br.Width - bellSize) / 2 - 2, br.Y + (br.Height - bellSize) / 2 + 2, bellSize, bellSize);
+                PTUITheme.DrawVectorBell(pe.Graphics, bellRect, PTUITheme.PrimaryLime);
+
+                // Badge số lượng thông báo
+                if (_pendingBookingCount > 0)
                 {
-                    PTUITheme.FillRoundedRectangle(pe.Graphics, sb, br, 8);
+                    int badgeSize = 22;
+                    Rectangle badgeRect = new Rectangle(br.Right - badgeSize - 3, br.Y + 3, badgeSize, badgeSize);
+                    
+                    using (Pen pBorder = new Pen(btnNotificationBell.BackColor, 2.2f))
+                    {
+                        pe.Graphics.DrawEllipse(pBorder, badgeRect);
+                    }
+
+                    using (SolidBrush bRed = new SolidBrush(Color.FromArgb(239, 68, 68)))
+                    {
+                        pe.Graphics.FillEllipse(bRed, badgeRect);
+                    }
+
+                    using (Font badgeFont = new Font("Segoe UI", 9.5f, FontStyle.Bold))
+                    {
+                        Rectangle textRect = new Rectangle(badgeRect.X, badgeRect.Y - 1, badgeRect.Width, badgeRect.Height);
+                        TextRenderer.DrawText(pe.Graphics, _pendingBookingCount.ToString(), badgeFont, textRect, Color.White,
+                            TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
+                    }
                 }
-                TextRenderer.DrawText(pe.Graphics, btnCreateSession.Text, btnCreateSession.Font, br, Color.Black,
-                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
             };
         }
 
@@ -84,12 +112,12 @@ namespace QuanLyGym.UI.Forms.PT
                     _viewLichTap?.BringToFront();
                     break;
                 case 1:
-                    lblHeaderTitle.Text = "HỘI VIÊN PHỤ TRÁCH & GÓI TẬP";
+                    lblHeaderTitle.Text = "NHẬT KÝ HỘI VIÊN ĐÃ DẠY";
                     _viewHoiVien?.Show();
                     _viewHoiVien?.BringToFront();
                     break;
                 case 2:
-                    lblHeaderTitle.Text = "THEO DÕI THỂ CHẤT, INBODY & MỨC TẠ";
+                    lblHeaderTitle.Text = "TRA CỨU CHỈ SỐ INBODY HỘI VIÊN";
                     _viewTheoDoiTheChat?.Show();
                     _viewTheoDoiTheChat?.BringToFront();
                     break;
@@ -172,7 +200,7 @@ namespace QuanLyGym.UI.Forms.PT
             TextRenderer.DrawText(g, "Tuấn Minh", PTUITheme.FontBold, nameRect, PTUITheme.TextWhite,
                 TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
 
-            // PT Status (Green dot + Sẵn Sàng Nhận Lịch - Không bị cắt chữ)
+            // PT Status
             Rectangle dotRect = new Rectangle(68, 43, 8, 8);
             using (SolidBrush bGreen = new SolidBrush(PTUITheme.Green))
             {
@@ -216,11 +244,18 @@ namespace QuanLyGym.UI.Forms.PT
             SwitchTab(2);
         }
 
-        private void btnCreateSession_Click(object sender, EventArgs e)
+        private void btnNotificationBell_Click(object sender, EventArgs e)
         {
-            using (var modal = new frmDatLichModal())
+            using (var modal = new frmXacNhanLichModal())
             {
+                modal.OnBookingsChanged += () =>
+                {
+                    _pendingBookingCount = modal.PendingCount;
+                    btnNotificationBell.Invalidate();
+                };
                 modal.ShowDialog(this);
+                _pendingBookingCount = modal.PendingCount;
+                btnNotificationBell.Invalidate();
             }
         }
     }

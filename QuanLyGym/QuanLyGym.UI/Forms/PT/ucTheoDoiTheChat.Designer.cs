@@ -4,11 +4,11 @@ namespace QuanLyGym.UI.Forms.PT
     {
         private System.ComponentModel.IContainer components = null;
 
-        private ucPTTopStats topStats;
         private System.Windows.Forms.Panel pnlContent;
+        private System.Windows.Forms.Panel pnlSearchBar;
+        private System.Windows.Forms.TextBox txtSearchMember;
+        private System.Windows.Forms.Button btnSearchMember;
         private System.Windows.Forms.Panel pnlMemberBanner;
-        private ModernDarkComboBox cboSelectMember;
-        private System.Windows.Forms.Label lblSelectMember;
         private System.Windows.Forms.Panel pnlChart;
         private System.Windows.Forms.Panel pnlBottomRow;
         private System.Windows.Forms.Panel pnlMeasurementsCard;
@@ -35,7 +35,6 @@ namespace QuanLyGym.UI.Forms.PT
 
         private void InitializeComponent()
         {
-            this.topStats = new QuanLyGym.UI.Forms.PT.ucPTTopStats();
             this.pnlContent = new System.Windows.Forms.Panel();
             this.pnlBottomRow = new System.Windows.Forms.Panel();
             this.pnlRecordsCard = new System.Windows.Forms.Panel();
@@ -52,54 +51,106 @@ namespace QuanLyGym.UI.Forms.PT
             this.lblWeight = new System.Windows.Forms.Label();
             this.pnlChart = new System.Windows.Forms.Panel();
             this.pnlMemberBanner = new System.Windows.Forms.Panel();
-            this.cboSelectMember = new QuanLyGym.UI.Forms.PT.ModernDarkComboBox();
-            this.lblSelectMember = new System.Windows.Forms.Label();
+            this.pnlSearchBar = new System.Windows.Forms.Panel();
+            this.btnSearchMember = new System.Windows.Forms.Button();
+            this.txtSearchMember = new System.Windows.Forms.TextBox();
             this.pnlContent.SuspendLayout();
             this.pnlBottomRow.SuspendLayout();
             this.pnlRecordsCard.SuspendLayout();
             this.pnlMeasurementsCard.SuspendLayout();
-            this.pnlMemberBanner.SuspendLayout();
+            this.pnlSearchBar.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // topStats
-            // 
-            this.topStats.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(17)))), ((int)(((byte)(21)))));
-            this.topStats.Dock = System.Windows.Forms.DockStyle.Top;
-            this.topStats.Location = new System.Drawing.Point(0, 0);
-            this.topStats.Name = "topStats";
-            this.topStats.Size = new System.Drawing.Size(1200, 148);
-            this.topStats.TabIndex = 0;
             // 
             // pnlContent
             // 
             this.pnlContent.Controls.Add(this.pnlBottomRow);
             this.pnlContent.Controls.Add(this.pnlChart);
             this.pnlContent.Controls.Add(this.pnlMemberBanner);
+            this.pnlContent.Controls.Add(this.pnlSearchBar);
             this.pnlContent.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlContent.Location = new System.Drawing.Point(0, 148);
+            this.pnlContent.Location = new System.Drawing.Point(0, 0);
             this.pnlContent.Name = "pnlContent";
-            this.pnlContent.Padding = new System.Windows.Forms.Padding(24, 0, 24, 20);
-            this.pnlContent.Size = new System.Drawing.Size(1200, 552);
-            this.pnlContent.TabIndex = 1;
+            this.pnlContent.Padding = new System.Windows.Forms.Padding(24, 14, 24, 20);
+            this.pnlContent.Size = new System.Drawing.Size(1200, 700);
+            this.pnlContent.TabIndex = 0;
+            // 
+            // pnlSearchBar
+            // 
+            this.pnlSearchBar.Controls.Add(this.btnSearchMember);
+            this.pnlSearchBar.Controls.Add(this.txtSearchMember);
+            this.pnlSearchBar.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlSearchBar.Location = new System.Drawing.Point(24, 14);
+            this.pnlSearchBar.Name = "pnlSearchBar";
+            this.pnlSearchBar.Size = new System.Drawing.Size(1152, 50);
+            this.pnlSearchBar.TabIndex = 0;
+            // 
+            // txtSearchMember
+            // 
+            this.txtSearchMember.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(24)))), ((int)(((byte)(33)))));
+            this.txtSearchMember.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtSearchMember.Font = new System.Drawing.Font("Segoe UI", 10.5F);
+            this.txtSearchMember.ForeColor = System.Drawing.Color.White;
+            this.txtSearchMember.Location = new System.Drawing.Point(0, 10);
+            this.txtSearchMember.Name = "txtSearchMember";
+            this.txtSearchMember.PlaceholderText = "Nhập tên, SĐT hoặc Mã hội viên để tra cứu InBody & mức tạ...";
+            this.txtSearchMember.Size = new System.Drawing.Size(420, 26);
+            this.txtSearchMember.TabIndex = 0;
+            this.txtSearchMember.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtSearchMember_KeyDown);
+            // 
+            // btnSearchMember
+            // 
+            this.btnSearchMember.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(34)))), ((int)(((byte)(46)))));
+            this.btnSearchMember.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnSearchMember.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(55)))), ((int)(((byte)(75)))));
+            this.btnSearchMember.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSearchMember.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
+            this.btnSearchMember.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(204)))), ((int)(((byte)(255)))), ((int)(((byte)(0)))));
+            this.btnSearchMember.Location = new System.Drawing.Point(430, 7);
+            this.btnSearchMember.Name = "btnSearchMember";
+            this.btnSearchMember.Size = new System.Drawing.Size(95, 34);
+            this.btnSearchMember.TabIndex = 1;
+            this.btnSearchMember.Text = "Tra Cứu";
+            this.btnSearchMember.UseMnemonic = false;
+            this.btnSearchMember.UseVisualStyleBackColor = false;
+            this.btnSearchMember.Click += new System.EventHandler(this.btnSearchMember_Click);
+            // 
+            // pnlMemberBanner
+            // 
+            this.pnlMemberBanner.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(17)))), ((int)(((byte)(21)))));
+            this.pnlMemberBanner.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlMemberBanner.Location = new System.Drawing.Point(24, 64);
+            this.pnlMemberBanner.Name = "pnlMemberBanner";
+            this.pnlMemberBanner.Size = new System.Drawing.Size(1152, 64);
+            this.pnlMemberBanner.TabIndex = 1;
+            // 
+            // pnlChart
+            // 
+            this.pnlChart.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(17)))), ((int)(((byte)(21)))));
+            this.pnlChart.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlChart.Location = new System.Drawing.Point(24, 128);
+            this.pnlChart.Name = "pnlChart";
+            this.pnlChart.Size = new System.Drawing.Size(1152, 230);
+            this.pnlChart.TabIndex = 2;
             // 
             // pnlBottomRow
             // 
             this.pnlBottomRow.Controls.Add(this.pnlRecordsCard);
             this.pnlBottomRow.Controls.Add(this.pnlMeasurementsCard);
             this.pnlBottomRow.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlBottomRow.Location = new System.Drawing.Point(24, 305);
+            this.pnlBottomRow.Location = new System.Drawing.Point(24, 358);
             this.pnlBottomRow.Name = "pnlBottomRow";
-            this.pnlBottomRow.Size = new System.Drawing.Size(1152, 265);
-            this.pnlBottomRow.TabIndex = 2;
+            this.pnlBottomRow.Padding = new System.Windows.Forms.Padding(0, 10, 0, 0);
+            this.pnlBottomRow.Size = new System.Drawing.Size(1152, 322);
+            this.pnlBottomRow.TabIndex = 3;
             // 
             // pnlRecordsCard
             // 
             this.pnlRecordsCard.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(17)))), ((int)(((byte)(21)))));
             this.pnlRecordsCard.Controls.Add(this.btnUpdatePR);
             this.pnlRecordsCard.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlRecordsCard.Location = new System.Drawing.Point(576, 0);
+            this.pnlRecordsCard.Location = new System.Drawing.Point(576, 10);
             this.pnlRecordsCard.Name = "pnlRecordsCard";
-            this.pnlRecordsCard.Size = new System.Drawing.Size(576, 265);
+            this.pnlRecordsCard.Size = new System.Drawing.Size(576, 312);
             this.pnlRecordsCard.TabIndex = 1;
             // 
             // btnUpdatePR
@@ -133,10 +184,9 @@ namespace QuanLyGym.UI.Forms.PT
             this.pnlMeasurementsCard.Controls.Add(this.txtWeight);
             this.pnlMeasurementsCard.Controls.Add(this.lblWeight);
             this.pnlMeasurementsCard.Dock = System.Windows.Forms.DockStyle.Left;
-            this.pnlMeasurementsCard.Location = new System.Drawing.Point(0, 0);
+            this.pnlMeasurementsCard.Location = new System.Drawing.Point(0, 10);
             this.pnlMeasurementsCard.Name = "pnlMeasurementsCard";
-            this.pnlMeasurementsCard.Padding = new System.Windows.Forms.Padding(0, 0, 16, 0);
-            this.pnlMeasurementsCard.Size = new System.Drawing.Size(576, 265);
+            this.pnlMeasurementsCard.Size = new System.Drawing.Size(576, 312);
             this.pnlMeasurementsCard.TabIndex = 0;
             // 
             // btnSaveMeasurement
@@ -151,7 +201,7 @@ namespace QuanLyGym.UI.Forms.PT
             this.btnSaveMeasurement.Name = "btnSaveMeasurement";
             this.btnSaveMeasurement.Size = new System.Drawing.Size(536, 40);
             this.btnSaveMeasurement.TabIndex = 8;
-            this.btnSaveMeasurement.Text = "Lưu Kết Quả Đo Hôm Nay";
+            this.btnSaveMeasurement.Text = "Lưu Chỉ Số Mới";
             this.btnSaveMeasurement.UseMnemonic = false;
             this.btnSaveMeasurement.UseVisualStyleBackColor = false;
             this.btnSaveMeasurement.Click += new System.EventHandler(this.btnSaveMeasurement_Click);
@@ -175,7 +225,7 @@ namespace QuanLyGym.UI.Forms.PT
             this.lblWaist.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(142)))), ((int)(((byte)(149)))), ((int)(((byte)(165)))));
             this.lblWaist.Location = new System.Drawing.Point(298, 116);
             this.lblWaist.Name = "lblWaist";
-            this.lblWaist.Size = new System.Drawing.Size(91, 13);
+            this.lblWaist.Size = new System.Drawing.Size(89, 13);
             this.lblWaist.TabIndex = 6;
             this.lblWaist.Text = "VÒNG EO (CM)";
             this.lblWaist.UseMnemonic = false;
@@ -252,61 +302,12 @@ namespace QuanLyGym.UI.Forms.PT
             this.lblWeight.Text = "CÂN NẶNG (KG)";
             this.lblWeight.UseMnemonic = false;
             // 
-            // pnlChart
-            // 
-            this.pnlChart.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(17)))), ((int)(((byte)(21)))));
-            this.pnlChart.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnlChart.Location = new System.Drawing.Point(24, 60);
-            this.pnlChart.Name = "pnlChart";
-            this.pnlChart.Size = new System.Drawing.Size(1152, 235);
-            this.pnlChart.TabIndex = 1;
-            // 
-            // pnlMemberBanner
-            // 
-            this.pnlMemberBanner.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(17)))), ((int)(((byte)(21)))));
-            this.pnlMemberBanner.Controls.Add(this.cboSelectMember);
-            this.pnlMemberBanner.Controls.Add(this.lblSelectMember);
-            this.pnlMemberBanner.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnlMemberBanner.Location = new System.Drawing.Point(24, 0);
-            this.pnlMemberBanner.Name = "pnlMemberBanner";
-            this.pnlMemberBanner.Size = new System.Drawing.Size(1152, 60);
-            this.pnlMemberBanner.TabIndex = 0;
-            // 
-            // cboSelectMember
-            // 
-            this.cboSelectMember.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.cboSelectMember.Font = new System.Drawing.Font("Segoe UI", 9.5F);
-            this.cboSelectMember.Items.AddRange(new string[] {
-            "Nguyễn Đức An (Tăng Cơ Hypertrophy)",
-            "Phạm Mai Linh (Siết Mỡ Transformation)",
-            "Lê Hoàng Nam (Sức Bền & Marathon)",
-            "Đỗ Bảo Trâm (Nữ Cơ Bản 1–1)"});
-            this.cboSelectMember.Location = new System.Drawing.Point(806, 11);
-            this.cboSelectMember.Name = "cboSelectMember";
-            this.cboSelectMember.Size = new System.Drawing.Size(330, 38);
-            this.cboSelectMember.TabIndex = 1;
-            this.cboSelectMember.SelectedIndexChanged += new System.EventHandler(this.cboSelectMember_SelectedIndexChanged);
-            // 
-            // lblSelectMember
-            // 
-            this.lblSelectMember.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblSelectMember.AutoSize = true;
-            this.lblSelectMember.Font = new System.Drawing.Font("Segoe UI", 9.5F);
-            this.lblSelectMember.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(142)))), ((int)(((byte)(149)))), ((int)(((byte)(165)))));
-            this.lblSelectMember.Location = new System.Drawing.Point(676, 21);
-            this.lblSelectMember.Name = "lblSelectMember";
-            this.lblSelectMember.Size = new System.Drawing.Size(122, 17);
-            this.lblSelectMember.TabIndex = 0;
-            this.lblSelectMember.Text = "Chọn hội viên khác:";
-            this.lblSelectMember.UseMnemonic = false;
-            // 
             // ucTheoDoiTheChat
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(17)))), ((int)(((byte)(21)))));
             this.Controls.Add(this.pnlContent);
-            this.Controls.Add(this.topStats);
             this.Name = "ucTheoDoiTheChat";
             this.Size = new System.Drawing.Size(1200, 700);
             this.pnlContent.ResumeLayout(false);
@@ -314,8 +315,8 @@ namespace QuanLyGym.UI.Forms.PT
             this.pnlRecordsCard.ResumeLayout(false);
             this.pnlMeasurementsCard.ResumeLayout(false);
             this.pnlMeasurementsCard.PerformLayout();
-            this.pnlMemberBanner.ResumeLayout(false);
-            this.pnlMemberBanner.PerformLayout();
+            this.pnlSearchBar.ResumeLayout(false);
+            this.pnlSearchBar.PerformLayout();
             this.ResumeLayout(false);
         }
     }

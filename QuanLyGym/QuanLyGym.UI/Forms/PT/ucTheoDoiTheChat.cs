@@ -1,18 +1,50 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace QuanLyGym.UI.Forms.PT
 {
     public partial class ucTheoDoiTheChat : UserControl
     {
+        public class MemberPhysicalProfile
+        {
+            public string MemberCode { get; set; } = "";
+            public string FullName { get; set; } = "";
+            public string Initials { get; set; } = "";
+            public string Phone { get; set; } = "";
+            public string PackageName { get; set; } = "";
+            public decimal CurrentWeight { get; set; }
+            public decimal Height { get; set; }
+            public decimal BodyFat { get; set; }
+            public decimal Waist { get; set; }
+            public decimal BMI { get; set; }
+            public string BmiStatus { get; set; } = "Chuẩn";
+            public DateTime LastRecordedDate { get; set; }
+            public string[] MonthLabels { get; set; } = Array.Empty<string>();
+            public double[] WeightHistory { get; set; } = Array.Empty<double>();
+            public double[] BodyFatHistory { get; set; } = Array.Empty<double>();
+            public string BenchPressPR { get; set; } = "75 kg";
+            public string SquatPR { get; set; } = "105 kg";
+            public string DeadliftPR { get; set; } = "130 kg";
+            public Color AvatarColor { get; set; } = PTUITheme.PrimaryLime;
+        }
+
+        private List<MemberPhysicalProfile> _profiles = new List<MemberPhysicalProfile>();
+        private MemberPhysicalProfile _currentProfile = null!;
+
         public ucTheoDoiTheChat()
         {
             InitializeComponent();
             this.DoubleBuffered = true;
             this.ResizeRedraw = true;
             this.BackColor = PTUITheme.BgDark;
+
+            InitProfiles();
+            _currentProfile = _profiles[0];
+            LoadProfileToUI(_currentProfile);
 
             pnlChart.Paint += PnlChart_Paint;
             pnlChart.Resize += (s, e) => pnlChart.Invalidate();
@@ -33,14 +65,7 @@ namespace QuanLyGym.UI.Forms.PT
             };
 
             pnlMemberBanner.Paint += PnlMemberBanner_Paint;
-            pnlMemberBanner.Resize += (s, e) =>
-            {
-                int padRight = 16;
-                cboSelectMember.Size = new Size(330, 38);
-                cboSelectMember.Location = new Point(pnlMemberBanner.ClientSize.Width - padRight - cboSelectMember.Width, (pnlMemberBanner.ClientSize.Height - cboSelectMember.Height) / 2);
-                lblSelectMember.Location = new Point(cboSelectMember.Left - lblSelectMember.PreferredWidth - 12, (pnlMemberBanner.ClientSize.Height - lblSelectMember.PreferredHeight) / 2);
-                pnlMemberBanner.Invalidate();
-            };
+            pnlMemberBanner.Resize += (s, e) => pnlMemberBanner.Invalidate();
 
             btnSaveMeasurement.MouseEnter += (s, e) => { btnSaveMeasurement.BackColor = PTUITheme.LimeHover; btnSaveMeasurement.Invalidate(); };
             btnSaveMeasurement.MouseLeave += (s, e) => { btnSaveMeasurement.BackColor = PTUITheme.PrimaryLime; btnSaveMeasurement.Invalidate(); };
@@ -55,9 +80,209 @@ namespace QuanLyGym.UI.Forms.PT
                 TextRenderer.DrawText(pe.Graphics, btnSaveMeasurement.Text, btnSaveMeasurement.Font, br, Color.Black,
                     TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
             };
+        }
 
-            cboSelectMember.SelectedIndex = 0;
-            cboSelectMember.SelectedIndexChanged += (s, e) => pnlMemberBanner.Invalidate();
+        private void InitProfiles()
+        {
+            _profiles = new List<MemberPhysicalProfile>
+            {
+                new MemberPhysicalProfile
+                {
+                    MemberCode = "HV001",
+                    FullName = "Nguyễn Đức An",
+                    Initials = "DA",
+                    Phone = "0912.345.678",
+                    PackageName = "Tăng Cơ Hypertrophy",
+                    CurrentWeight = 72.0m,
+                    Height = 175m,
+                    BodyFat = 16.5m,
+                    Waist = 79m,
+                    BMI = 23.5m,
+                    BmiStatus = "Chuẩn",
+                    LastRecordedDate = new DateTime(2026, 11, 4),
+                    MonthLabels = new string[] { "T1 (78k)", "T2 (77k)", "T3 (76k)", "T4 (74.8k)", "T5 (73.5k)", "T6 (72k)" },
+                    WeightHistory = new double[] { 78.0, 77.0, 76.0, 74.8, 73.5, 72.0 },
+                    BodyFatHistory = new double[] { 22.0, 20.5, 19.0, 18.2, 17.0, 16.5 },
+                    BenchPressPR = "75 kg",
+                    SquatPR = "105 kg",
+                    DeadliftPR = "130 kg",
+                    AvatarColor = PTUITheme.PrimaryLime
+                },
+                new MemberPhysicalProfile
+                {
+                    MemberCode = "HV002",
+                    FullName = "Phạm Mai Linh",
+                    Initials = "ML",
+                    Phone = "0988.765.432",
+                    PackageName = "Body Transformation Siết Mỡ",
+                    CurrentWeight = 52.0m,
+                    Height = 162m,
+                    BodyFat = 20.8m,
+                    Waist = 64m,
+                    BMI = 19.8m,
+                    BmiStatus = "Thon Gọn",
+                    LastRecordedDate = new DateTime(2026, 11, 2),
+                    MonthLabels = new string[] { "T1 (56k)", "T2 (55k)", "T3 (54.2k)", "T4 (53.5k)", "T5 (52.8k)", "T6 (52k)" },
+                    WeightHistory = new double[] { 56.0, 55.0, 54.2, 53.5, 52.8, 52.0 },
+                    BodyFatHistory = new double[] { 25.5, 24.0, 23.2, 22.5, 21.6, 20.8 },
+                    BenchPressPR = "32.5 kg",
+                    SquatPR = "55 kg",
+                    DeadliftPR = "65 kg",
+                    AvatarColor = PTUITheme.Cyan
+                },
+                new MemberPhysicalProfile
+                {
+                    MemberCode = "HV003",
+                    FullName = "Lê Hoàng Nam",
+                    Initials = "HN",
+                    Phone = "0903.112.233",
+                    PackageName = "Sức Bền & Thể Lực",
+                    CurrentWeight = 68.0m,
+                    Height = 172m,
+                    BodyFat = 14.5m,
+                    Waist = 76m,
+                    BMI = 23.0m,
+                    BmiStatus = "Chuẩn VĐV",
+                    LastRecordedDate = new DateTime(2026, 10, 30),
+                    MonthLabels = new string[] { "T1 (71k)", "T2 (70.5k)", "T3 (69.8k)", "T4 (69k)", "T5 (68.5k)", "T6 (68k)" },
+                    WeightHistory = new double[] { 71.0, 70.5, 69.8, 69.0, 68.5, 68.0 },
+                    BodyFatHistory = new double[] { 17.5, 16.8, 16.0, 15.5, 15.0, 14.5 },
+                    BenchPressPR = "65 kg",
+                    SquatPR = "95 kg",
+                    DeadliftPR = "115 kg",
+                    AvatarColor = Color.FromArgb(251, 146, 60)
+                },
+                new MemberPhysicalProfile
+                {
+                    MemberCode = "HV004",
+                    FullName = "Đỗ Bảo Trâm",
+                    Initials = "BT",
+                    Phone = "0977.889.900",
+                    PackageName = "Tập Nữ Cơ Bản 1–1",
+                    CurrentWeight = 49.0m,
+                    Height = 158m,
+                    BodyFat = 23.0m,
+                    Waist = 63m,
+                    BMI = 19.6m,
+                    BmiStatus = "Chuẩn",
+                    LastRecordedDate = new DateTime(2026, 10, 28),
+                    MonthLabels = new string[] { "T1 (51k)", "T2 (50.5k)", "T3 (50k)", "T4 (49.8k)", "T5 (49.4k)", "T6 (49k)" },
+                    WeightHistory = new double[] { 51.0, 50.5, 50.0, 49.8, 49.4, 49.0 },
+                    BodyFatHistory = new double[] { 26.0, 25.4, 24.8, 24.2, 23.5, 23.0 },
+                    BenchPressPR = "25 kg",
+                    SquatPR = "45 kg",
+                    DeadliftPR = "50 kg",
+                    AvatarColor = Color.FromArgb(168, 85, 247)
+                },
+                new MemberPhysicalProfile
+                {
+                    MemberCode = "HV005",
+                    FullName = "Trần Quốc Huy",
+                    Initials = "QH",
+                    Phone = "0934.556.677",
+                    PackageName = "Giảm Cân Cấp Tốc HIIT",
+                    CurrentWeight = 78.0m,
+                    Height = 176m,
+                    BodyFat = 19.2m,
+                    Waist = 83m,
+                    BMI = 25.2m,
+                    BmiStatus = "Đang Giảm Mỡ",
+                    LastRecordedDate = new DateTime(2026, 10, 24),
+                    MonthLabels = new string[] { "T1 (85k)", "T2 (83k)", "T3 (81.5k)", "T4 (80k)", "T5 (79k)", "T6 (78k)" },
+                    WeightHistory = new double[] { 85.0, 83.0, 81.5, 80.0, 79.0, 78.0 },
+                    BodyFatHistory = new double[] { 25.0, 23.5, 22.0, 21.0, 20.0, 19.2 },
+                    BenchPressPR = "70 kg",
+                    SquatPR = "90 kg",
+                    DeadliftPR = "120 kg",
+                    AvatarColor = Color.FromArgb(56, 189, 248)
+                },
+                new MemberPhysicalProfile
+                {
+                    MemberCode = "HV006",
+                    FullName = "Vũ Thị Hương",
+                    Initials = "TH",
+                    Phone = "0965.443.322",
+                    PackageName = "Dãn Cơ & Phục Hồi Chấn Thương",
+                    CurrentWeight = 54.0m,
+                    Height = 163m,
+                    BodyFat = 21.5m,
+                    Waist = 67m,
+                    BMI = 20.3m,
+                    BmiStatus = "Chuẩn",
+                    LastRecordedDate = new DateTime(2026, 10, 20),
+                    MonthLabels = new string[] { "T1 (56k)", "T2 (55.5k)", "T3 (55k)", "T4 (54.8k)", "T5 (54.4k)", "T6 (54k)" },
+                    WeightHistory = new double[] { 56.0, 55.5, 55.0, 54.8, 54.4, 54.0 },
+                    BodyFatHistory = new double[] { 23.5, 23.0, 22.6, 22.2, 21.8, 21.5 },
+                    BenchPressPR = "30 kg",
+                    SquatPR = "40 kg",
+                    DeadliftPR = "55 kg",
+                    AvatarColor = Color.FromArgb(244, 114, 182)
+                }
+            };
+        }
+
+        private void LoadProfileToUI(MemberPhysicalProfile p)
+        {
+            _currentProfile = p;
+            txtWeight.Text = p.CurrentWeight.ToString("0.0");
+            txtHeight.Text = p.Height.ToString("0");
+            txtBodyFat.Text = p.BodyFat.ToString("0.0");
+            txtWaist.Text = p.Waist.ToString("0");
+
+            pnlMemberBanner.Invalidate();
+            pnlChart.Invalidate();
+            pnlMeasurementsCard.Invalidate();
+            pnlRecordsCard.Invalidate();
+        }
+
+        public void SelectMemberByName(string memberName)
+        {
+            var found = _profiles.FirstOrDefault(p =>
+                p.FullName.Equals(memberName, StringComparison.OrdinalIgnoreCase) ||
+                memberName.Contains(p.FullName) ||
+                p.FullName.Contains(memberName));
+
+            if (found != null)
+            {
+                txtSearchMember.Text = found.FullName;
+                LoadProfileToUI(found);
+            }
+        }
+
+        private void btnSearchMember_Click(object sender, EventArgs e)
+        {
+            string keyword = txtSearchMember.Text.Trim().ToLower();
+            if (string.IsNullOrEmpty(keyword))
+            {
+                MessageBox.Show("Vui lòng nhập Tên, Số điện thoại hoặc Mã hội viên cần tra cứu!",
+                    "Nhập Từ Khóa", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            var found = _profiles.FirstOrDefault(p =>
+                p.FullName.ToLower().Contains(keyword) ||
+                p.Phone.Contains(keyword) ||
+                p.MemberCode.ToLower().Contains(keyword) ||
+                p.PackageName.ToLower().Contains(keyword));
+
+            if (found != null)
+            {
+                LoadProfileToUI(found);
+            }
+            else
+            {
+                MessageBox.Show($"Không tìm thấy hội viên nào khớp với từ khóa \"{txtSearchMember.Text}\" trong danh sách đã dạy!",
+                    "Không Tìm Thấy", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void txtSearchMember_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.SuppressKeyPress = true;
+                btnSearchMember_Click(sender, EventArgs.Empty);
+            }
         }
 
         private void RelayoutMeasurementsControls()
@@ -93,19 +318,6 @@ namespace QuanLyGym.UI.Forms.PT
             btnSaveMeasurement.Size = new Size(cardW - (pad * 2), 40);
         }
 
-        public void SelectMemberByName(string memberName)
-        {
-            for (int i = 0; i < cboSelectMember.Items.Count; i++)
-            {
-                string? itemText = cboSelectMember.Items[i]?.ToString();
-                if (itemText != null && itemText.Contains(memberName))
-                {
-                    cboSelectMember.SelectedIndex = i;
-                    break;
-                }
-            }
-        }
-
         private void PnlMemberBanner_Paint(object? sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
@@ -115,30 +327,37 @@ namespace QuanLyGym.UI.Forms.PT
             PTUITheme.DrawCard(g, new Rectangle(r.X, r.Y, r.Width - 1, r.Height - 1), radius: 10,
                 customBg: Color.FromArgb(20, 24, 32), customBorder: Color.FromArgb(35, 42, 56));
 
-            // Avatar initial dynamic
-            Rectangle avRect = new Rectangle(14, 11, 38, 38);
-            using (SolidBrush b = new SolidBrush(Color.FromArgb(32, 42, 56)))
+            if (_currentProfile == null) return;
+
+            // Avatar initial
+            Rectangle avRect = new Rectangle(14, 12, 40, 40);
+            using (SolidBrush b = new SolidBrush(Color.FromArgb(32, _currentProfile.AvatarColor.R, _currentProfile.AvatarColor.G, _currentProfile.AvatarColor.B)))
             {
                 PTUITheme.FillRoundedRectangle(g, b, avRect, 8);
             }
-
-            string selectedMemberText = cboSelectMember.SelectedItem ?? "Nguyễn Đức An (Tăng Cơ Hypertrophy)";
-            string initials = "DA";
-            if (selectedMemberText.Contains("Mai Linh")) initials = "ML";
-            else if (selectedMemberText.Contains("Hoàng Nam")) initials = "HN";
-            else if (selectedMemberText.Contains("Bảo Trâm")) initials = "BT";
-
-            TextRenderer.DrawText(g, initials, PTUITheme.FontBold, avRect, PTUITheme.PrimaryLime,
+            using (Pen p = new Pen(Color.FromArgb(80, _currentProfile.AvatarColor.R, _currentProfile.AvatarColor.G, _currentProfile.AvatarColor.B), 1.2f))
+            {
+                PTUITheme.DrawRoundedRectangle(g, p, avRect, 8);
+            }
+            TextRenderer.DrawText(g, _currentProfile.Initials, PTUITheme.FontBold, avRect, _currentProfile.AvatarColor,
                 TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
 
             // Subtitle & Member name
-            Rectangle subRect = new Rectangle(62, 12, 280, 16);
-            TextRenderer.DrawText(g, "HỒ SƠ THỂ CHẤT HỘI VIÊN", PTUITheme.FontSmallBold, subRect, PTUITheme.TextMuted,
+            Rectangle subRect = new Rectangle(64, 12, 350, 16);
+            TextRenderer.DrawText(g, "HỒ SƠ THỂ CHẤT & KẾT QUẢ ĐO INBODY", PTUITheme.FontSmallBold, subRect, PTUITheme.TextMuted,
                 TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
 
-            Rectangle nameRect = new Rectangle(62, 28, 420, 22);
-            TextRenderer.DrawText(g, selectedMemberText, PTUITheme.FontBold, nameRect, PTUITheme.TextWhite,
-                TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
+            Rectangle nameRect = new Rectangle(64, 30, 450, 24);
+            string titleText = $"{_currentProfile.FullName} ({_currentProfile.MemberCode})  •  Gói: {_currentProfile.PackageName}  •  SĐT: {_currentProfile.Phone}";
+            TextRenderer.DrawText(g, titleText, PTUITheme.FontBold, nameRect, PTUITheme.TextWhite,
+                TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
+
+            // Badge ngày đo gần nhất ở góc phải (thay thế cho combobox cũ)
+            Rectangle dateBadge = new Rectangle(r.Width - 230, 16, 215, 30);
+            PTUITheme.DrawCard(g, dateBadge, radius: 6, customBg: Color.FromArgb(28, 34, 46), customBorder: Color.FromArgb(45, 55, 75));
+            Rectangle dateTextRect = new Rectangle(dateBadge.X + 8, dateBadge.Y, dateBadge.Width - 16, dateBadge.Height);
+            TextRenderer.DrawText(g, $"📅 Đo gần nhất: {_currentProfile.LastRecordedDate:dd/MM/yyyy}", PTUITheme.FontSmallBold, dateTextRect, PTUITheme.PrimaryLime,
+                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
         }
 
         private void PnlChart_Paint(object? sender, PaintEventArgs e)
@@ -149,13 +368,15 @@ namespace QuanLyGym.UI.Forms.PT
             Rectangle r = pnlChart.ClientRectangle;
             PTUITheme.DrawCard(g, new Rectangle(r.X, r.Y, r.Width - 1, r.Height - 1), radius: 12);
 
+            if (_currentProfile == null) return;
+
             // Chart Title
-            Rectangle titleRect = new Rectangle(20, 14, 380, 22);
-            TextRenderer.DrawText(g, "BIẾN THIÊN CÂN NẶNG & BODY FAT (%)", PTUITheme.FontSection, titleRect, PTUITheme.TextWhite,
+            Rectangle titleRect = new Rectangle(20, 14, 400, 22);
+            TextRenderer.DrawText(g, $"BIẾN THIÊN CÂN NẶNG & BODY FAT (%) - {_currentProfile.FullName.ToUpper()}", PTUITheme.FontSection, titleRect, PTUITheme.TextWhite,
                 TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
 
-            Rectangle subTitleRect = new Rectangle(20, 36, 380, 18);
-            TextRenderer.DrawText(g, "Theo dõi qua các lần đo InBody định kỳ", PTUITheme.FontSmall, subTitleRect, PTUITheme.TextMuted,
+            Rectangle subTitleRect = new Rectangle(20, 36, 400, 18);
+            TextRenderer.DrawText(g, "Theo dõi qua các lần đo InBody định kỳ trong quá trình kèm 1-1", PTUITheme.FontSmall, subTitleRect, PTUITheme.TextMuted,
                 TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
 
             // Legends at top-right
@@ -168,10 +389,11 @@ namespace QuanLyGym.UI.Forms.PT
             TextRenderer.DrawText(g, "● Body Fat (%)", PTUITheme.FontSmallBold, leg2, PTUITheme.Cyan,
                 TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
 
-            // Chart Data
-            string[] months = new string[] { "T1 (78k)", "T2 (77k)", "T3 (76k)", "T4 (74.8k)", "T5 (73.5k)", "T6 (72k)" };
-            double[] weights = new double[] { 78.0, 77.0, 76.0, 74.8, 73.5, 72.0 };
-            double[] bodyFats = new double[] { 22.0, 20.5, 19.0, 18.2, 17.0, 16.5 };
+            string[] months = _currentProfile.MonthLabels;
+            double[] weights = _currentProfile.WeightHistory;
+            double[] bodyFats = _currentProfile.BodyFatHistory;
+
+            if (months.Length == 0) return;
 
             int chartLeft = 50;
             int chartRight = r.Width - 50;
@@ -179,7 +401,7 @@ namespace QuanLyGym.UI.Forms.PT
             int chartBottom = r.Height - 38;
             int chartHeight = chartBottom - chartTop;
             int count = months.Length;
-            int stepX = (chartRight - chartLeft) / (count - 1);
+            int stepX = (chartRight - chartLeft) / Math.Max(1, count - 1);
 
             // Draw horizontal grid lines
             using (Pen gridPen = new Pen(Color.FromArgb(28, 33, 44), 1))
@@ -194,15 +416,23 @@ namespace QuanLyGym.UI.Forms.PT
             Point[] weightPoints = new Point[count];
             Point[] fatPoints = new Point[count];
 
+            double minW = weights.Min() - 2.0;
+            double maxW = weights.Max() + 2.0;
+            double rangeW = Math.Max(1.0, maxW - minW);
+
+            double minF = bodyFats.Min() - 2.0;
+            double maxF = bodyFats.Max() + 2.0;
+            double rangeF = Math.Max(1.0, maxF - minF);
+
             for (int i = 0; i < count; i++)
             {
                 int px = chartLeft + i * stepX;
 
-                double wRatio = (weights[i] - 70.0) / 10.0;
+                double wRatio = (weights[i] - minW) / rangeW;
                 int wy = chartBottom - (int)(wRatio * chartHeight);
                 weightPoints[i] = new Point(px, wy);
 
-                double fRatio = (bodyFats[i] - 15.0) / 10.0;
+                double fRatio = (bodyFats[i] - minF) / rangeF;
                 int fy = chartBottom - (int)(fRatio * chartHeight);
                 fatPoints[i] = new Point(px, fy);
             }
@@ -276,8 +506,12 @@ namespace QuanLyGym.UI.Forms.PT
             TextRenderer.DrawText(g, "Cập Nhật Chỉ Số Đo Mới", PTUITheme.FontSection, titleRect, PTUITheme.PrimaryLime,
                 TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
 
-            Rectangle bmiRect = new Rectangle(r.Width - 145, 16, 125, 24);
-            PTUITheme.DrawBadge(g, "BMI: 23.5 (Chuẩn)", bmiRect, PTUITheme.LimeDark, PTUITheme.PrimaryLime, PTUITheme.FontSmallBold, 12);
+            if (_currentProfile != null)
+            {
+                string bmiBadgeText = $"BMI: {_currentProfile.BMI} ({_currentProfile.BmiStatus})";
+                Rectangle bmiRect = new Rectangle(r.Width - 170, 16, 150, 24);
+                PTUITheme.DrawBadge(g, bmiBadgeText, bmiRect, PTUITheme.LimeDark, PTUITheme.PrimaryLime, PTUITheme.FontSmallBold, 12);
+            }
         }
 
         private void PnlRecordsCard_Paint(object? sender, PaintEventArgs e)
@@ -292,9 +526,13 @@ namespace QuanLyGym.UI.Forms.PT
             TextRenderer.DrawText(g, "Kỷ Lục Mức Tạ Cá Nhân (PR – 1RM)", PTUITheme.FontSection, titleRect, PTUITheme.Cyan,
                 TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
 
-            DrawPRRow(g, 20, 54, r.Width - 40, "Barbell Bench Press (Ngực)", "75 kg");
-            DrawPRRow(g, 20, 102, r.Width - 40, "Barbell Back Squat (Đùi Sau)", "105 kg");
-            DrawPRRow(g, 20, 150, r.Width - 40, "Conventional Deadlift (Lưng Xô)", "130 kg");
+            string bench = _currentProfile?.BenchPressPR ?? "75 kg";
+            string squat = _currentProfile?.SquatPR ?? "105 kg";
+            string deadlift = _currentProfile?.DeadliftPR ?? "130 kg";
+
+            DrawPRRow(g, 20, 54, r.Width - 40, "Barbell Bench Press (Ngực)", bench);
+            DrawPRRow(g, 20, 102, r.Width - 40, "Barbell Back Squat (Đùi Sau)", squat);
+            DrawPRRow(g, 20, 150, r.Width - 40, "Conventional Deadlift (Lưng Xô)", deadlift);
         }
 
         private void DrawPRRow(Graphics g, int x, int y, int width, string exerciseName, string weight)
@@ -313,20 +551,41 @@ namespace QuanLyGym.UI.Forms.PT
 
         private void btnSaveMeasurement_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Đã lưu kết quả đo InBody mới hôm nay thành công!",
-                "Thông Báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            if (decimal.TryParse(txtWeight.Text, out decimal w) &&
+                decimal.TryParse(txtHeight.Text, out decimal h) &&
+                decimal.TryParse(txtBodyFat.Text, out decimal f) &&
+                decimal.TryParse(txtWaist.Text, out decimal wst))
+            {
+                _currentProfile.CurrentWeight = w;
+                _currentProfile.Height = h;
+                _currentProfile.BodyFat = f;
+                _currentProfile.Waist = wst;
+                _currentProfile.LastRecordedDate = DateTime.Today;
+
+                if (h > 0)
+                {
+                    decimal hM = h / 100m;
+                    _currentProfile.BMI = Math.Round(w / (hM * hM), 1);
+                }
+
+                MessageBox.Show($"Đã lưu kết quả đo InBody mới thành công cho hội viên {_currentProfile.FullName}!\n\nCân nặng: {w} kg\nBody Fat: {f}%\nBMI: {_currentProfile.BMI}",
+                    "Thông Báo Thành Công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                pnlMemberBanner.Invalidate();
+                pnlChart.Invalidate();
+                pnlMeasurementsCard.Invalidate();
+            }
+            else
+            {
+                MessageBox.Show("Vui lòng kiểm tra lại định dạng các chỉ số đo (phải là số hợp lệ)!",
+                    "Dữ Liệu Không Hợp Lệ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         }
 
         private void btnUpdatePR_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Mở form cập nhật mức tạ PR 1RM cho hội viên.",
+            MessageBox.Show($"Cập nhật mức tạ PR cho hội viên {_currentProfile.FullName}.\nTính năng đang lưu trữ các mốc kỷ lục 1RM của hội viên.",
                 "Cập Nhật Kỷ Lục PR", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
-        private void cboSelectMember_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            pnlMemberBanner.Invalidate();
-            pnlChart.Invalidate();
         }
     }
 }

@@ -75,6 +75,8 @@ namespace QuanLyGym.UI.Forms.PT
             {
                 this.DoubleBuffered = true;
                 this.ResizeRedraw = true;
+                this.SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);
+                this.UpdateStyles();
             }
         }
 
@@ -230,6 +232,58 @@ namespace QuanLyGym.UI.Forms.PT
                 g.DrawEllipse(p, cx - r, cy - r, r * 2, r * 2);
                 g.DrawLine(p, cx, cy, cx, cy - 4);
                 g.DrawLine(p, cx, cy, cx + 3, cy);
+            }
+        }
+
+        // 5. Vector Notification Bell Icon (Modern sleek curve, scalable & prominent)
+        public static void DrawVectorBell(Graphics g, Rectangle bounds, Color color)
+        {
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+            float cx = bounds.X + bounds.Width / 2f;
+            float cy = bounds.Y + bounds.Height / 2f;
+            float scale = bounds.Width / 24f;
+
+            using (Pen pen = new Pen(color, 2.3f * scale))
+            using (SolidBrush brush = new SolidBrush(color))
+            {
+                pen.StartCap = LineCap.Round;
+                pen.EndCap = LineCap.Round;
+                pen.LineJoin = LineJoin.Round;
+
+                // 1. Quai treo trên đỉnh chuông
+                g.DrawArc(pen, cx - 2.8f * scale, cy - 11.5f * scale, 5.6f * scale, 5.6f * scale, 175, 190);
+
+                // 2. Thân chuông uốn lượn mềm mại, to rõ
+                using (GraphicsPath path = new GraphicsPath())
+                {
+                    path.AddArc(cx - 4.5f * scale, cy - 9f * scale, 9f * scale, 7.5f * scale, 180, 180);
+
+                    PointF[] rightFlange = new PointF[]
+                    {
+                        new PointF(cx + 4.5f * scale, cy - 5.25f * scale),
+                        new PointF(cx + 6f * scale, cy + 0.5f * scale),
+                        new PointF(cx + 10f * scale, cy + 5.5f * scale)
+                    };
+                    path.AddCurve(rightFlange, 0.4f);
+
+                    path.AddLine(cx + 10f * scale, cy + 5.5f * scale, cx - 10f * scale, cy + 5.5f * scale);
+
+                    PointF[] leftFlange = new PointF[]
+                    {
+                        new PointF(cx - 10f * scale, cy + 5.5f * scale),
+                        new PointF(cx - 6f * scale, cy + 0.5f * scale),
+                        new PointF(cx - 4.5f * scale, cy - 5.25f * scale)
+                    };
+                    path.AddCurve(leftFlange, 0.4f);
+
+                    path.CloseFigure();
+                    g.DrawPath(pen, path);
+                }
+
+                // 3. Quả lắc chuông tròn xinh xắn bên dưới
+                g.FillEllipse(brush, cx - 2.8f * scale, cy + 6.8f * scale, 5.6f * scale, 4.8f * scale);
             }
         }
     }

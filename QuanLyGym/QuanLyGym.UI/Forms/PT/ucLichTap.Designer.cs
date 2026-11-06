@@ -7,7 +7,7 @@ namespace QuanLyGym.UI.Forms.PT
         private ucPTTopStats topStats;
         private System.Windows.Forms.Panel pnlContent;
         private System.Windows.Forms.Panel pnlRightContainer;
-        private System.Windows.Forms.Panel pnlRightDetails;
+        private PTUITheme.DoubleBufferedPanel pnlRightDetails;
         private System.Windows.Forms.Panel pnlLeftCalendar;
         private System.Windows.Forms.Panel pnlCalendarHeader;
         private System.Windows.Forms.Button btnPrevWeek;
@@ -15,7 +15,7 @@ namespace QuanLyGym.UI.Forms.PT
         private System.Windows.Forms.Button btnNextWeek;
         private System.Windows.Forms.Button btnWeekView;
         private System.Windows.Forms.Button btnDayView;
-        private System.Windows.Forms.Panel pnlScheduleGrid;
+        private PTUITheme.DoubleBufferedPanel pnlScheduleGrid;
         private System.Windows.Forms.FlowLayoutPanel pnlTodaySessionButtons;
         private System.Windows.Forms.Label lblTodaySessionsHeader;
         private System.Windows.Forms.Button btnCheckIn;
@@ -36,14 +36,14 @@ namespace QuanLyGym.UI.Forms.PT
             this.topStats = new QuanLyGym.UI.Forms.PT.ucPTTopStats();
             this.pnlContent = new System.Windows.Forms.Panel();
             this.pnlRightContainer = new System.Windows.Forms.Panel();
-            this.pnlRightDetails = new System.Windows.Forms.Panel();
+            this.pnlRightDetails = new QuanLyGym.UI.Forms.PT.PTUITheme.DoubleBufferedPanel();
             this.btnCancelSchedule = new System.Windows.Forms.Button();
             this.btnEditSchedule = new System.Windows.Forms.Button();
             this.btnCheckIn = new System.Windows.Forms.Button();
             this.lblTodaySessionsHeader = new System.Windows.Forms.Label();
             this.pnlTodaySessionButtons = new System.Windows.Forms.FlowLayoutPanel();
             this.pnlLeftCalendar = new System.Windows.Forms.Panel();
-            this.pnlScheduleGrid = new System.Windows.Forms.Panel();
+            this.pnlScheduleGrid = new QuanLyGym.UI.Forms.PT.PTUITheme.DoubleBufferedPanel();
             this.pnlCalendarHeader = new System.Windows.Forms.Panel();
             this.btnDayView = new System.Windows.Forms.Button();
             this.btnWeekView = new System.Windows.Forms.Button();
@@ -264,7 +264,7 @@ namespace QuanLyGym.UI.Forms.PT
             this.lblWeekRange.Name = "lblWeekRange";
             this.lblWeekRange.Size = new System.Drawing.Size(239, 19);
             this.lblWeekRange.TabIndex = 1;
-            this.lblWeekRange.Text = "05/10/2026 – 11/10/2026 (Tuần 41)";
+            this.lblWeekRange.Text = "02/11/2026 – 08/11/2026 (Tuần 45)";
             this.lblWeekRange.UseMnemonic = false;
             // 
             // btnPrevWeek

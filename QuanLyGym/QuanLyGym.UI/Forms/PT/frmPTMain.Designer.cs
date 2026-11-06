@@ -14,7 +14,7 @@ namespace QuanLyGym.UI.Forms.PT
         private System.Windows.Forms.Panel pnlMainArea;
         private System.Windows.Forms.Panel pnlTopHeader;
         private System.Windows.Forms.Label lblHeaderTitle;
-        private System.Windows.Forms.Button btnCreateSession;
+        private System.Windows.Forms.Button btnNotificationBell;
         private System.Windows.Forms.Panel pnlMainContainer;
 
         protected override void Dispose(bool disposing)
@@ -38,7 +38,7 @@ namespace QuanLyGym.UI.Forms.PT
             this.pnlMainArea = new System.Windows.Forms.Panel();
             this.pnlMainContainer = new System.Windows.Forms.Panel();
             this.pnlTopHeader = new System.Windows.Forms.Panel();
-            this.btnCreateSession = new System.Windows.Forms.Button();
+            this.btnNotificationBell = new System.Windows.Forms.Button();
             this.lblHeaderTitle = new System.Windows.Forms.Label();
             this.pnlSidebar.SuspendLayout();
             this.pnlMainArea.SuspendLayout();
@@ -80,7 +80,7 @@ namespace QuanLyGym.UI.Forms.PT
             this.btnMenuPhysical.Padding = new System.Windows.Forms.Padding(12, 0, 0, 0);
             this.btnMenuPhysical.Size = new System.Drawing.Size(222, 44);
             this.btnMenuPhysical.TabIndex = 4;
-            this.btnMenuPhysical.Text = "Theo Dõi Thể Chất & PR";
+            this.btnMenuPhysical.Text = "TRA CỨU CHỈ SỐ INBODY HỘI VIÊN";
             this.btnMenuPhysical.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnMenuPhysical.UseMnemonic = false;
             this.btnMenuPhysical.UseVisualStyleBackColor = true;
@@ -98,7 +98,7 @@ namespace QuanLyGym.UI.Forms.PT
             this.btnMenuMembers.Padding = new System.Windows.Forms.Padding(12, 0, 0, 0);
             this.btnMenuMembers.Size = new System.Drawing.Size(222, 44);
             this.btnMenuMembers.TabIndex = 3;
-            this.btnMenuMembers.Text = "Hội Viên Phụ Trách";
+            this.btnMenuMembers.Text = "NHẬT KÝ HỘI VIÊN ĐÃ DẠY";
             this.btnMenuMembers.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnMenuMembers.UseMnemonic = false;
             this.btnMenuMembers.UseVisualStyleBackColor = true;
@@ -164,7 +164,7 @@ namespace QuanLyGym.UI.Forms.PT
             // pnlTopHeader
             // 
             this.pnlTopHeader.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(17)))), ((int)(((byte)(21)))));
-            this.pnlTopHeader.Controls.Add(this.btnCreateSession);
+            this.pnlTopHeader.Controls.Add(this.btnNotificationBell);
             this.pnlTopHeader.Controls.Add(this.lblHeaderTitle);
             this.pnlTopHeader.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlTopHeader.Location = new System.Drawing.Point(0, 0);
@@ -172,23 +172,20 @@ namespace QuanLyGym.UI.Forms.PT
             this.pnlTopHeader.Size = new System.Drawing.Size(1134, 65);
             this.pnlTopHeader.TabIndex = 0;
             // 
-            // btnCreateSession
+            // btnNotificationBell
             // 
-            this.btnCreateSession.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnCreateSession.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(204)))), ((int)(((byte)(255)))), ((int)(((byte)(0)))));
-            this.btnCreateSession.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnCreateSession.FlatAppearance.BorderSize = 0;
-            this.btnCreateSession.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnCreateSession.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
-            this.btnCreateSession.ForeColor = System.Drawing.Color.Black;
-            this.btnCreateSession.Location = new System.Drawing.Point(962, 14);
-            this.btnCreateSession.Name = "btnCreateSession";
-            this.btnCreateSession.Size = new System.Drawing.Size(148, 38);
-            this.btnCreateSession.TabIndex = 1;
-            this.btnCreateSession.Text = "+ Đặt Lịch Tập Mới";
-            this.btnCreateSession.UseMnemonic = false;
-            this.btnCreateSession.UseVisualStyleBackColor = false;
-            this.btnCreateSession.Click += new System.EventHandler(this.btnCreateSession_Click);
+            this.btnNotificationBell.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnNotificationBell.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(26)))), ((int)(((byte)(36)))));
+            this.btnNotificationBell.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnNotificationBell.FlatAppearance.BorderSize = 0;
+            this.btnNotificationBell.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnNotificationBell.Location = new System.Drawing.Point(1058, 10);
+            this.btnNotificationBell.Name = "btnNotificationBell";
+            this.btnNotificationBell.Size = new System.Drawing.Size(54, 46);
+            this.btnNotificationBell.TabIndex = 1;
+            this.btnNotificationBell.UseMnemonic = false;
+            this.btnNotificationBell.UseVisualStyleBackColor = false;
+            this.btnNotificationBell.Click += new System.EventHandler(this.btnNotificationBell_Click);
             // 
             // lblHeaderTitle
             // 
@@ -210,7 +207,7 @@ namespace QuanLyGym.UI.Forms.PT
             this.ClientSize = new System.Drawing.Size(1384, 821);
             this.Controls.Add(this.pnlMainArea);
             this.Controls.Add(this.pnlSidebar);
-            this.MinimumSize = new System.Drawing.Size(1280, 800);
+            this.MinimumSize = new System.Drawing.Size(1100, 680);
             this.Name = "frmPTMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Titan Gym - Trainer Suite (Hệ Thống Huấn Luyện Viên PT)";
