@@ -4,12 +4,14 @@ using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
+using QuanLyGym.UI.Services;
 using QuanLyGym.UI.Utils;
 
 namespace QuanLyGym.UI.Forms.Member.Views
 {
     public class ScheduleItem
     {
+        public int ScheduleID { get; set; }
         public DateTime Date { get; set; }
         public string DateDisplay => Date.ToString("dd/MM/yyyy");
         public string DayOfWeekVN
@@ -40,6 +42,13 @@ namespace QuanLyGym.UI.Forms.Member.Views
 
     public class ucMemberSchedule : UserControl
     {
+        private class ComboBoxItem
+        {
+            public string Text { get; set; } = "";
+            public int Value { get; set; }
+            public override string ToString() => Text;
+        }
+
         // Internal holder for each of the 42 calendar grid cells (reused, never destroyed)
         private class DayCellView
         {
@@ -52,7 +61,7 @@ namespace QuanLyGym.UI.Forms.Member.Views
 
         // Data Store
         private readonly List<ScheduleItem> _schedules = new List<ScheduleItem>();
-        private DateTime _currentMonth = new DateTime(2026, 10, 1);
+        private DateTime _currentMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
         private string _selectedFilter = "Tất cả";
         private bool _isCalendarMode = false;
 
@@ -83,7 +92,7 @@ namespace QuanLyGym.UI.Forms.Member.Views
         public ucMemberSchedule()
         {
             EnableDoubleBuffer(this);
-            SeedInitialSchedules();
+            LoadSchedulesFromDatabase();
             InitializeComponent();
             RefreshAllViews();
         }
@@ -98,88 +107,36 @@ namespace QuanLyGym.UI.Forms.Member.Views
             catch { }
         }
 
-        private void SeedInitialSchedules()
+        private void LoadSchedulesFromDatabase()
         {
-            // 1. Lịch do PT xếp (Lộ trình cố định - Tự động hiển thị "Đã xác nhận")
-            _schedules.Add(new ScheduleItem
+            _schedules.Clear();
+            var list = MemberService.Instance.GetAllSchedules();
+            foreach (var s in list)
             {
-                Date = new DateTime(2026, 10, 26),
-                TimeRange = "18:00 - 19:30",
-                WorkoutType = "Gym Thể hình (Tăng cơ)",
-                TrainerName = "HLV Nguyễn Văn Nam",
-                Room = "PT-01",
-                Source = "Lộ trình PT xếp",
-                Status = "Đã xác nhận",
-                Note = "Giáo án tăng khối lượng cơ ngực & vai"
-            });
-            _schedules.Add(new ScheduleItem
-            {
-                Date = new DateTime(2026, 10, 28),
-                TimeRange = "17:30 - 19:00",
-                WorkoutType = "Cardio & HIIT đốt mỡ",
-                TrainerName = "HLV Nguyễn Văn Nam",
-                Room = "Room 02",
-                Source = "Lộ trình PT xếp",
-                Status = "Đã xác nhận",
-                Note = "Cardio nhịp tim vùng 2 kết hợp giãn cơ sâu"
-            });
-            _schedules.Add(new ScheduleItem
-            {
-                Date = new DateTime(2026, 11, 1),
-                TimeRange = "08:30 - 10:00",
-                WorkoutType = "Yoga & Giãn cơ phục hồi",
-                TrainerName = "HLV Lê Thu Hà",
-                Room = "Studio A",
-                Source = "Lộ trình PT xếp",
-                Status = "Đã xác nhận",
-                Note = "Lớp nhóm phục hồi cơ khớp cuối tuần"
-            });
-            _schedules.Add(new ScheduleItem
-            {
-                Date = new DateTime(2026, 10, 23),
-                TimeRange = "18:00 - 19:30",
-                WorkoutType = "Chân - Mông (Leg Day)",
-                TrainerName = "HLV Nguyễn Văn Nam",
-                Room = "PT-01",
-                Source = "Lộ trình PT xếp",
-                Status = "Hoàn thành",
-                Note = "Squat 80kg x 4 hiệp đạt chuẩn kỹ thuật"
-            });
-            _schedules.Add(new ScheduleItem
-            {
-                Date = new DateTime(2026, 10, 19),
-                TimeRange = "18:00 - 19:30",
-                WorkoutType = "Lưng - Xô & Tay trước",
-                TrainerName = "HLV Nguyễn Văn Nam",
-                Room = "PT-01",
-                Source = "Lộ trình PT xếp",
-                Status = "Hoàn thành",
-                Note = "Deadlift & Pull-up"
-            });
+                string source = s.Note?.Contains("tự đặt") == true || s.Status == "Pending" ? "Hội viên tự đặt" : "Lộ trình PT xếp";
+                string statusDisplay = s.Status switch
+                {
+                    "Confirmed" => "Đã xác nhận",
+                    "Pending" => "Chờ HLV duyệt",
+                    "Completed" => "Hoàn thành",
+                    "Scheduled" => "Đã xác nhận",
+                    "Cancelled" => "Đã hủy",
+                    _ => s.Status ?? "Đã xác nhận"
+                };
 
-            // 2. Lịch do Hội viên chủ động đặt thêm (Đi qua luồng duyệt: "Chờ HLV duyệt")
-            _schedules.Add(new ScheduleItem
-            {
-                Date = new DateTime(2026, 10, 30),
-                TimeRange = "18:00 - 19:30",
-                WorkoutType = "Ngực & Tay sau tăng cường",
-                TrainerName = "HLV Nguyễn Văn Nam",
-                Room = "PT-01",
-                Source = "Hội viên tự đặt",
-                Status = "Chờ HLV duyệt",
-                Note = "Hội viên xin tập thêm trước chuyến công tác"
-            });
-            _schedules.Add(new ScheduleItem
-            {
-                Date = new DateTime(2026, 11, 4),
-                TimeRange = "17:30 - 19:00",
-                WorkoutType = "Boxing & Kickfit đối kháng",
-                TrainerName = "HLV Trần Minh Đức",
-                Room = "PT-02",
-                Source = "Hội viên tự đặt",
-                Status = "Chờ HLV duyệt",
-                Note = "Đăng ký buổi bổ trợ xả stress"
-            });
+                _schedules.Add(new ScheduleItem
+                {
+                    ScheduleID = s.ScheduleID,
+                    Date = s.TrainingDate,
+                    TimeRange = $"{s.StartTime:hh\\:mm} - {s.EndTime:hh\\:mm}",
+                    WorkoutType = !string.IsNullOrEmpty(s.TrainingType) ? s.TrainingType : "Gym Thể hình",
+                    TrainerName = s.PT?.FullName ?? "HLV Titan",
+                    Room = s.Branch?.BranchName ?? (s.PT?.Branch?.BranchName ?? "Chi nhánh"),
+                    Source = source,
+                    Status = statusDisplay,
+                    Note = s.Note ?? ""
+                });
+            }
         }
 
         private void InitializeComponent()
@@ -189,44 +146,18 @@ namespace QuanLyGym.UI.Forms.Member.Views
             this.BackColor = UITheme.Background;
             this.Dock = DockStyle.Fill;
             this.AutoScroll = true;
+            this.AutoScrollMinSize = new Size(1000, 640);
 
-            Panel pnlMain = new Panel
-            {
-                Dock = DockStyle.Top,
-                Height = 800,
-                Padding = new Padding(24, 20, 24, 30),
-                BackColor = UITheme.Background
-            };
+            float scale = Math.Max(1.0f, (float)this.DeviceDpi / 96f);
 
-            // Header Section
-            Panel pnlHeader = new Panel { Dock = DockStyle.Top, Height = 56 };
-            Label lblTitle = new Label
-            {
-                Text = "📅 LỊCH TẬP & ĐẶT LỊCH HUẤN LUYỆN VIÊN (PT)",
-                Font = UITheme.FontTitle,
-                ForeColor = UITheme.TextDark,
-                AutoSize = true,
-                Location = new Point(0, 4)
-            };
-            Label lblSubtitle = new Label
-            {
-                Text = "Xem lộ trình tập do PT xếp cố định hoặc chủ động đặt thêm ca tập cá nhân",
-                Font = UITheme.FontRegular,
-                ForeColor = UITheme.TextMuted,
-                AutoSize = true,
-                Location = new Point(0, 32)
-            };
-            pnlHeader.Controls.Add(lblTitle);
-            pnlHeader.Controls.Add(lblSubtitle);
-
-            // Two Column Layout
+            // Two Column Layout — Left (64% Table/Calendar), Right (36% Booking Form)
             TableLayoutPanel pnlCols = new TableLayoutPanel
             {
+                Dock = DockStyle.Fill,
                 ColumnCount = 2,
                 RowCount = 1,
-                Height = 690,
-                Dock = DockStyle.Top,
-                Padding = new Padding(0, 10, 0, 10)
+                Padding = new Padding((int)(16 * scale), (int)(12 * scale), (int)(16 * scale), (int)(14 * scale)),
+                BackColor = UITheme.Background
             };
             pnlCols.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 64f));
             pnlCols.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 36f));
@@ -236,20 +167,17 @@ namespace QuanLyGym.UI.Forms.Member.Views
             // Left: Schedule List Card with Table / Calendar toggle
             RoundedPanel cardLeft = CreateScheduleLeftCard();
             cardLeft.Dock = DockStyle.Fill;
-            cardLeft.Margin = new Padding(0, 0, 10, 0);
+            cardLeft.Margin = new Padding(0, 0, (int)(8 * scale), 0);
 
             // Right: Booking Form Card
             RoundedPanel cardRight = CreateBookingFormCard();
             cardRight.Dock = DockStyle.Fill;
-            cardRight.Margin = new Padding(10, 0, 0, 0);
+            cardRight.Margin = new Padding((int)(8 * scale), 0, 0, 0);
 
             pnlCols.Controls.Add(cardLeft, 0, 0);
             pnlCols.Controls.Add(cardRight, 1, 0);
 
-            pnlMain.Controls.Add(pnlCols);
-            pnlMain.Controls.Add(pnlHeader);
-
-            this.Controls.Add(pnlMain);
+            this.Controls.Add(pnlCols);
             this.ResumeLayout(true);
         }
 
@@ -259,7 +187,6 @@ namespace QuanLyGym.UI.Forms.Member.Views
         {
             RoundedPanel card = new RoundedPanel
             {
-                Height = 670,
                 CornerRadius = 12,
                 BackColor = UITheme.CardBg,
                 BorderColor = UITheme.Border,
@@ -432,20 +359,21 @@ namespace QuanLyGym.UI.Forms.Member.Views
 
         private Panel BuildTableView()
         {
+            float scale = Math.Max(1.0f, (float)this.DeviceDpi / 96f);
             Panel pnl = new Panel { Dock = DockStyle.Fill };
 
             dgvSchedule = new DataGridView { Dock = DockStyle.Fill };
             UITheme.StyleDataGridView(dgvSchedule);
+            dgvSchedule.RowTemplate.Height = (int)Math.Round(36f * scale);
+            dgvSchedule.ColumnHeadersHeight = (int)Math.Round(34f * scale);
 
-            var colDate = new DataGridViewTextBoxColumn { Name = "Date", HeaderText = "Ngày tập", Width = 110, AutoSizeMode = DataGridViewAutoSizeColumnMode.None };
-            var colTime = new DataGridViewTextBoxColumn { Name = "Time", HeaderText = "Khung giờ", Width = 105, AutoSizeMode = DataGridViewAutoSizeColumnMode.None };
-            var colType = new DataGridViewTextBoxColumn { Name = "Type", HeaderText = "Bộ môn & Mục tiêu", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill, MinimumWidth = 140 };
-            var colTrainer = new DataGridViewTextBoxColumn { Name = "Trainer", HeaderText = "HLV phụ trách", Width = 145, AutoSizeMode = DataGridViewAutoSizeColumnMode.None };
-            var colSource = new DataGridViewTextBoxColumn { Name = "Source", HeaderText = "Nguồn gốc lịch", Width = 135, AutoSizeMode = DataGridViewAutoSizeColumnMode.None };
-            var colRoom = new DataGridViewTextBoxColumn { Name = "Room", HeaderText = "Phòng", Width = 75, AutoSizeMode = DataGridViewAutoSizeColumnMode.None };
-            var colStatus = new DataGridViewTextBoxColumn { Name = "Status", HeaderText = "Trạng thái", Width = 125, AutoSizeMode = DataGridViewAutoSizeColumnMode.None };
-
-            dgvSchedule.Columns.AddRange(colDate, colTime, colType, colTrainer, colSource, colRoom, colStatus);
+            dgvSchedule.Columns.Add(UITheme.CreateFillColumn("Date", "Ngày tập", 13f, 85));
+            dgvSchedule.Columns.Add(UITheme.CreateFillColumn("Time", "Khung giờ", 16f, 95));
+            dgvSchedule.Columns.Add(UITheme.CreateFillColumn("Type", "Bộ môn & Mục tiêu", 22f, 110));
+            dgvSchedule.Columns.Add(UITheme.CreateFillColumn("Trainer", "HLV phụ trách", 18f, 110));
+            dgvSchedule.Columns.Add(UITheme.CreateFillColumn("Source", "Nguồn gốc lịch", 14f, 90));
+            dgvSchedule.Columns.Add(UITheme.CreateFillColumn("Room", "Chi nhánh", 11f, 85));
+            dgvSchedule.Columns.Add(UITheme.CreateFillColumn("Status", "Trạng thái", 12f, 85));
 
             dgvSchedule.CellFormatting += (s, e) =>
             {
@@ -944,7 +872,11 @@ namespace QuanLyGym.UI.Forms.Member.Views
 
                     if (res == DialogResult.Yes)
                     {
-                        _schedules.Remove(target);
+                        if (target.ScheduleID > 0)
+                        {
+                            MemberService.Instance.CancelSchedule(target.ScheduleID, out var msg);
+                        }
+                        LoadSchedulesFromDatabase();
                         RefreshAllViews();
                         MessageBox.Show("Đã hủy buổi tập thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
@@ -962,13 +894,14 @@ namespace QuanLyGym.UI.Forms.Member.Views
 
         private RoundedPanel CreateBookingFormCard()
         {
+            float scale = Math.Max(1.0f, (float)this.DeviceDpi / 96f);
+
             RoundedPanel card = new RoundedPanel
             {
-                Height = 670,
                 CornerRadius = 12,
                 BackColor = UITheme.CardBg,
                 BorderColor = UITheme.Border,
-                Padding = new Padding(22)
+                Padding = new Padding((int)(18 * scale))
             };
 
             Label lblTitle = new Label
@@ -977,54 +910,57 @@ namespace QuanLyGym.UI.Forms.Member.Views
                 Font = UITheme.FontSection,
                 ForeColor = UITheme.TextDark,
                 Dock = DockStyle.Top,
-                Height = 30
+                Height = (int)(30 * scale),
+                UseMnemonic = false
             };
 
-            Panel pnlForm = new Panel { Dock = DockStyle.Fill, AutoScroll = true };
+            TableLayoutPanel pnlForm = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                ColumnCount = 1,
+                RowCount = 14,
+                AutoScroll = true,
+                Padding = new Padding(0, (int)(4 * scale), 0, 0)
+            };
+            pnlForm.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
 
-            int y = 6;
-            int inputWidth = 350;
-
-            // Notice Box explaining the approval workflow
+            // Notice Box
             Panel pnlNotice = new Panel
             {
-                Location = new Point(4, y),
-                Width = inputWidth,
-                Height = 44,
+                Dock = DockStyle.Top,
+                Height = (int)(46 * scale),
                 BackColor = Color.FromArgb(254, 243, 199),
-                Padding = new Padding(8)
+                Padding = new Padding((int)(8 * scale)),
+                Margin = new Padding(0, 0, 0, (int)(6 * scale))
             };
             Label lblNotice = new Label
             {
                 Text = "💡 Lịch Hội viên đặt thêm sẽ đi qua luồng duyệt (Chờ HLV duyệt) trước khi chốt lịch chính thức.",
                 Font = UITheme.FontSmallBold,
                 ForeColor = Color.FromArgb(180, 83, 9),
-                Dock = DockStyle.Fill
+                Dock = DockStyle.Fill,
+                UseMnemonic = false
             };
             pnlNotice.Controls.Add(lblNotice);
-            pnlForm.Controls.Add(pnlNotice);
-            y += 50;
 
-            // 1. Chọn ngày tập
-            pnlForm.Controls.Add(CreateFormLabel("1. Chọn ngày tập:", ref y));
+            // 1. Date
+            Label lblDate = new Label { Text = "1. Chọn ngày tập:", Font = UITheme.FontSmallBold, AutoSize = true, Margin = new Padding(0, 0, 0, (int)(2 * scale)), UseMnemonic = false };
             dtpDate = new DateTimePicker
             {
                 Format = DateTimePickerFormat.Short,
-                Location = new Point(4, y),
-                Width = inputWidth,
+                Dock = DockStyle.Top,
+                Height = (int)(30 * scale),
                 Font = UITheme.FontRegular,
                 MinDate = DateTime.Today
             };
-            pnlForm.Controls.Add(dtpDate);
-            y += 38;
 
-            // 2. Chọn khung giờ ca tập
-            pnlForm.Controls.Add(CreateFormLabel("2. Khung giờ ca tập:", ref y));
+            // 2. Time
+            Label lblTime = new Label { Text = "2. Khung giờ ca tập:", Font = UITheme.FontSmallBold, AutoSize = true, Margin = new Padding(0, (int)(4 * scale), 0, (int)(2 * scale)), UseMnemonic = false };
             cboTime = new ComboBox
             {
                 DropDownStyle = ComboBoxStyle.DropDownList,
-                Location = new Point(4, y),
-                Width = inputWidth,
+                Dock = DockStyle.Top,
+                Height = (int)(30 * scale),
                 Font = UITheme.FontRegular
             };
             cboTime.Items.AddRange(new object[] {
@@ -1036,16 +972,14 @@ namespace QuanLyGym.UI.Forms.Member.Views
                 "19:30 - 21:00 (Ca muộn)"
             });
             cboTime.SelectedIndex = 4;
-            pnlForm.Controls.Add(cboTime);
-            y += 38;
 
-            // 3. Chọn bộ môn
-            pnlForm.Controls.Add(CreateFormLabel("3. Bộ môn & Mục tiêu rèn luyện:", ref y));
+            // 3. Type
+            Label lblType = new Label { Text = "3. Bộ môn & Mục tiêu rèn luyện:", Font = UITheme.FontSmallBold, AutoSize = true, Margin = new Padding(0, (int)(4 * scale), 0, (int)(2 * scale)), UseMnemonic = false };
             cboType = new ComboBox
             {
                 DropDownStyle = ComboBoxStyle.DropDownList,
-                Location = new Point(4, y),
-                Width = inputWidth,
+                Dock = DockStyle.Top,
+                Height = (int)(30 * scale),
                 Font = UITheme.FontRegular
             };
             cboType.Items.AddRange(new object[] {
@@ -1056,94 +990,85 @@ namespace QuanLyGym.UI.Forms.Member.Views
                 "Yoga & Giãn cơ phục hồi"
             });
             cboType.SelectedIndex = 1;
-            pnlForm.Controls.Add(cboType);
-            y += 38;
 
-            // 4. Chọn HLV PT
-            pnlForm.Controls.Add(CreateFormLabel("4. Huấn luyện viên phụ trách:", ref y));
+            // 4. Trainer
+            Label lblTrainer = new Label { Text = "4. Huấn luyện viên phụ trách:", Font = UITheme.FontSmallBold, AutoSize = true, Margin = new Padding(0, (int)(4 * scale), 0, (int)(2 * scale)), UseMnemonic = false };
             cboTrainer = new ComboBox
             {
                 DropDownStyle = ComboBoxStyle.DropDownList,
-                Location = new Point(4, y),
-                Width = inputWidth,
+                Dock = DockStyle.Top,
+                Height = (int)(30 * scale),
                 Font = UITheme.FontRegular
             };
-            cboTrainer.Items.AddRange(new object[] {
-                "HLV Nguyễn Văn Nam (HLV Thể hình chính)",
-                "HLV Lê Thu Hà (Yoga & Cardio)",
-                "HLV Trần Minh Đức (Boxing & Kickfit)"
-            });
-            cboTrainer.SelectedIndex = 0;
-            pnlForm.Controls.Add(cboTrainer);
-            y += 38;
+            var pts = MemberService.Instance.GetAllPTs();
+            foreach (var pt in pts)
+            {
+                cboTrainer.Items.Add(new ComboBoxItem { Text = $"{pt.FullName} ({pt.Specialization})", Value = pt.PTID });
+            }
+            if (cboTrainer.Items.Count > 0) cboTrainer.SelectedIndex = 0;
 
-            // 5. Chọn phòng
-            pnlForm.Controls.Add(CreateFormLabel("5. Phòng tập:", ref y));
+            // 5. Room / Branch
+            Label lblRoom = new Label { Text = "5. Chi nhánh tập:", Font = UITheme.FontSmallBold, AutoSize = true, Margin = new Padding(0, (int)(4 * scale), 0, (int)(2 * scale)), UseMnemonic = false };
             cboRoom = new ComboBox
             {
                 DropDownStyle = ComboBoxStyle.DropDownList,
-                Location = new Point(4, y),
-                Width = inputWidth,
+                Dock = DockStyle.Top,
+                Height = (int)(30 * scale),
                 Font = UITheme.FontRegular
             };
-            cboRoom.Items.AddRange(new object[] {
-                "Phòng PT-01 (Khu VIP)",
-                "Phòng PT-02 (Khu VIP)",
-                "Studio A (Yoga & Lớp nhóm)",
-                "Khu vực Máy tập Tự do"
-            });
-            cboRoom.SelectedIndex = 0;
-            pnlForm.Controls.Add(cboRoom);
-            y += 38;
+            var branches = MemberService.Instance.GetAllBranches();
+            foreach (var b in branches)
+            {
+                cboRoom.Items.Add(new ComboBoxItem { Text = b.BranchName, Value = b.BranchID });
+            }
+            if (cboRoom.Items.Count > 0) cboRoom.SelectedIndex = 0;
 
-            // 6. Ghi chú & Yêu cầu HLV
-            pnlForm.Controls.Add(CreateFormLabel("6. Ghi chú mục tiêu buổi tập & Yêu cầu HLV:", ref y));
+            // 6. Note
+            Label lblNote = new Label { Text = "6. Ghi chú mục tiêu buổi tập & Yêu cầu HLV:", Font = UITheme.FontSmallBold, AutoSize = true, Margin = new Padding(0, (int)(4 * scale), 0, (int)(2 * scale)), UseMnemonic = false };
             txtNote = new TextBox
             {
                 Multiline = true,
-                Height = 85,
-                Width = inputWidth,
-                Location = new Point(4, y),
+                Height = (int)(75 * scale),
+                Dock = DockStyle.Top,
                 Font = UITheme.FontRegular,
                 ScrollBars = ScrollBars.Vertical,
                 Text = "Cần HLV hỗ trợ kỹ thuật và kiểm tra form động tác."
             };
-            pnlForm.Controls.Add(txtNote);
-            y += 98;
 
             // Submit Button
             btnSubmit = new Button
             {
                 Text = "🚀 Gửi yêu cầu đặt lịch hẹn",
                 Font = UITheme.FontBold,
-                Height = 44,
-                Width = inputWidth,
-                Location = new Point(4, y),
+                Height = (int)(42 * scale),
+                Dock = DockStyle.Top,
+                Margin = new Padding(0, (int)(8 * scale), 0, 0),
                 BackColor = UITheme.Primary,
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                Cursor = Cursors.Hand
+                Cursor = Cursors.Hand,
+                UseMnemonic = false
             };
             btnSubmit.FlatAppearance.BorderSize = 0;
             btnSubmit.Click += BtnSubmit_Click;
+
+            pnlForm.Controls.Add(pnlNotice);
+            pnlForm.Controls.Add(lblDate);
+            pnlForm.Controls.Add(dtpDate);
+            pnlForm.Controls.Add(lblTime);
+            pnlForm.Controls.Add(cboTime);
+            pnlForm.Controls.Add(lblType);
+            pnlForm.Controls.Add(cboType);
+            pnlForm.Controls.Add(lblTrainer);
+            pnlForm.Controls.Add(cboTrainer);
+            pnlForm.Controls.Add(lblRoom);
+            pnlForm.Controls.Add(cboRoom);
+            pnlForm.Controls.Add(lblNote);
+            pnlForm.Controls.Add(txtNote);
             pnlForm.Controls.Add(btnSubmit);
 
             card.Controls.Add(pnlForm);
             card.Controls.Add(lblTitle);
-
-            // Responsive width adjustment on resize
-            card.Resize += (s, e) =>
-            {
-                int w = Math.Max(260, pnlForm.ClientSize.Width - 14);
-                pnlNotice.Width = w;
-                dtpDate.Width = w;
-                cboTime.Width = w;
-                cboType.Width = w;
-                cboTrainer.Width = w;
-                cboRoom.Width = w;
-                txtNote.Width = w;
-                btnSubmit.Width = w;
-            };
 
             return card;
         }
@@ -1153,12 +1078,14 @@ namespace QuanLyGym.UI.Forms.Member.Views
             DateTime chosenDate = dtpDate.Value.Date;
             string timeStr = cboTime.Text.Split('(')[0].Trim();
             string typeStr = cboType.Text.Split('(')[0].Trim();
-            string trainerStr = cboTrainer.Text.Split('(')[0].Trim();
-            string roomStr = cboRoom.Text.Split('(')[0].Trim();
+            int ptId = (cboTrainer.SelectedItem as ComboBoxItem)?.Value ?? 1;
+            int branchId = (cboRoom.SelectedItem as ComboBoxItem)?.Value ?? 1;
+            string trainerStr = (cboTrainer.SelectedItem as ComboBoxItem)?.Text ?? cboTrainer.Text;
+            string roomStr = (cboRoom.SelectedItem as ComboBoxItem)?.Text ?? cboRoom.Text;
             string noteStr = txtNote.Text.Trim();
 
             // Check if there is already a schedule on that date and time slot
-            bool isDuplicate = _schedules.Any(x => x.Date.Date == chosenDate && x.TimeRange == timeStr);
+            bool isDuplicate = _schedules.Any(x => x.Date.Date == chosenDate && x.TimeRange == timeStr && x.Status != "Đã hủy");
             if (isDuplicate)
             {
                 MessageBox.Show(
@@ -1170,33 +1097,38 @@ namespace QuanLyGym.UI.Forms.Member.Views
                 return;
             }
 
-            // Create new schedule item with source "Hội viên tự đặt" and status "Chờ HLV duyệt"
-            var newItem = new ScheduleItem
+            TimeSpan start = new TimeSpan(8, 0, 0);
+            TimeSpan end = new TimeSpan(9, 30, 0);
+            var parts = timeStr.Split('-');
+            if (parts.Length == 2 && TimeSpan.TryParse(parts[0].Trim(), out var s) && TimeSpan.TryParse(parts[1].Trim(), out var ee))
             {
-                Date = chosenDate,
-                TimeRange = timeStr,
-                WorkoutType = typeStr,
-                TrainerName = trainerStr,
-                Room = roomStr,
-                Source = "Hội viên tự đặt",
-                Status = "Chờ HLV duyệt",
-                Note = noteStr
-            };
+                start = s;
+                end = ee;
+            }
 
-            _schedules.Insert(0, newItem);
-            RefreshAllViews();
+            bool saved = MemberService.Instance.BookSchedule(chosenDate, start, end, typeStr, ptId, branchId, noteStr);
+            if (saved)
+            {
+                LoadSchedulesFromDatabase();
+                RefreshAllViews();
 
-            MessageBox.Show(
-                $"✅ Gửi yêu cầu đặt lịch hẹn thành công!\n\n" +
-                $"• Ngày tập: {chosenDate:dd/MM/yyyy}\n" +
-                $"• Khung giờ: {timeStr}\n" +
-                $"• HLV phụ trách: {trainerStr}\n" +
-                $"• Nguồn gốc: Hội viên tự đặt\n" +
-                $"• Trạng thái: Chờ HLV duyệt (HLV sẽ phản hồi sớm nhất)",
-                "Đặt lịch thành công",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information
-            );
+                MessageBox.Show(
+                    $"✅ Gửi yêu cầu đặt lịch hẹn thành công!\n\n" +
+                    $"• Ngày tập: {chosenDate:dd/MM/yyyy}\n" +
+                    $"• Khung giờ: {timeStr}\n" +
+                    $"• HLV phụ trách: {trainerStr}\n" +
+                    $"• Chi nhánh: {roomStr}\n" +
+                    $"• Nguồn gốc: Hội viên tự đặt\n" +
+                    $"• Trạng thái: Chờ HLV duyệt (HLV sẽ phản hồi sớm nhất)",
+                    "Đặt lịch thành công",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
+            }
+            else
+            {
+                MessageBox.Show("Không thể lưu lịch tập vào cơ sở dữ liệu.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private Label CreateFormLabel(string text, ref int y)

@@ -95,6 +95,14 @@ namespace QuanLyGym.UI.Utils
             dgv.RowTemplate.Height = 44;
             dgv.Font = FontRegular;
 
+            // Enable double buffering via reflection to prevent flicker
+            try
+            {
+                typeof(Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                    ?.SetValue(dgv, true, null);
+            }
+            catch { }
+
             // Column Header Style
             dgv.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(248, 250, 252);
             dgv.ColumnHeadersDefaultCellStyle.ForeColor = TextDark;
@@ -111,6 +119,19 @@ namespace QuanLyGym.UI.Utils
             dgv.DefaultCellStyle.SelectionForeColor = Primary;
             dgv.DefaultCellStyle.Padding = new Padding(12, 0, 12, 0);
             dgv.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(252, 253, 255);
+        }
+
+        // Helper để tạo cột DataGridView co giãn linh hoạt theo tỷ lệ (FillWeight)
+        public static DataGridViewTextBoxColumn CreateFillColumn(string name, string headerText, float fillWeight, int minWidth = 70)
+        {
+            return new DataGridViewTextBoxColumn
+            {
+                Name = name,
+                HeaderText = headerText,
+                FillWeight = fillWeight,
+                MinimumWidth = minWidth,
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            };
         }
 
         // Style standard button as modern flat button

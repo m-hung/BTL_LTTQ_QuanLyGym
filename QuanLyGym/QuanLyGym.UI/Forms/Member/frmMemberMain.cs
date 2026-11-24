@@ -11,6 +11,8 @@ namespace QuanLyGym.UI.Forms.Member
     public partial class frmMemberMain : Form
     {
         private Panel pnlSidebar = null!;
+        private Panel pnlMainArea = null!;
+        private Panel pnlHeader = null!;
         private Panel pnlContentContainer = null!;
         private Label lblHeaderTitle = null!;
         private Label lblHeaderSubtitle = null!;
@@ -32,50 +34,61 @@ namespace QuanLyGym.UI.Forms.Member
 
         public frmMemberMain()
         {
-            // Gắn dữ liệu hội viên theo tài khoản đang đăng nhập (trước khi tạo các view)
             if (!QuanLyGym.UI.Services.MemberService.Instance.LoadCurrentMemberByAccount(UserSession.AccountID))
             {
-                MessageBox.Show("Tài khoản này chưa có hồ sơ hội viên.", "Thông báo",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                // Fallback demo member if needed
             }
 
             InitializeComponent();
+
+            DisplayHelper.AutoConfigureForm(this);
+
             SetupModernDashboardLayout();
             NavigateTo("Dashboard");
         }
 
         private void SetupModernDashboardLayout()
         {
-            this.AutoScaleMode = AutoScaleMode.None;
+            this.SuspendLayout();
             this.BackColor = UITheme.Background;
             this.Font = UITheme.FontRegular;
 
+            float dpiScale = Math.Max(1.0f, (float)this.DeviceDpi / 96f);
+
             // 1. Sidebar (Dock Left)
-            pnlSidebar = CreateSidebar();
-            this.Controls.Add(pnlSidebar);
+            pnlSidebar = CreateSidebar(dpiScale);
+            pnlSidebar.Dock = DockStyle.Left;
 
-            // 2. Top Header Bar (Dock Top)
-            // pnlHeader được tạo và gán từ hàm CreateHeaderBar
-            pnlHeader = CreateHeaderBar();
-            this.Controls.Add(pnlHeader);
+            // 2. Main Area (Dock Fill) bao bọc Header và Content
+            pnlMainArea = new Panel
+            {
+                Dock = DockStyle.Fill,
+                BackColor = UITheme.Background
+            };
 
-            // 3. Main Content Container (Dock Fill)
+            // 2.1. Header Bar (Dock Top trong pnlMainArea)
+            pnlHeader = CreateHeaderBar(dpiScale);
+            pnlHeader.Dock = DockStyle.Top;
+
+            // 2.2. Content Container (Dock Fill trong pnlMainArea)
             pnlContentContainer = new Panel
             {
                 Dock = DockStyle.Fill,
                 BackColor = UITheme.Background,
-                AutoScroll = false // Let each hosted UserControl manage its own scroll
+                AutoScroll = false
             };
-            this.Controls.Add(pnlContentContainer);
 
-            // Bring header and sidebar to front
-            pnlHeader.BringToFront();
-            pnlSidebar.BringToFront();
-            pnlContentContainer.BringToFront();
+            pnlMainArea.Controls.Clear();
+            pnlMainArea.Controls.Add(pnlContentContainer);
+            pnlMainArea.Controls.Add(pnlHeader);
 
-            this.ResumeLayout(false);
+            this.Controls.Clear();
+            this.Controls.Add(pnlMainArea);
+            this.Controls.Add(pnlSidebar);
 
-            // Start live clock for header
+            this.ResumeLayout(true);
+
+            // Đồng hồ thời gian thực
             timerHeaderClock = new System.Windows.Forms.Timer { Interval = 1000 };
             timerHeaderClock.Tick += (s, e) =>
             {
@@ -87,79 +100,97 @@ namespace QuanLyGym.UI.Forms.Member
             timerHeaderClock.Start();
         }
 
-        private Panel CreateSidebar()
+        private Panel CreateSidebar(float dpiScale)
         {
+            int sidebarWidth = Math.Max(260, (int)Math.Round(260f * dpiScale));
             Panel sidebar = new Panel
             {
-                Width = 260,
+                Width = sidebarWidth,
                 Dock = DockStyle.Left,
                 BackColor = UITheme.SidebarBg,
-                Padding = new Padding(14, 18, 14, 18)
+                Padding = new Padding((int)(12 * dpiScale), (int)(14 * dpiScale), (int)(12 * dpiScale), (int)(14 * dpiScale))
             };
 
             // 1. Brand Logo
-            Panel pnlLogo = new Panel { Dock = DockStyle.Top, Height = 60 };
+            int logoHeight = (int)Math.Round(64f * dpiScale);
+            Panel pnlLogo = new Panel { Dock = DockStyle.Top, Height = logoHeight };
             Label lblLogoText = new Label
             {
                 Text = "⚡ TITAN GYM",
-                Font = new Font("Segoe UI", 16f, FontStyle.Bold),
+                Font = new Font("Segoe UI", 14f, FontStyle.Bold),
                 ForeColor = Color.White,
-                Location = new Point(8, 6),
-                AutoSize = true
+                Location = new Point((int)(6 * dpiScale), (int)(6 * dpiScale)),
+                AutoSize = true,
+                UseMnemonic = false
             };
             Label lblSlogan = new Label
             {
                 Text = "MEMBER PORTAL DASHBOARD",
                 Font = new Font("Segoe UI", 7.5f, FontStyle.Bold),
                 ForeColor = UITheme.Primary,
-                Location = new Point(10, 36),
-                AutoSize = true
+                Location = new Point((int)(8 * dpiScale), (int)(36 * dpiScale)),
+                AutoSize = true,
+                UseMnemonic = false
             };
             pnlLogo.Controls.Add(lblLogoText);
             pnlLogo.Controls.Add(lblSlogan);
 
             // 2. Member Mini Profile Card
+            int profileHeight = (int)Math.Round(76f * dpiScale);
             Panel pnlProfile = new Panel
             {
                 Dock = DockStyle.Top,
-                Height = 84,
+                Height = profileHeight,
                 BackColor = Color.FromArgb(32, 38, 52),
-                Padding = new Padding(12),
-                Margin = new Padding(0, 10, 0, 16)
+                Padding = new Padding((int)(8 * dpiScale)),
+                Margin = new Padding(0, (int)(6 * dpiScale), 0, (int)(10 * dpiScale))
             };
 
+            int avatarSize = (int)Math.Round(42f * dpiScale);
             Panel pnlAvatar = new Panel
             {
-                Size = new Size(46, 46),
+                Size = new Size(avatarSize, avatarSize),
                 BackColor = UITheme.Primary,
-                Location = new Point(10, 18)
+                Location = new Point((int)(8 * dpiScale), (int)(16 * dpiScale))
             };
+            var curMember = QuanLyGym.UI.Services.MemberService.Instance.GetCurrentMember();
+            string displayName = curMember?.FullName ?? (string.IsNullOrEmpty(UserSession.DisplayName) ? "Hội viên Titan" : UserSession.DisplayName);
+            string firstLetter = displayName.Length > 0 ? displayName.Substring(0, 1).ToUpper() : "H";
             Label lblAvatarTxt = new Label
             {
-                Text = "H",
-                Font = new Font("Segoe UI", 16f, FontStyle.Bold),
+                Text = firstLetter,
+                Font = new Font("Segoe UI", 13f, FontStyle.Bold),
                 ForeColor = Color.White,
                 Dock = DockStyle.Fill,
-                TextAlign = ContentAlignment.MiddleCenter
+                TextAlign = ContentAlignment.MiddleCenter,
+                UseMnemonic = false
             };
             pnlAvatar.Controls.Add(lblAvatarTxt);
 
             Label lblUserName = new Label
             {
-                Text = string.IsNullOrEmpty(UserSession.DisplayName) ? "Trần Văn Hùng" : UserSession.DisplayName,
+                Text = displayName,
                 Font = UITheme.FontBold,
                 ForeColor = Color.White,
-                Location = new Point(64, 18),
-                AutoSize = true
+                Location = new Point(avatarSize + (int)(14 * dpiScale), (int)(14 * dpiScale)),
+                AutoSize = true,
+                MaximumSize = new Size(sidebarWidth - avatarSize - (int)(30 * dpiScale), (int)(24 * dpiScale)),
+                AutoEllipsis = true,
+                UseMnemonic = false
             };
+
+            bool isClassic = QuanLyGym.UI.Services.MemberService.Instance.IsClassicMember();
+            var activeMembership = QuanLyGym.UI.Services.MemberService.Instance.GetActiveMembership();
+            string pkgName = activeMembership?.Package?.PackageName ?? (isClassic ? "Classic" : "VIP Diamond");
 
             Label lblBadge = new Label
             {
-                Text = "● VIP DIAMOND",
+                Text = isClassic ? "● HỘI VIÊN CLASSIC" : $"● {pkgName.ToUpper()}",
                 Font = new Font("Segoe UI", 7.5f, FontStyle.Bold),
-                ForeColor = Color.FromArgb(52, 211, 153), // Emerald
-                Location = new Point(64, 40),
-                AutoSize = true
+                ForeColor = isClassic ? Color.FromArgb(56, 189, 248) : Color.FromArgb(52, 211, 153),
+                Location = new Point(avatarSize + (int)(14 * dpiScale), (int)(38 * dpiScale)),
+                AutoSize = true,
+                UseMnemonic = false
             };
 
             pnlProfile.Controls.Add(pnlAvatar);
@@ -167,7 +198,7 @@ namespace QuanLyGym.UI.Forms.Member
             pnlProfile.Controls.Add(lblBadge);
 
             // Divider
-            Panel pnlDiv = new Panel { Dock = DockStyle.Top, Height = 14 };
+            Panel pnlDiv = new Panel { Dock = DockStyle.Top, Height = (int)(10 * dpiScale) };
 
             // 3. Navigation Buttons Menu
             Panel pnlMenu = new Panel
@@ -176,57 +207,82 @@ namespace QuanLyGym.UI.Forms.Member
                 AutoScroll = true
             };
 
-            btnNavDashboard = CreateNavButton("🏠  Tổng quan Dashboard", "Dashboard");
-            btnNavMembership = CreateNavButton("💳  Gói tập & Thẻ VIP", "Membership");
-            btnNavSchedule = CreateNavButton("📅  Lịch tập & Đặt lịch PT", "Schedule");
-            btnNavCheckIn = CreateNavButton("📸  Điểm danh Check-in", "CheckIn");
-            btnNavProgress = CreateNavButton("📊  Chỉ số InBody & Cơ thể", "Progress");
-            btnNavProfile = CreateNavButton("👤  Hồ sơ & Bảo mật", "Profile");
+            btnNavDashboard = CreateNavButton("🏠  Tổng quan", "Dashboard", dpiScale);
+            btnNavMembership = CreateNavButton("💳  Gói tập & Thẻ VIP", "Membership", dpiScale);
+            btnNavSchedule = CreateNavButton("📅  Lịch tập PT", "Schedule", dpiScale);
+            btnNavCheckIn = CreateNavButton("📸  Điểm danh", "CheckIn", dpiScale);
+            btnNavProgress = CreateNavButton("📊  Chỉ số InBody", "Progress", dpiScale);
+            btnNavProfile = CreateNavButton("👤  Hồ sơ cá nhân", "Profile", dpiScale);
+
+            Button? btnNavUpgrade = null;
+            if (isClassic)
+            {
+                btnNavUpgrade = CreateNavButton("⚡  Nâng cấp gói tập", "Upgrade", dpiScale);
+                btnNavUpgrade.ForeColor = Color.FromArgb(245, 158, 11);
+            }
 
             navButtons.Add(btnNavDashboard);
             navButtons.Add(btnNavMembership);
-            navButtons.Add(btnNavSchedule);
+            if (!isClassic)
+            {
+                navButtons.Add(btnNavSchedule);
+            }
+            if (btnNavUpgrade != null)
+            {
+                navButtons.Add(btnNavUpgrade);
+            }
             navButtons.Add(btnNavCheckIn);
             navButtons.Add(btnNavProgress);
             navButtons.Add(btnNavProfile);
 
-            // Add in reverse for Dock Top
+            // Dock Top stack (thứ tự ngược để Dashboard nằm trên cùng)
             pnlMenu.Controls.Add(btnNavProfile);
             pnlMenu.Controls.Add(btnNavProgress);
             pnlMenu.Controls.Add(btnNavCheckIn);
-            pnlMenu.Controls.Add(btnNavSchedule);
+            if (btnNavUpgrade != null)
+            {
+                pnlMenu.Controls.Add(btnNavUpgrade);
+            }
+            if (!isClassic)
+            {
+                pnlMenu.Controls.Add(btnNavSchedule);
+            }
             pnlMenu.Controls.Add(btnNavMembership);
             pnlMenu.Controls.Add(btnNavDashboard);
 
             // 4. Bottom Logout Button
-            Panel pnlBottom = new Panel { Dock = DockStyle.Bottom, Height = 80 };
+            int bottomHeight = (int)Math.Round(76f * dpiScale);
+            Panel pnlBottom = new Panel { Dock = DockStyle.Bottom, Height = bottomHeight };
+            int logoutHeight = (int)Math.Round(44f * dpiScale);
             Button btnLogoutNav = new Button
             {
                 Text = "🚪  Đăng xuất tài khoản",
                 Dock = DockStyle.Top,
-                Height = 44,
+                Height = logoutHeight,
                 Font = UITheme.FontBold,
-                ForeColor = Color.FromArgb(248, 113, 113), // Red 400
+                ForeColor = Color.FromArgb(248, 113, 113),
                 BackColor = Color.FromArgb(38, 28, 36),
                 FlatStyle = FlatStyle.Flat,
                 Cursor = Cursors.Hand,
                 TextAlign = ContentAlignment.MiddleLeft,
-                Padding = new Padding(16, 0, 0, 0)
+                Padding = new Padding((int)(12 * dpiScale), 0, (int)(8 * dpiScale), 0),
+                UseMnemonic = false
             };
             btnLogoutNav.FlatAppearance.BorderSize = 0;
             btnLogoutNav.Click += (s, e) =>
             {
-                UserSession.Logout(this); // Logout() đã tự hỏi xác nhận
+                UserSession.Logout(this);
             };
 
             Label lblVer = new Label
             {
                 Text = "Titan Gym Member Portal v2.6 Pro",
-                Font = new Font("Segoe UI", 7.5f),
+                Font = new Font("Segoe UI", 7.2f),
                 ForeColor = Color.FromArgb(100, 116, 139),
                 Dock = DockStyle.Bottom,
-                Height = 24,
-                TextAlign = ContentAlignment.MiddleCenter
+                Height = (int)(22 * dpiScale),
+                TextAlign = ContentAlignment.MiddleCenter,
+                UseMnemonic = false
             };
             pnlBottom.Controls.Add(btnLogoutNav);
             pnlBottom.Controls.Add(lblVer);
@@ -240,22 +296,24 @@ namespace QuanLyGym.UI.Forms.Member
             return sidebar;
         }
 
-        private Button CreateNavButton(string text, string viewKey)
+        private Button CreateNavButton(string text, string viewKey, float dpiScale)
         {
+            int btnHeight = (int)Math.Round(46f * dpiScale);
             Button btn = new Button
             {
                 Text = text,
                 Dock = DockStyle.Top,
-                Height = 48,
+                Height = btnHeight,
                 Font = new Font("Segoe UI", 9.5f, FontStyle.Bold),
                 ForeColor = UITheme.SidebarText,
                 BackColor = Color.Transparent,
                 FlatStyle = FlatStyle.Flat,
                 Cursor = Cursors.Hand,
                 TextAlign = ContentAlignment.MiddleLeft,
-                Padding = new Padding(16, 0, 0, 0),
+                Padding = new Padding((int)(12 * dpiScale), 0, (int)(8 * dpiScale), 0),
                 Tag = viewKey,
-                Margin = new Padding(0, 3, 0, 3)
+                Margin = new Padding(0, (int)(2 * dpiScale), 0, (int)(2 * dpiScale)),
+                UseMnemonic = false
             };
             btn.FlatAppearance.BorderSize = 0;
             btn.FlatAppearance.MouseOverBackColor = UITheme.SidebarHover;
@@ -264,17 +322,18 @@ namespace QuanLyGym.UI.Forms.Member
             return btn;
         }
 
-        private Panel CreateHeaderBar()
+        private Panel CreateHeaderBar(float dpiScale)
         {
+            int headerHeight = (int)Math.Round(72f * dpiScale);
             Panel header = new Panel
             {
                 Dock = DockStyle.Top,
-                Height = 70,
+                Height = headerHeight,
                 BackColor = Color.White,
-                Padding = new Padding(24, 12, 24, 12)
+                Padding = new Padding(0)
             };
 
-            // Border line at bottom
+            // Border bottom
             Panel borderBottom = new Panel
             {
                 Dock = DockStyle.Bottom,
@@ -283,58 +342,74 @@ namespace QuanLyGym.UI.Forms.Member
             };
             header.Controls.Add(borderBottom);
 
-            // Title & Subtitle
+            // FlowLayoutPanel chứa tiêu đề
+            FlowLayoutPanel pnlTitleFlow = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Left,
+                FlowDirection = FlowDirection.TopDown,
+                WrapContents = false,
+                AutoSize = true,
+                Padding = new Padding((int)(20 * dpiScale), (int)(12 * dpiScale), 0, 0),
+                BackColor = Color.Transparent
+            };
+
             lblHeaderTitle = new Label
             {
-                Text = "TỔNG QUAN HỘI VIÊN",
-                Font = UITheme.FontSubtitle,
+                Text = "TỔNG QUAN HỘI VIÊN (DASHBOARD)",
+                Font = new Font("Segoe UI", 12f, FontStyle.Bold),
                 ForeColor = UITheme.TextDark,
-                Location = new Point(24, 14),
-                AutoSize = true
+                AutoSize = true,
+                Margin = new Padding(0, 0, 0, (int)(3 * dpiScale)),
+                UseMnemonic = false
             };
             lblHeaderSubtitle = new Label
             {
-                Text = "Hệ thống quản lý thông tin, lịch tập & tiến trình hội viên",
+                Text = "Theo dõi gói tập, lịch tập hôm nay, điểm danh và tiến độ thể hình",
                 Font = UITheme.FontSmall,
                 ForeColor = UITheme.TextMuted,
-                Location = new Point(24, 40),
-                AutoSize = true
+                AutoSize = true,
+                Margin = new Padding(0),
+                UseMnemonic = false
             };
-            header.Controls.Add(lblHeaderTitle);
-            header.Controls.Add(lblHeaderSubtitle);
+            pnlTitleFlow.Controls.Add(lblHeaderTitle);
+            pnlTitleFlow.Controls.Add(lblHeaderSubtitle);
+            header.Controls.Add(pnlTitleFlow);
 
-            // Right Info Items
+            // FlowLayoutPanel bên phải
             FlowLayoutPanel pnlRight = new FlowLayoutPanel
             {
                 Dock = DockStyle.Right,
                 AutoSize = true,
+                WrapContents = false,
                 FlowDirection = FlowDirection.LeftToRight,
-                Padding = new Padding(0, 8, 0, 0)
+                Padding = new Padding(0, (int)(15 * dpiScale), (int)(20 * dpiScale), 0),
+                BackColor = Color.Transparent
             };
 
-            // Branch Badge
+            var currentMember = QuanLyGym.UI.Services.MemberService.Instance.GetCurrentMember();
+            string branchName = currentMember?.Branch?.BranchName ?? "Chi nhánh Titan Gym";
             Label lblBranch = new Label
             {
-                Text = "📍 Chi nhánh Cầu Giấy",
+                Text = $"📍 {branchName}",
                 Font = UITheme.FontSmallBold,
                 ForeColor = UITheme.Primary,
                 BackColor = UITheme.PrimaryLight,
-                Padding = new Padding(10, 6, 10, 6),
+                Padding = new Padding((int)(8 * dpiScale), (int)(5 * dpiScale), (int)(8 * dpiScale), (int)(5 * dpiScale)),
                 AutoSize = true,
-                Margin = new Padding(6, 4, 10, 4)
+                Margin = new Padding((int)(4 * dpiScale), (int)(2 * dpiScale), (int)(8 * dpiScale), (int)(2 * dpiScale)),
+                UseMnemonic = false
             };
 
-            // Digital Clock
             lblHeaderClock = new Label
             {
                 Text = "🕒 " + DateTime.Now.ToString("HH:mm:ss  |  dd/MM/yyyy"),
                 Font = UITheme.FontSmallBold,
                 ForeColor = UITheme.TextRegular,
                 AutoSize = true,
-                Margin = new Padding(6, 8, 12, 4)
+                Margin = new Padding((int)(4 * dpiScale), (int)(6 * dpiScale), (int)(10 * dpiScale), (int)(2 * dpiScale)),
+                UseMnemonic = false
             };
 
-            // Notification Bell
             Button btnBell = new Button
             {
                 Text = "🔔 (2)",
@@ -342,14 +417,14 @@ namespace QuanLyGym.UI.Forms.Member
                 BackColor = Color.FromArgb(254, 243, 199),
                 ForeColor = Color.FromArgb(180, 83, 9),
                 FlatStyle = FlatStyle.Flat,
-                Size = new Size(65, 32),
+                Size = new Size((int)(68 * dpiScale), (int)(32 * dpiScale)),
                 Cursor = Cursors.Hand,
-                Margin = new Padding(4, 4, 6, 4)
+                Margin = new Padding((int)(3 * dpiScale), (int)(2 * dpiScale), (int)(4 * dpiScale), (int)(2 * dpiScale)),
+                UseMnemonic = false
             };
             btnBell.FlatAppearance.BorderSize = 0;
             btnBell.Click += (s, e) => MessageBox.Show("1. Nhắc nhở: Bạn có lịch tập lúc 18:00 chiều nay với HLV Nam.\n2. Thông báo: Phòng xông hơi đã hoàn thành bảo trì sẵn sàng đón khách.", "Thông báo của bạn", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-            // Refresh Button
             Button btnRefresh = new Button
             {
                 Text = "🔄 Làm mới",
@@ -357,9 +432,10 @@ namespace QuanLyGym.UI.Forms.Member
                 BackColor = Color.FromArgb(241, 245, 249),
                 ForeColor = UITheme.TextDark,
                 FlatStyle = FlatStyle.Flat,
-                Size = new Size(88, 32),
+                Size = new Size((int)(96 * dpiScale), (int)(32 * dpiScale)),
                 Cursor = Cursors.Hand,
-                Margin = new Padding(4, 4, 4, 4)
+                Margin = new Padding((int)(3 * dpiScale), (int)(2 * dpiScale), (int)(3 * dpiScale), (int)(2 * dpiScale)),
+                UseMnemonic = false
             };
             btnRefresh.FlatAppearance.BorderSize = 0;
             btnRefresh.Click += (s, e) =>
@@ -382,15 +458,22 @@ namespace QuanLyGym.UI.Forms.Member
             if (currentViewKey == viewKey && !forceReload) return;
             currentViewKey = viewKey;
 
-            // Update Navigation Button styles
             foreach (var btn in navButtons)
             {
                 bool isActive = (btn.Tag?.ToString() == viewKey);
                 btn.BackColor = isActive ? UITheme.SidebarActive : Color.Transparent;
-                btn.ForeColor = isActive ? UITheme.SidebarTextActive : UITheme.SidebarText;
+                if (isActive)
+                {
+                    btn.ForeColor = UITheme.SidebarTextActive;
+                }
+                else
+                {
+                    btn.ForeColor = (btn.Tag?.ToString() == "Upgrade")
+                        ? Color.FromArgb(245, 158, 11)
+                        : UITheme.SidebarText;
+                }
             }
 
-            // Update Header text
             switch (viewKey)
             {
                 case "Dashboard":
@@ -398,8 +481,12 @@ namespace QuanLyGym.UI.Forms.Member
                     lblHeaderSubtitle.Text = "Theo dõi gói tập, lịch tập hôm nay, điểm danh và tiến độ thể hình";
                     break;
                 case "Membership":
-                    lblHeaderTitle.Text = "GÓI TẬP & THẺ HỘI VIÊN VIP";
+                    lblHeaderTitle.Text = "GÓI TẬP & THẺ HỘI VIÊN";
                     lblHeaderSubtitle.Text = "Thông tin thẻ hội viên điện tử, thời hạn và danh sách đặc quyền gói tập";
+                    break;
+                case "Upgrade":
+                    lblHeaderTitle.Text = "NÂNG CẤP GÓI TẬP KÈM HUẤN LUYỆN VIÊN (PT 1-1)";
+                    lblHeaderSubtitle.Text = "Chuyển đổi từ gói Classic lên các gói tập có HLV cá nhân để đạt hiệu quả tối đa";
                     break;
                 case "Schedule":
                     lblHeaderTitle.Text = "LỊCH TẬP & ĐẶT LỊCH HUẤN LUYỆN VIÊN (PT)";
@@ -419,7 +506,6 @@ namespace QuanLyGym.UI.Forms.Member
                     break;
             }
 
-            // Get or create view
             UserControl view;
             if (forceReload && viewCache.TryGetValue(viewKey, out var oldView))
             {
@@ -433,20 +519,19 @@ namespace QuanLyGym.UI.Forms.Member
                 view = viewKey switch
                 {
                     "Dashboard" => new ucMemberDashboard(key => NavigateTo(key)),
-                    "Membership" => new ucMemberMembership(),
+                    "Membership" => new ucMemberMembership(key => NavigateTo(key)),
+                    "Upgrade" => new ucMemberUpgradePackage(key => NavigateTo(key)),
                     "Schedule" => new ucMemberSchedule(),
                     "CheckIn" => new ucMemberCheckIn(),
                     "Progress" => new ucMemberProgress(),
                     "Profile" => new ucMemberProfile(),
                     _ => new ucMemberDashboard(key => NavigateTo(key))
                 };
-                view.AutoScaleMode = AutoScaleMode.None;
                 view.Dock = DockStyle.Fill;
                 viewCache[viewKey] = view;
                 pnlContentContainer.Controls.Add(view);
             }
 
-            // Switch view by toggling visibility - prevents WinForms AutoScale rescale bug on re-adding controls
             pnlContentContainer.SuspendLayout();
             foreach (Control c in pnlContentContainer.Controls)
             {

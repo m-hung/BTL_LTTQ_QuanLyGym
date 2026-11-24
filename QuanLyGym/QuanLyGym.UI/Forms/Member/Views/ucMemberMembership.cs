@@ -1,15 +1,21 @@
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Linq;
 using System.Windows.Forms;
+using QuanLyGym.UI.Helpers;
+using QuanLyGym.UI.Services;
 using QuanLyGym.UI.Utils;
 
 namespace QuanLyGym.UI.Forms.Member.Views
 {
     public class ucMemberMembership : UserControl
     {
-        public ucMemberMembership()
+        private Action<string>? _navigateCallback;
+
+        public ucMemberMembership(Action<string>? navigateCallback = null)
         {
+            _navigateCallback = navigateCallback;
             InitializeComponent();
         }
 
@@ -20,139 +26,160 @@ namespace QuanLyGym.UI.Forms.Member.Views
             this.BackColor = UITheme.Background;
             this.Dock = DockStyle.Fill;
             this.AutoScroll = true;
+            this.AutoScrollMinSize = new Size(1000, 640);
 
-            Panel pnlMain = new Panel
+            float scale = Math.Max(1.0f, (float)this.DeviceDpi / 96f);
+
+            TableLayoutPanel pnlRootLayout = new TableLayoutPanel
             {
-                Dock = DockStyle.Top,
-                Height = 930,
-                Padding = new Padding(24, 20, 24, 30),
+                Dock = DockStyle.Fill,
+                ColumnCount = 1,
+                RowCount = 2,
+                Padding = new Padding((int)(16 * scale), (int)(12 * scale), (int)(16 * scale), (int)(14 * scale)),
                 BackColor = UITheme.Background
             };
+            pnlRootLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
+            int topRowH = (int)Math.Round(280f * scale);
+            pnlRootLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, topRowH)); // Hàng 0: Thẻ điện tử & Thông tin gói
+            pnlRootLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));    // Hàng 1: Lịch sử giao dịch & Đặc quyền
 
-            // Title Header
-            Panel pnlHeader = new Panel { Dock = DockStyle.Top, Height = 50 };
-            Label lblTitle = new Label
-            {
-                Text = "💳 QUẢN LÝ GÓI TẬP & THẺ HỘI VIÊN",
-                Font = UITheme.FontTitle,
-                ForeColor = UITheme.TextDark,
-                AutoSize = true,
-                Location = new Point(0, 8)
-            };
-            pnlHeader.Controls.Add(lblTitle);
-
-            // 1. Two Column Layout for Top: Digital Membership Card (Left 44%) and Active Package Details (Right 56%)
+            // 1. Two Column Layout for Top: Digital Card (42%) and Active Package Details (58%)
             TableLayoutPanel pnlTopCols = new TableLayoutPanel
             {
                 ColumnCount = 2,
                 RowCount = 1,
-                Height = 320,
-                Dock = DockStyle.Top,
-                Padding = new Padding(0, 4, 0, 16)
+                Dock = DockStyle.Fill,
+                Padding = new Padding(0, 0, 0, (int)(8 * scale))
             };
-            pnlTopCols.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 44f));
-            pnlTopCols.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 56f));
+            pnlTopCols.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 42f));
+            pnlTopCols.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 58f));
             pnlTopCols.RowStyles.Clear();
             pnlTopCols.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
 
-            RoundedPanel cardDigital = CreateDigitalCard();
+            RoundedPanel cardDigital = CreateDigitalCard(scale);
             cardDigital.Dock = DockStyle.Fill;
-            cardDigital.Margin = new Padding(0, 0, 10, 0);
+            cardDigital.Margin = new Padding(0, 0, (int)(6 * scale), 0);
 
-            RoundedPanel cardStatus = CreatePackageDetailsCard();
+            RoundedPanel cardStatus = CreatePackageDetailsCard(scale);
             cardStatus.Dock = DockStyle.Fill;
-            cardStatus.Margin = new Padding(10, 0, 0, 0);
+            cardStatus.Margin = new Padding((int)(6 * scale), 0, 0, 0);
 
             pnlTopCols.Controls.Add(cardDigital, 0, 0);
             pnlTopCols.Controls.Add(cardStatus, 1, 0);
 
-            // 2. Full-Width Transaction & Membership History Card (solves truncated columns)
-            RoundedPanel cardHistory = CreateHistoryCard();
-            cardHistory.Dock = DockStyle.Top;
-            cardHistory.Margin = new Padding(0, 0, 0, 16);
+            // 2. Bottom section: Lịch sử và Đặc quyền
+            TableLayoutPanel pnlBottomCols = new TableLayoutPanel
+            {
+                ColumnCount = 1,
+                RowCount = 2,
+                Dock = DockStyle.Fill,
+                Padding = new Padding(0)
+            };
+            pnlBottomCols.RowStyles.Add(new RowStyle(SizeType.Percent, 55f)); // Lịch sử GD 55%
+            pnlBottomCols.RowStyles.Add(new RowStyle(SizeType.Percent, 45f)); // Đặc quyền 45%
+            pnlBottomCols.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
 
-            // 3. Full-Width Privileges Card
-            RoundedPanel cardPrivileges = CreatePrivilegesCard();
-            cardPrivileges.Dock = DockStyle.Top;
+            RoundedPanel cardHistory = CreateHistoryCard(scale);
+            cardHistory.Dock = DockStyle.Fill;
+            cardHistory.Margin = new Padding(0, 0, 0, (int)(6 * scale));
 
-            pnlMain.Controls.Add(cardPrivileges);
-            pnlMain.Controls.Add(cardHistory);
-            pnlMain.Controls.Add(pnlTopCols);
-            pnlMain.Controls.Add(pnlHeader);
+            RoundedPanel cardPrivileges = CreatePrivilegesCard(scale);
+            cardPrivileges.Dock = DockStyle.Fill;
+            cardPrivileges.Margin = new Padding(0, (int)(4 * scale), 0, 0);
 
-            this.Controls.Add(pnlMain);
+            pnlBottomCols.Controls.Add(cardHistory, 0, 0);
+            pnlBottomCols.Controls.Add(cardPrivileges, 0, 1);
+
+            pnlRootLayout.Controls.Add(pnlTopCols, 0, 0);
+            pnlRootLayout.Controls.Add(pnlBottomCols, 0, 1);
+
+            this.Controls.Add(pnlRootLayout);
             this.ResumeLayout(true);
         }
 
-        private RoundedPanel CreateDigitalCard()
+        private RoundedPanel CreateDigitalCard(float scale)
         {
+            bool isClassic = MemberService.Instance.IsClassicMember();
+            var activeMembership = MemberService.Instance.GetActiveMembership();
+
+            Color bgStart = isClassic ? Color.FromArgb(15, 23, 42) : Color.FromArgb(20, 24, 33);
+            Color bgEnd = isClassic ? Color.FromArgb(30, 41, 59) : Color.FromArgb(45, 55, 72);
+            Color borderColor = isClassic ? Color.FromArgb(56, 189, 248) : Color.FromArgb(245, 158, 11);
+
             RoundedPanel card = new RoundedPanel
             {
-                Height = 320,
                 CornerRadius = 16,
-                BackColor = Color.FromArgb(20, 24, 33),          // Metallic Dark Gold / Slate
-                GradientEndColor = Color.FromArgb(45, 55, 72),
+                BackColor = bgStart,
+                GradientEndColor = bgEnd,
                 GradientAngle = 135f,
-                BorderColor = Color.FromArgb(245, 158, 11),       // Gold Amber Border
+                BorderColor = borderColor,
                 BorderWidth = 1,
-                Padding = new Padding(22)
+                Padding = new Padding((int)(18 * scale))
             };
 
             Label lblLogo = new Label
             {
                 Text = "⚡ TITAN FITNESS CLUB",
                 Font = new Font("Segoe UI", 12f, FontStyle.Bold),
-                ForeColor = Color.FromArgb(251, 191, 36), // Gold
+                ForeColor = isClassic ? Color.FromArgb(56, 189, 248) : Color.FromArgb(251, 191, 36),
                 AutoSize = true,
-                Location = new Point(22, 22)
+                Location = new Point((int)(18 * scale), (int)(16 * scale)),
+                UseMnemonic = false
             };
+
+            string badgeText = isClassic ? "CLASSIC MEMBER" : (activeMembership?.Package?.PackageName.ToUpper() ?? "VIP DIAMOND");
+            Color badgeBg = isClassic ? Color.FromArgb(14, 165, 233) : Color.FromArgb(79, 70, 229);
 
             Label lblBadge = new Label
             {
-                Text = "VIP DIAMOND",
+                Text = badgeText,
                 Font = new Font("Segoe UI", 8.5f, FontStyle.Bold),
                 ForeColor = Color.White,
-                BackColor = Color.FromArgb(79, 70, 229),
-                Padding = new Padding(8, 3, 8, 3),
+                BackColor = badgeBg,
+                Padding = new Padding((int)(8 * scale), (int)(3 * scale), (int)(8 * scale), (int)(3 * scale)),
                 AutoSize = true,
-                Anchor = AnchorStyles.Top | AnchorStyles.Right,
-                Location = new Point(card.Width - 130, 22)
+                UseMnemonic = false
             };
 
-            // Chip icon simulation
             Panel chip = new Panel
             {
-                Size = new Size(38, 30),
-                BackColor = Color.FromArgb(245, 158, 11),
-                Location = new Point(24, 72)
+                Size = new Size((int)(38 * scale), (int)(28 * scale)),
+                BackColor = isClassic ? Color.FromArgb(56, 189, 248) : Color.FromArgb(245, 158, 11),
+                Location = new Point((int)(20 * scale), (int)(56 * scale))
             };
 
+            string cardNumber = $"MB-2026 •••• •••• {UserSession.AccountID:D4}";
             Label lblCardNumber = new Label
             {
-                Text = "MB-2026 •••• •••• 8899",
-                Font = new Font("Consolas", 14f, FontStyle.Bold),
+                Text = cardNumber,
+                Font = new Font("Consolas", 13.5f, FontStyle.Bold),
                 ForeColor = Color.FromArgb(241, 245, 249),
                 AutoSize = true,
-                Location = new Point(22, 138)
+                Location = new Point((int)(18 * scale), (int)(110 * scale)),
+                UseMnemonic = false
             };
 
+            string memberName = MemberService.Instance.GetCurrentMember()?.FullName?.ToUpper() ?? (string.IsNullOrEmpty(UserSession.DisplayName) ? "HỘI VIÊN TITAN" : UserSession.DisplayName.ToUpper());
             Label lblMemberName = new Label
             {
-                Text = "TRẦN VĂN HÙNG",
-                Font = new Font("Segoe UI", 11.5f, FontStyle.Bold),
+                Text = memberName,
+                Font = new Font("Segoe UI", 11f, FontStyle.Bold),
                 ForeColor = Color.White,
                 AutoSize = true,
-                Location = new Point(22, 210)
+                UseMnemonic = false
             };
+
+            string expiryText = activeMembership != null
+                ? $"HẠN DÙNG: {activeMembership.EndDate:dd/MM/yyyy}"
+                : "HẠN DÙNG: 30/11/2026";
 
             Label lblExpiry = new Label
             {
-                Text = "HẠN DÙNG: 31/12/2026",
-                Font = new Font("Segoe UI", 9f, FontStyle.Bold),
+                Text = expiryText,
+                Font = new Font("Segoe UI", 8.5f, FontStyle.Bold),
                 ForeColor = Color.FromArgb(203, 213, 225),
                 AutoSize = true,
-                Anchor = AnchorStyles.Bottom | AnchorStyles.Right,
-                Location = new Point(card.Width - 195, 210)
+                UseMnemonic = false
             };
 
             card.Controls.Add(lblLogo);
@@ -164,88 +191,26 @@ namespace QuanLyGym.UI.Forms.Member.Views
 
             card.Resize += (s, e) =>
             {
-                lblBadge.Location = new Point(card.Width - 130, 22);
-                lblExpiry.Location = new Point(card.Width - 195, 210);
+                lblBadge.Location = new Point(Math.Max(120, card.Width - lblBadge.Width - (int)(18 * scale)), (int)(16 * scale));
+                lblMemberName.Location = new Point((int)(18 * scale), Math.Max(120, card.Height - (int)(38 * scale)));
+                lblExpiry.Location = new Point(Math.Max(120, card.Width - lblExpiry.Width - (int)(18 * scale)), Math.Max(120, card.Height - (int)(38 * scale)));
             };
 
             return card;
         }
 
-        private RoundedPanel CreatePrivilegesCard()
+        private RoundedPanel CreatePackageDetailsCard(float scale)
         {
             RoundedPanel card = new RoundedPanel
             {
-                Height = 200,
                 CornerRadius = 12,
                 BackColor = UITheme.CardBg,
                 BorderColor = UITheme.Border,
-                Padding = new Padding(20, 16, 20, 16)
+                Padding = new Padding((int)(18 * scale), (int)(12 * scale), (int)(18 * scale), (int)(10 * scale))
             };
 
-            Label lblTitle = new Label
-            {
-                Text = "⭐ ĐẶC QUYỀN HỘI VIÊN GÓI DIAMOND",
-                Font = UITheme.FontSection,
-                ForeColor = UITheme.TextDark,
-                Dock = DockStyle.Top,
-                Height = 30
-            };
-
-            string[] benefits = new string[]
-            {
-                "Tập luyện không giới hạn khung giờ toàn hệ thống.",
-                "Đo & phân tích chỉ số InBody 2 lần/tháng miễn phí.",
-                "Miễn phí xông hơi đá muối & bể bơi 4 mùa cao cấp.",
-                "Kèm 12 buổi huấn luyện 1-1 cùng HLV (PT chuyên nghiệp).",
-                "Trang bị Smart Locker cá nhân & khăn tập riêng.",
-                "Ưu đãi giảm 15% khi mua Whey & thực phẩm bổ sung."
-            };
-
-            TableLayoutPanel pnlList = new TableLayoutPanel
-            {
-                Dock = DockStyle.Fill,
-                ColumnCount = 2,
-                RowCount = 3,
-                Padding = new Padding(0, 8, 0, 0)
-            };
-            pnlList.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50f));
-            pnlList.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50f));
-            pnlList.RowStyles.Add(new RowStyle(SizeType.Percent, 33.33f));
-            pnlList.RowStyles.Add(new RowStyle(SizeType.Percent, 33.33f));
-            pnlList.RowStyles.Add(new RowStyle(SizeType.Percent, 33.33f));
-
-            for (int i = 0; i < benefits.Length; i++)
-            {
-                int col = i % 2;
-                int row = i / 2;
-                Label item = new Label
-                {
-                    Text = "⭐  " + benefits[i],
-                    Font = UITheme.FontRegular,
-                    ForeColor = UITheme.TextRegular,
-                    Dock = DockStyle.Fill,
-                    TextAlign = ContentAlignment.MiddleLeft
-                };
-                pnlList.Controls.Add(item, col, row);
-            }
-
-            card.Controls.Add(pnlList);
-            card.Controls.Add(lblTitle);
-            lblTitle.SendToBack();
-
-            return card;
-        }
-
-        private RoundedPanel CreatePackageDetailsCard()
-        {
-            RoundedPanel card = new RoundedPanel
-            {
-                Height = 320,
-                CornerRadius = 12,
-                BackColor = UITheme.CardBg,
-                BorderColor = UITheme.Border,
-                Padding = new Padding(22, 16, 22, 14)
-            };
+            bool isClassic = MemberService.Instance.IsClassicMember();
+            var activeMembership = MemberService.Instance.GetActiveMembership();
 
             Label lblTitle = new Label
             {
@@ -253,109 +218,156 @@ namespace QuanLyGym.UI.Forms.Member.Views
                 Font = UITheme.FontSection,
                 ForeColor = UITheme.TextDark,
                 Dock = DockStyle.Top,
-                Height = 30
+                Height = (int)(28 * scale),
+                UseMnemonic = false
             };
 
             TableLayoutPanel grid = new TableLayoutPanel
             {
-                Dock = DockStyle.Top,
-                Height = 190,
+                Dock = DockStyle.Fill,
                 ColumnCount = 2,
                 RowCount = 4,
-                Padding = new Padding(0, 4, 0, 0)
+                Padding = new Padding(0, (int)(2 * scale), 0, 0)
             };
             grid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50f));
             grid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50f));
             grid.RowStyles.Clear();
             for (int r = 0; r < 4; r++) grid.RowStyles.Add(new RowStyle(SizeType.Percent, 25f));
 
-            grid.Controls.Add(CreateInfoRow("Gói tập:", "VIP Diamond 12 Tháng"), 0, 0);
-            grid.Controls.Add(CreateInfoRow("Trạng thái:", "● Đang hoạt động (Active)"), 1, 0);
-            grid.Controls.Add(CreateInfoRow("Ngày đăng ký:", "01/01/2026"), 0, 1);
-            grid.Controls.Add(CreateInfoRow("Ngày kết thúc:", "31/12/2026"), 1, 1);
-            grid.Controls.Add(CreateInfoRow("Giá gói:", "12,000,000 VNĐ"), 0, 2);
-            grid.Controls.Add(CreateInfoRow("Chi nhánh:", "Chi nhánh Cầu Giấy"), 1, 2);
-            grid.Controls.Add(CreateInfoRow("Số buổi đã tập:", "12 / 60 buổi"), 0, 3);
-            grid.Controls.Add(CreateInfoRow("Thời gian còn lại:", "74 ngày"), 1, 3);
+            string pkgName = activeMembership?.Package?.PackageName ?? (isClassic ? "Gói tập tự do (Classic)" : "Chưa kích hoạt gói");
+            string startDate = activeMembership?.StartDate.ToString("dd/MM/yyyy") ?? "--";
+            string endDate = activeMembership?.EndDate.ToString("dd/MM/yyyy") ?? "--";
+            string price = activeMembership != null ? activeMembership.Price.ToString("N0") + " VNĐ" : "-- VNĐ";
+            string branch = activeMembership?.Branch?.BranchName ?? (MemberService.Instance.GetCurrentMember()?.Branch?.BranchName ?? "Chi nhánh Titan");
 
-            // Progress bar
+            string sessionInfo = isClassic ? "Tự do không giới hạn (Không kèm PT)" : $"{activeMembership?.UsedPTSessions ?? 0} / {activeMembership?.Package?.TotalPTSessions ?? 0} buổi";
+            int remainingDays = activeMembership != null ? Math.Max(0, (activeMembership.EndDate.Date - DateTime.Today).Days) : 0;
+
+            grid.Controls.Add(CreateInfoRow("Gói tập:", pkgName), 0, 0);
+            grid.Controls.Add(CreateInfoRow("Trạng thái:", activeMembership != null ? "● Đang hoạt động (Active)" : "○ Chưa kích hoạt"), 1, 0);
+            grid.Controls.Add(CreateInfoRow("Ngày đăng ký:", startDate), 0, 1);
+            grid.Controls.Add(CreateInfoRow("Ngày kết thúc:", endDate), 1, 1);
+            grid.Controls.Add(CreateInfoRow("Giá gói:", price), 0, 2);
+            grid.Controls.Add(CreateInfoRow("Chi nhánh:", branch), 1, 2);
+            grid.Controls.Add(CreateInfoRow(isClassic ? "Hình thức tập:" : "Số buổi đã tập:", sessionInfo), 0, 3);
+            grid.Controls.Add(CreateInfoRow("Thời gian còn lại:", $"Còn {remainingDays} ngày"), 1, 3);
+
+            // Bottom Buttons & Progress
+            Panel pnlBottomArea = new Panel { Dock = DockStyle.Bottom, Height = (int)(54 * scale) };
+
+            int progressPercent = 0;
+            if (activeMembership != null)
+            {
+                if (isClassic)
+                {
+                    int totalDays = Math.Max(1, (activeMembership.EndDate.Date - activeMembership.StartDate.Date).Days);
+                    int elapsed = Math.Max(0, (DateTime.Today - activeMembership.StartDate.Date).Days);
+                    progressPercent = Math.Clamp((int)Math.Round((double)elapsed / totalDays * 100), 0, 100);
+                }
+                else
+                {
+                    int totalSessions = activeMembership.Package?.TotalPTSessions ?? 0;
+                    int usedSessions = activeMembership.UsedPTSessions;
+                    progressPercent = totalSessions > 0 ? Math.Clamp((int)Math.Round((double)usedSessions / totalSessions * 100), 0, 100) : 0;
+                }
+            }
+
             ModernProgressBar prog = new ModernProgressBar
             {
                 Dock = DockStyle.Top,
-                Height = 8,
-                Value = 20,
+                Height = (int)(6 * scale),
+                Value = progressPercent,
                 Maximum = 100,
-                ProgressColor = UITheme.Primary,
-                ProgressColor2 = UITheme.Secondary,
-                Margin = new Padding(0, 6, 0, 8)
+                ProgressColor = isClassic ? Color.FromArgb(14, 165, 233) : UITheme.Primary,
+                ProgressColor2 = isClassic ? Color.FromArgb(56, 189, 248) : UITheme.Secondary,
+                Margin = new Padding(0, 0, 0, (int)(6 * scale))
             };
 
-            // Buttons
             FlowLayoutPanel pnlButtons = new FlowLayoutPanel
             {
                 Dock = DockStyle.Bottom,
-                Height = 38,
+                Height = (int)(38 * scale),
                 FlowDirection = FlowDirection.LeftToRight
             };
 
             Button btnExtend = new Button
             {
-                Text = "🔄 Gia hạn gói tập",
+                Text = "💳 Gia hạn gói tập",
                 Font = UITheme.FontBold,
-                Size = new Size(160, 36),
-                BackColor = UITheme.Primary,
+                Size = new Size((int)(160 * scale), (int)(34 * scale)),
+                BackColor = isClassic ? Color.FromArgb(14, 165, 233) : UITheme.Primary,
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                Cursor = Cursors.Hand
+                Cursor = Cursors.Hand,
+                UseMnemonic = false
             };
             btnExtend.FlatAppearance.BorderSize = 0;
-            btnExtend.Click += (s, e) => MessageBox.Show("Yêu cầu gia hạn gói VIP Diamond đã được gửi tới bộ phận Lễ tân. Chúng tôi sẽ liên hệ hỗ trợ bạn ngay!", "Gia hạn gói tập", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            btnExtend.Click += (s, e) => MessageBox.Show($"Yêu cầu gia hạn {pkgName} đã được gửi tới bộ phận Lễ tân. Chúng tôi sẽ liên hệ hỗ trợ bạn ngay!", "Gia hạn gói tập", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             Button btnUpgrade = new Button
             {
-                Text = "⚡ Nâng cấp Black Card",
+                Text = isClassic ? "⚡ Nâng cấp gói kèm PT 1-1" : "⚡ Nâng cấp Black Card",
                 Font = UITheme.FontBold,
-                Size = new Size(190, 36),
-                BackColor = UITheme.PrimaryLight,
-                ForeColor = UITheme.Primary,
+                Size = new Size((int)(210 * scale), (int)(34 * scale)),
+                BackColor = isClassic ? Color.FromArgb(243, 232, 255) : UITheme.PrimaryLight,
+                ForeColor = isClassic ? Color.FromArgb(124, 58, 237) : UITheme.Primary,
                 FlatStyle = FlatStyle.Flat,
                 Cursor = Cursors.Hand,
-                Margin = new Padding(10, 0, 0, 0)
+                Margin = new Padding((int)(10 * scale), 0, 0, 0),
+                UseMnemonic = false
             };
             btnUpgrade.FlatAppearance.BorderSize = 0;
-            btnUpgrade.Click += (s, e) => MessageBox.Show("Đặc quyền Black Card: Kèm 30 buổi PT 1-1, Locker cá nhân vĩnh viễn và đồ uống cao cấp không giới hạn.", "Nâng cấp gói", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            btnUpgrade.Click += (s, e) =>
+            {
+                if (isClassic)
+                {
+                    _navigateCallback?.Invoke("Upgrade");
+                }
+                else
+                {
+                    MessageBox.Show("Đặc quyền Black Card: Kèm 30 buổi PT 1-1, Locker cá nhân vĩnh viễn và đồ uống cao cấp không giới hạn.", "Nâng cấp gói", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            };
 
             pnlButtons.Controls.Add(btnExtend);
             pnlButtons.Controls.Add(btnUpgrade);
 
-            card.Controls.Add(pnlButtons);
-            card.Controls.Add(prog);
+            pnlBottomArea.Controls.Add(pnlButtons);
+            pnlBottomArea.Controls.Add(prog);
+
             card.Controls.Add(grid);
+            card.Controls.Add(pnlBottomArea);
             card.Controls.Add(lblTitle);
 
             return card;
         }
 
-        private Panel CreateInfoRow(string label, string val)
+        private FlowLayoutPanel CreateInfoRow(string label, string val)
         {
-            Panel pnl = new Panel { Dock = DockStyle.Fill, Margin = new Padding(0, 1, 0, 1) };
-            Label l = new Label { Text = label, Font = UITheme.FontSmall, ForeColor = UITheme.TextMuted, Location = new Point(0, 1), AutoSize = true };
-            Label v = new Label { Text = val, Font = UITheme.FontBold, ForeColor = UITheme.TextDark, Location = new Point(0, 21), AutoSize = true };
+            FlowLayoutPanel pnl = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                FlowDirection = FlowDirection.TopDown,
+                WrapContents = false,
+                Margin = new Padding(2),
+                BackColor = Color.Transparent
+            };
+            Label l = new Label { Text = label, Font = UITheme.FontSmall, ForeColor = UITheme.TextMuted, AutoSize = true, Margin = new Padding(0, 0, 0, 1), UseMnemonic = false };
+            Label v = new Label { Text = val, Font = UITheme.FontBold, ForeColor = UITheme.TextDark, AutoSize = true, Margin = new Padding(0), UseMnemonic = false };
             if (val.Contains("Đang hoạt động")) v.ForeColor = UITheme.Success;
             pnl.Controls.Add(l);
             pnl.Controls.Add(v);
             return pnl;
         }
 
-        private RoundedPanel CreateHistoryCard()
+        private RoundedPanel CreateHistoryCard(float scale)
         {
             RoundedPanel card = new RoundedPanel
             {
-                Height = 250,
                 CornerRadius = 12,
                 BackColor = UITheme.CardBg,
                 BorderColor = UITheme.Border,
-                Padding = new Padding(20)
+                Padding = new Padding((int)(16 * scale), (int)(10 * scale), (int)(16 * scale), (int)(10 * scale))
             };
 
             Label lblTitle = new Label
@@ -364,24 +376,47 @@ namespace QuanLyGym.UI.Forms.Member.Views
                 Font = UITheme.FontSection,
                 ForeColor = UITheme.TextDark,
                 Dock = DockStyle.Top,
-                Height = 32
+                Height = (int)(28 * scale),
+                UseMnemonic = false
             };
 
             DataGridView dgv = new DataGridView { Dock = DockStyle.Fill };
             UITheme.StyleDataGridView(dgv);
+            dgv.RowTemplate.Height = (int)Math.Round(36f * scale);
+            dgv.ColumnHeadersHeight = (int)Math.Round(34f * scale);
 
-            var colId = new DataGridViewTextBoxColumn { Name = "ID", HeaderText = "Mã HĐ", Width = 140, AutoSizeMode = DataGridViewAutoSizeColumnMode.None };
-            var colPkg = new DataGridViewTextBoxColumn { Name = "Package", HeaderText = "Gói tập", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill, MinimumWidth = 230 };
-            var colDate = new DataGridViewTextBoxColumn { Name = "Date", HeaderText = "Ngày kích hoạt", Width = 145, AutoSizeMode = DataGridViewAutoSizeColumnMode.None };
-            var colEnd = new DataGridViewTextBoxColumn { Name = "End", HeaderText = "Ngày kết thúc", Width = 145, AutoSizeMode = DataGridViewAutoSizeColumnMode.None };
-            var colPrice = new DataGridViewTextBoxColumn { Name = "Price", HeaderText = "Giá tiền", Width = 150, AutoSizeMode = DataGridViewAutoSizeColumnMode.None };
-            var colStatus = new DataGridViewTextBoxColumn { Name = "Status", HeaderText = "Tình trạng", Width = 160, AutoSizeMode = DataGridViewAutoSizeColumnMode.None };
+            dgv.Columns.Add(UITheme.CreateFillColumn("ID", "MÃ HĐ", 14f, 85));
+            dgv.Columns.Add(UITheme.CreateFillColumn("Package", "Gói tập", 30f, 130));
+            dgv.Columns.Add(UITheme.CreateFillColumn("Date", "Ngày kích hoạt", 16f, 100));
+            dgv.Columns.Add(UITheme.CreateFillColumn("End", "Ngày kết thúc", 16f, 100));
+            dgv.Columns.Add(UITheme.CreateFillColumn("Price", "Giá tiền", 12f, 85));
+            dgv.Columns.Add(UITheme.CreateFillColumn("Status", "Tình trạng", 12f, 85));
 
-            dgv.Columns.AddRange(colId, colPkg, colDate, colEnd, colPrice, colStatus);
-
-            dgv.Rows.Add("#HD-2026-01", "VIP Diamond 12 Tháng", "01/01/2026", "31/12/2026", "12,000,000 đ", "Đã thanh toán");
-            dgv.Rows.Add("#HD-2025-02", "Gói Tập Gym 6 Tháng", "01/06/2025", "31/12/2025", "4,500,000 đ", "Đã hoàn thành");
-            dgv.Rows.Add("#HD-2025-01", "Gói Trải Nghiệm 3 Tháng", "01/03/2025", "31/05/2025", "2,200,000 đ", "Đã hoàn thành");
+            try
+            {
+                var history = MemberService.Instance.GetMembershipHistory();
+                if (history.Count > 0)
+                {
+                    foreach (var m in history)
+                    {
+                        string hdCode = $"#HD-{m.MembershipID:D4}";
+                        string pName = m.Package?.PackageName ?? "Gói tập";
+                        string sDate = m.StartDate.ToString("dd/MM/yyyy");
+                        string eDate = m.EndDate.ToString("dd/MM/yyyy");
+                        string pPrice = $"{m.Price:N0} đ";
+                        string statusStr = m.Status == "Active" ? "Đã thanh toán (Active)" : (m.Status == "Completed" ? "Đã hoàn thành" : (m.Status == "Pending" ? "Chờ duyệt" : m.Status));
+                        dgv.Rows.Add(hdCode, pName, sDate, eDate, pPrice, statusStr);
+                    }
+                }
+                else
+                {
+                    dgv.Rows.Add("#--", "Chưa có giao dịch gói tập", "--", "--", "--", "--");
+                }
+            }
+            catch
+            {
+                dgv.Rows.Add("#--", "Lỗi tải lịch sử gói tập từ CSDL", "--", "--", "--", "--");
+            }
 
             dgv.CellFormatting += (s, e) =>
             {
@@ -398,9 +433,120 @@ namespace QuanLyGym.UI.Forms.Member.Views
 
             card.Controls.Add(dgv);
             card.Controls.Add(lblTitle);
-            lblTitle.SendToBack();
 
             return card;
+        }
+
+        private RoundedPanel CreatePrivilegesCard(float scale)
+        {
+            RoundedPanel card = new RoundedPanel
+            {
+                CornerRadius = 12,
+                BackColor = UITheme.CardBg,
+                BorderColor = UITheme.Border,
+                Padding = new Padding((int)(16 * scale), (int)(10 * scale), (int)(16 * scale), (int)(10 * scale)),
+                AutoScroll = true
+            };
+
+            var activeMembership = MemberService.Instance.GetActiveMembership();
+            var pkg = activeMembership?.Package;
+            bool isClassic = MemberService.Instance.IsClassicMember();
+            string pkgName = pkg?.PackageName?.Trim() ?? (isClassic ? "Classic" : "VIP Diamond");
+            string titleText = $"⭐ ĐẶC QUYỀN HỘI VIÊN GÓI {pkgName.ToUpper()}";
+
+            Label lblTitle = new Label
+            {
+                Text = titleText,
+                Font = UITheme.FontSection,
+                ForeColor = UITheme.TextDark,
+                Dock = DockStyle.Top,
+                Height = (int)(28 * scale),
+                UseMnemonic = false
+            };
+
+            // Phân tích danh sách đặc quyền trực tiếp từ cột Benefits trong CSDL
+            List<string> benefitsList = new List<string>();
+            if (!string.IsNullOrWhiteSpace(pkg?.Benefits))
+            {
+                var splitItems = pkg.Benefits.Split(new[] { ',', ';', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (var item in splitItems)
+                {
+                    string clean = item.Trim();
+                    if (string.IsNullOrEmpty(clean)) continue;
+                    clean = clean.TrimStart('✓', '•', '-', '*', '★', ' ').Trim();
+                    if (!string.IsNullOrEmpty(clean))
+                    {
+                        benefitsList.Add(clean);
+                    }
+                }
+            }
+
+            // Fallback nếu CSDL chưa có dữ liệu quyền lợi
+            if (benefitsList.Count == 0)
+            {
+                if (isClassic)
+                {
+                    benefitsList.Add("Tập luyện không giới hạn khung giờ toàn hệ thống.");
+                    benefitsList.Add("Sử dụng đầy đủ hệ thống máy tạ & Cardio tiêu chuẩn.");
+                    benefitsList.Add("Trang bị Smart Locker cá nhân & phòng tắm nóng lạnh.");
+                    benefitsList.Add("Đo & phân tích chỉ số InBody 1 lần/tháng miễn phí.");
+                }
+                else
+                {
+                    benefitsList.Add("Tập luyện không giới hạn khung giờ toàn hệ thống.");
+                    benefitsList.Add("Huấn luyện 1-1 chuyên sâu cùng Huấn luyện viên thể hình.");
+                    benefitsList.Add("Tư vấn & thiết lập lộ trình dinh dưỡng cá nhân hóa.");
+                    benefitsList.Add("Sử dụng phòng xông hơi Sauna & Smart Locker VIP.");
+                }
+            }
+
+            int rowCount = Math.Max(1, (int)Math.Ceiling(benefitsList.Count / 2.0));
+            int rowHeight = (int)(36 * scale);
+
+            TableLayoutPanel grid = new TableLayoutPanel
+            {
+                Dock = DockStyle.Top,
+                AutoSize = true,
+                ColumnCount = 2,
+                RowCount = rowCount,
+                Padding = new Padding(0, (int)(8 * scale), 0, 0)
+            };
+            grid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50f));
+            grid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50f));
+            grid.RowStyles.Clear();
+            for (int r = 0; r < rowCount; r++)
+            {
+                grid.RowStyles.Add(new RowStyle(SizeType.Absolute, rowHeight));
+            }
+
+            for (int i = 0; i < benefitsList.Count; i++)
+            {
+                int col = i % 2;
+                int row = i / 2;
+                bool isSpecial = benefitsList[i].StartsWith("⚡") || benefitsList[i].Contains("Ưu đãi");
+                grid.Controls.Add(CreatePrivilegeItem(benefitsList[i], scale, isSpecial), col, row);
+            }
+
+            // Đảm bảo lblTitle ở trên cùng, sau đó đến grid
+            card.Controls.Add(grid);
+            card.Controls.Add(lblTitle);
+
+            return card;
+        }
+
+        private Label CreatePrivilegeItem(string text, float scale, bool isHighlight = false)
+        {
+            return new Label
+            {
+                Text = text.StartsWith("★") ? text : "★  " + text,
+                Font = isHighlight ? new Font("Segoe UI", 9.5f, FontStyle.Bold) : UITheme.FontRegular,
+                ForeColor = isHighlight ? Color.FromArgb(124, 58, 237) : UITheme.TextDark,
+                Dock = DockStyle.Fill,
+                TextAlign = ContentAlignment.MiddleLeft,
+                Padding = new Padding((int)(4 * scale), 0, (int)(4 * scale), 0),
+                UseMnemonic = false,
+                AutoEllipsis = true
+            };
         }
     }
 }
