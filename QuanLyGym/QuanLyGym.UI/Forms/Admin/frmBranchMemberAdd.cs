@@ -2,21 +2,10 @@ using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using QuanLyGym.BLL.Models;
 
 namespace QuanLyGym.UI.Forms.Admin
 {
-    public class BranchMemberItem
-    {
-        public string MemberId { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
-        public string Phone { get; set; } = string.Empty;
-        public string Package { get; set; } = "Gói VIP Diamond (12T)";
-        public string AssignedPt { get; set; } = "Tự tập";
-        public string StartDate { get; set; } = DateTime.Now.ToString("dd/MM/yyyy");
-        public string ExpireDate { get; set; } = DateTime.Now.AddMonths(12).ToString("dd/MM/yyyy");
-        public string Status { get; set; } = "Đang tập";
-    }
-
     public sealed class frmBranchMemberAdd : Form
     {
         [DllImport("user32.dll")]
@@ -58,7 +47,12 @@ namespace QuanLyGym.UI.Forms.Admin
             };
 
             // Title Bar
-            var pnlTitle = new Panel { Dock = DockStyle.Top, Height = 46, BackColor = Color.FromArgb(10, 10, 12) };
+            var pnlTitle = new Panel
+            {
+                Dock = DockStyle.Top,
+                Height = 46,
+                BackColor = Color.FromArgb(10, 10, 12)
+            };
             pnlTitle.MouseDown += (s, e) =>
             {
                 if (e.Button == MouseButtons.Left) { ReleaseCapture(); SendMessage(Handle, WM_NCLBUTTONDOWN, HTCAPTION, 0); }
@@ -112,7 +106,7 @@ namespace QuanLyGym.UI.Forms.Admin
                 Text = "➕  Đăng ký học viên",
                 Font = new Font("Segoe UI", 9F, FontStyle.Bold),
                 ForeColor = Color.White,
-                Size = new Size(165, 36),
+                Size = new Size(160, 36),
                 BackColor = Color.FromArgb(249, 115, 22),
                 FlatStyle = FlatStyle.Flat,
                 Cursor = Cursors.Hand,
@@ -154,7 +148,7 @@ namespace QuanLyGym.UI.Forms.Admin
             {
                 Dock = DockStyle.Fill,
                 BackColor = Color.FromArgb(15, 15, 17),
-                Padding = new Padding(24, 18, 24, 16)
+                Padding = new Padding(24, 20, 24, 16)
             };
 
             var stack = new TableLayoutPanel
@@ -165,14 +159,14 @@ namespace QuanLyGym.UI.Forms.Admin
                 BackColor = Color.Transparent
             };
 
-            _txtId = CreateTextBox("HV-" + DateTime.Now.Year + "-" + new Random().Next(100, 999));
-            stack.Controls.Add(CreateField("Mã học viên / Mã thẻ:", _txtId), 0, 0);
+            _txtId = CreateTextBox("HV-" + new Random().Next(100, 999));
+            stack.Controls.Add(CreateField("Mã học viên:", _txtId), 0, 0);
 
-            _txtName = CreateTextBox("ví dụ: Trần Mai Hương");
+            _txtName = CreateTextBox("ví dụ: Hoàng Thuỳ Linh");
             stack.Controls.Add(CreateField("Họ và tên học viên (*):", _txtName), 0, 1);
 
-            _txtPhone = CreateTextBox("0987 654 321");
-            stack.Controls.Add(CreateField("Số điện thoại liên hệ (*):", _txtPhone), 0, 2);
+            _txtPhone = CreateTextBox("0909 888 777");
+            stack.Controls.Add(CreateField("Số điện thoại (*):", _txtPhone), 0, 2);
 
             _cboPackage = new ComboBox
             {
@@ -183,12 +177,12 @@ namespace QuanLyGym.UI.Forms.Admin
                 Font = new Font("Segoe UI", 9.5F),
                 FlatStyle = FlatStyle.Flat
             };
-            _cboPackage.Items.AddRange(new object[] { "Gói VIP Diamond (Toàn hệ thống)", "Gói Platinum 12 Tháng", "Gói Classic 6 Tháng", "Gói Huấn Luyện Viên PT 1-1 (30 Buổi)", "Gói Học Viên Yoga & GroupX" });
+            _cboPackage.Items.AddRange(new object[] { "Classic (Tập tự do)", "Silver (Kèm PT 1-1)", "Gold (Kèm PT 1-1)", "VIP Diamond (12 Tháng)" });
             _cboPackage.SelectedIndex = 0;
-            stack.Controls.Add(CreateField("Gói tập đăng ký:", _cboPackage, false), 0, 3);
+            stack.Controls.Add(CreateField("Gói hội viên đăng ký (*):", _cboPackage, false), 0, 3);
 
             _txtPt = CreateTextBox("Tự tập");
-            stack.Controls.Add(CreateField("HLV phụ trách kèm cặp (nếu có):", _txtPt), 0, 4);
+            stack.Controls.Add(CreateField("Huấn luyện viên phụ trách (nếu có):", _txtPt), 0, 4);
 
             _numMonths = new NumericUpDown
             {
@@ -198,9 +192,9 @@ namespace QuanLyGym.UI.Forms.Admin
                 Value = 12,
                 BackColor = Color.FromArgb(20, 20, 23),
                 ForeColor = Color.White,
-                Font = new Font("Segoe UI", 9.5F)
+                Font = new Font("Segoe UI", 10F)
             };
-            stack.Controls.Add(CreateField("Thời hạn gói tập (Số tháng):", _numMonths, false), 0, 5);
+            stack.Controls.Add(CreateField("Thời hạn gói (tháng):", _numMonths, false), 0, 5);
 
             pnlBody.Controls.Add(stack);
 

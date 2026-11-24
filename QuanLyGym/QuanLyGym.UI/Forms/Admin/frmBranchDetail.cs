@@ -6,6 +6,9 @@ using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
+using QuanLyGym.BLL.Models;
+using QuanLyGym.BLL.Services;
 
 namespace QuanLyGym.UI.Forms.Admin
 {
@@ -61,13 +64,14 @@ namespace QuanLyGym.UI.Forms.Admin
         private int _selectedDetailTab = 0;
         private Button _btnTabStaff = null!;
         private Button _btnTabMembers = null!;
-        private Button _btnTabFacility = null!;
+        private Button _btnTabRevenue = null!;
         private Panel _pnlTabContainer = null!;
 
         // Grids & Content Panels
         private DataGridView _gridStaff = null!;
         private DataGridView _gridMembers = null!;
-        private Panel _pnlFacilityContent = null!;
+        private Panel _pnlRevenueContent = null!;
+        private DataGridView _gridRevenue = null!;
         private TextBox _txtStaffSearch = null!;
         private FilterDropdown _ddStaffRole = null!;
         private TextBox _txtMemberSearch = null!;
@@ -128,7 +132,7 @@ namespace QuanLyGym.UI.Forms.Admin
 
             var lblTitleText = new Label
             {
-                Text = "🏢  TRUNG TÂM QUẢN LÝ VẬN HÀNH CHI NHÁNH",
+                Text = "🏢  TRUNG TÂM QUẢN LÝ VẬN HÀNH CHI NHÁNH (DATABASE)",
                 Font = new Font("Segoe UI", 10.5F, FontStyle.Bold),
                 ForeColor = Orange,
                 AutoSize = true,
@@ -232,7 +236,7 @@ namespace QuanLyGym.UI.Forms.Admin
 
             _gridStaff = BuildStaffGridView();
             _gridMembers = BuildMemberGridView();
-            _pnlFacilityContent = BuildFacilitySection();
+            _pnlRevenueContent = BuildRevenueSection();
 
             pnlBody.Controls.Add(_pnlTabContainer);
             pnlBody.Controls.Add(pnlGap3);
@@ -433,7 +437,7 @@ namespace QuanLyGym.UI.Forms.Admin
             tbl.Controls.Add(CreateMiniKpiCard("👥  TỔNG HỌC VIÊN", out _lblKpiMembersVal, Blue), 0, 0);
             tbl.Controls.Add(CreateMiniKpiCard("👔  ĐỘI NGŨ NHÂN SỰ", out _lblKpiStaffVal, Purple), 1, 0);
             tbl.Controls.Add(CreateMiniKpiCard("⏰  GIỜ HOẠT ĐỘNG", out _lblKpiHoursVal, Green), 2, 0);
-            tbl.Controls.Add(CreateMiniKpiCard("💰  DOANH THU THÁNG", out _lblKpiRevenueVal, Orange), 3, 0);
+            tbl.Controls.Add(CreateMiniKpiCard("💰  DOANH THU (MEMBERSHIPS)", out _lblKpiRevenueVal, Orange), 3, 0);
 
             pnlWrapper.Controls.Add(tbl);
             return pnlWrapper;
@@ -502,15 +506,15 @@ namespace QuanLyGym.UI.Forms.Admin
 
             _btnTabStaff = CreateSubTabButton($"👔  Nhân viên chi nhánh ({_staffList.Count})", true);
             _btnTabMembers = CreateSubTabButton($"👥  Hội viên & Học viên ({_memberList.Count})", false);
-            _btnTabFacility = CreateSubTabButton("🏢  Cơ sở vật chất & Tiện ích", false);
+            _btnTabRevenue = CreateSubTabButton("📊  Doanh thu theo tháng", false);
 
             _btnTabStaff.Click += (s, e) => SwitchDetailTab(0);
             _btnTabMembers.Click += (s, e) => SwitchDetailTab(1);
-            _btnTabFacility.Click += (s, e) => SwitchDetailTab(2);
+            _btnTabRevenue.Click += (s, e) => SwitchDetailTab(2);
 
             flp.Controls.Add(_btnTabStaff);
             flp.Controls.Add(_btnTabMembers);
-            flp.Controls.Add(_btnTabFacility);
+            flp.Controls.Add(_btnTabRevenue);
 
             pnl.Controls.Add(flp);
             return pnl;
@@ -549,9 +553,9 @@ namespace QuanLyGym.UI.Forms.Admin
             _btnTabMembers.BackColor = (index == 1) ? CardBg : Color.Transparent;
             _btnTabMembers.FlatAppearance.BorderColor = (index == 1) ? Orange : Border;
 
-            _btnTabFacility.ForeColor = (index == 2) ? Orange : MutedColor;
-            _btnTabFacility.BackColor = (index == 2) ? CardBg : Color.Transparent;
-            _btnTabFacility.FlatAppearance.BorderColor = (index == 2) ? Orange : Border;
+            _btnTabRevenue.ForeColor = (index == 2) ? Orange : MutedColor;
+            _btnTabRevenue.BackColor = (index == 2) ? CardBg : Color.Transparent;
+            _btnTabRevenue.FlatAppearance.BorderColor = (index == 2) ? Orange : Border;
 
             _pnlTabContainer.Controls.Clear();
             if (index == 0)
@@ -568,8 +572,8 @@ namespace QuanLyGym.UI.Forms.Admin
             }
             else
             {
-                _pnlTabContainer.Controls.Add(_pnlFacilityContent);
-                RefreshFacilityContent();
+                _pnlTabContainer.Controls.Add(_pnlRevenueContent);
+                RefreshRevenueContent();
             }
         }
 
@@ -732,6 +736,7 @@ namespace QuanLyGym.UI.Forms.Admin
                     string name = dgv.Rows[e.RowIndex].Cells["Name"].Value?.ToString() ?? "";
                     if (MessageBox.Show($"Xác nhận xóa nhân viên '{name}' ({id}) khỏi cơ sở {_branch.Name}?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                     {
+                        BranchService.Instance.RemoveStaffFromBranch(id, _branch.Id);
                         _staffList.RemoveAll(x => x.StaffId == id);
                         _branch.StaffCount = _staffList.Count;
                         HasChanged = true;
@@ -841,7 +846,7 @@ namespace QuanLyGym.UI.Forms.Admin
                 Size = new Size(160, 34),
                 Margin = new Padding(0)
             };
-            _ddMemberPackage.SetItems(new[] { "Tất cả gói tập", "VIP Diamond", "Platinum", "Classic", "PT 1-1" });
+            _ddMemberPackage.SetItems(new[] { "Tất cả gói tập", "Classic", "Silver", "Gold", "VIP Diamond" });
             _ddMemberPackage.SelectedIndexChanged += (s, e) => RefreshMemberGrid();
 
             flpLeft.Controls.Add(pnlSearch);
@@ -937,6 +942,7 @@ namespace QuanLyGym.UI.Forms.Admin
                     string name = dgv.Rows[e.RowIndex].Cells["Name"].Value?.ToString() ?? "";
                     if (MessageBox.Show($"Xác nhận xóa học viên '{name}' ({id}) khỏi cơ sở {_branch.Name}?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                     {
+                        BranchService.Instance.RemoveMemberFromBranch(id, _branch.Id);
                         _memberList.RemoveAll(x => x.MemberId == id);
                         _branch.MemberCount = _memberList.Count;
                         HasChanged = true;
@@ -982,16 +988,15 @@ namespace QuanLyGym.UI.Forms.Admin
         }
 
         // =====================================================================
-        // TAB 3: CƠ SỞ VẬT CHẤT
+        // TAB 3: DOANH THU THEO THÁNG (DANH SÁCH CHI TIẾT TỪ DATABASE)
         // =====================================================================
-        private Panel BuildFacilitySection()
+        private Panel BuildRevenueSection()
         {
             var pnl = new Panel
             {
                 Dock = DockStyle.Fill,
-                AutoScroll = true,
                 BackColor = CardBg,
-                Padding = new Padding(16, 14, 16, 14)
+                Padding = new Padding(12, 10, 12, 10)
             };
             pnl.Paint += (s, e) =>
             {
@@ -999,81 +1004,107 @@ namespace QuanLyGym.UI.Forms.Admin
                 e.Graphics.DrawRectangle(p, 0, 0, pnl.Width - 1, pnl.Height - 1);
             };
 
+            _gridRevenue = BuildRevenueGridView();
+            pnl.Controls.Add(_gridRevenue);
             return pnl;
         }
 
-        private void RefreshFacilityContent()
+        private DataGridView BuildRevenueGridView()
         {
-            _pnlFacilityContent.Controls.Clear();
-
-            var stack = new TableLayoutPanel
-            {
-                Dock = DockStyle.Top,
-                AutoSize = true,
-                ColumnCount = 2,
-                RowCount = 3,
-                BackColor = Color.Transparent
-            };
-            stack.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            stack.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-
-            stack.Controls.Add(CreateFacilityCard("📐 DIỆN TÍCH HOẠT ĐỘNG", $"{_branch.AreaSqM:N0} m² sàn tập luyện", "Thiết kế không gian mở, trang bị máy lạnh công nghiệp & lọc không khí HEPA."), 0, 0);
-            stack.Controls.Add(CreateFacilityCard("🏊 TIỆN ÍCH ĐẶC QUYỀN", "Bể bơi • Sauna • Boxing Ring", "Phòng xông hơi khô/ướt đá muối Himalaya, bể bơi 4 mùa nước ấm."), 1, 0);
-
-            stack.Controls.Add(CreateFacilityCard("🅿️ ĐỖ XE & AN NINH", "Bãi giữ xe ô tô & xe máy miễn phí", "Hệ thống Camera AI 24/7, thẻ từ thông minh SmartLock kiểm soát ra vào."), 0, 1);
-            stack.Controls.Add(CreateFacilityCard("🥤 QUẦY BAR NƯỚC & PHỤ KIỆN", "Protein Shake & Bổ sung điện giải", "Phục vụ thức uống thể thao, khăn tập miễn phí và tủ đồ cá nhân."), 1, 1);
-
-            stack.Controls.Add(CreateFacilityCard("📋 GHI CHÚ VẬN HÀNH", _branch.Note, "Liên hệ quản lý cơ sở khi có sự cố kỹ thuật hoặc bảo trì thiết bị."), 0, 2);
-            stack.SetColumnSpan(stack.GetControlFromPosition(0, 2)!, 2);
-
-            _pnlFacilityContent.Controls.Add(stack);
-        }
-
-        private Panel CreateFacilityCard(string title, string mainText, string subText)
-        {
-            var pnl = new Panel
+            var grid = new DataGridView
             {
                 Dock = DockStyle.Fill,
-                BackColor = ItemBg,
-                Margin = new Padding(6, 6, 6, 6),
-                Padding = new Padding(14, 12, 14, 12)
-            };
-            pnl.Paint += (s, e) =>
-            {
-                using var p = new Pen(Border);
-                e.Graphics.DrawRectangle(p, 0, 0, pnl.Width - 1, pnl.Height - 1);
-            };
-
-            var lblT = new Label
-            {
-                Text = title,
-                Font = new Font("Segoe UI", 8F, FontStyle.Bold),
-                ForeColor = Orange,
-                Dock = DockStyle.Top,
-                Height = 20
+                BackgroundColor = ItemBg,
+                BorderStyle = BorderStyle.None,
+                CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal,
+                GridColor = Color.FromArgb(35, 35, 40),
+                EnableHeadersVisualStyles = false,
+                AllowUserToAddRows = false,
+                AllowUserToDeleteRows = false,
+                AllowUserToResizeRows = false,
+                ReadOnly = true,
+                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                MultiSelect = false,
+                RowHeadersVisible = false,
+                AutoGenerateColumns = false,
+                RowTemplate = { Height = 34 }
             };
 
-            var lblM = new Label
+            grid.ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
             {
-                Text = mainText,
-                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
-                ForeColor = TextColor,
-                Dock = DockStyle.Top,
-                Height = 24
-            };
-
-            var lblS = new Label
-            {
-                Text = subText,
-                Font = new Font("Segoe UI", 8.5F),
+                BackColor = Color.FromArgb(28, 28, 32),
                 ForeColor = MutedColor,
-                Dock = DockStyle.Fill
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                Alignment = DataGridViewContentAlignment.MiddleLeft,
+                Padding = new Padding(10, 0, 0, 0)
+            };
+            grid.ColumnHeadersHeight = 38;
+            grid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+
+            grid.DefaultCellStyle = new DataGridViewCellStyle
+            {
+                BackColor = ItemBg,
+                ForeColor = TextColor,
+                Font = new Font("Segoe UI", 9F),
+                SelectionBackColor = Color.FromArgb(39, 39, 42),
+                SelectionForeColor = TextColor,
+                Padding = new Padding(10, 0, 0, 0)
             };
 
-            pnl.Controls.Add(lblS);
-            pnl.Controls.Add(lblM);
-            pnl.Controls.Add(lblT);
-            return pnl;
+            grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "Month", HeaderText = "THÁNG", Width = 140 });
+            grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "Revenue", HeaderText = "DOANH THU", Width = 190 });
+            grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "Count", HeaderText = "SỐ THẺ ĐĂNG KÝ", Width = 160 });
+            grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "TopPackage", HeaderText = "GÓI TẬP BÁN CHẠY NHẤT", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill });
+            grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "Share", HeaderText = "TỶ TRỌNG DOANH THU", Width = 170 });
+            grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "Status", HeaderText = "TRẠNG THÁI", Width = 140 });
+
+            return grid;
+        }
+
+        private void RefreshRevenueContent()
+        {
+            try
+            {
+                int currentYear = DateTime.Now.Year;
+                // Truy xuất trực tiếp từ Database với bảng Memberships (cột BranchID & PriceAtPurchase)
+                var list = RevenueService.Instance.GetMonthlyRevenueByBranch(_branch.Id, currentYear);
+
+                _gridRevenue.Rows.Clear();
+
+                foreach (var item in list)
+                {
+                    string status = item.Revenue > 0 ? "🟢 Có phát sinh" : "⚪ Chưa phát sinh";
+                    int rowIdx = _gridRevenue.Rows.Add(
+                        item.MonthLabel,
+                        item.Revenue > 0 ? item.Revenue.ToString("N0", ViCulture) + " ₫" : "0 ₫",
+                        item.MembershipCount > 0 ? $"{item.MembershipCount} thẻ tập" : "0 thẻ",
+                        item.TopPackage,
+                        item.SharePercent > 0 ? $"{item.SharePercent:N1}%" : "0.0%",
+                        status
+                    );
+
+                    var row = _gridRevenue.Rows[rowIdx];
+                    if (item.Revenue > 0)
+                    {
+                        row.Cells["Revenue"].Style.ForeColor = Orange;
+                        row.Cells["Revenue"].Style.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+                        row.Cells["Count"].Style.ForeColor = Blue;
+                        row.Cells["Status"].Style.ForeColor = Green;
+                    }
+                    else
+                    {
+                        row.Cells["Revenue"].Style.ForeColor = DimColor;
+                        row.Cells["Count"].Style.ForeColor = DimColor;
+                        row.Cells["TopPackage"].Style.ForeColor = DimColor;
+                        row.Cells["Share"].Style.ForeColor = DimColor;
+                        row.Cells["Status"].Style.ForeColor = DimColor;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[RefreshRevenueContent] Error: {ex.Message}");
+            }
         }
 
         // =====================================================================
@@ -1129,6 +1160,7 @@ namespace QuanLyGym.UI.Forms.Admin
 
             if (MessageBox.Show(prompt, "Xác nhận chuyển trạng thái", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
+                BranchService.Instance.ToggleBranchStatus(_branch.Id);
                 _branch.IsOnline = !_branch.IsOnline;
                 HasChanged = true;
                 UpdateHeaderAndKpis();
@@ -1141,6 +1173,7 @@ namespace QuanLyGym.UI.Forms.Admin
             using var dlg = new frmBranchEdit(_branch);
             if (dlg.ShowDialog(this) == DialogResult.OK && dlg.ResultBranch != null)
             {
+                BranchService.Instance.UpdateBranch(_branch);
                 HasChanged = true;
                 UpdateHeaderAndKpis();
                 MessageBox.Show($"Cập nhật thông tin chi nhánh '{_branch.Name}' thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -1152,6 +1185,7 @@ namespace QuanLyGym.UI.Forms.Admin
             using var dlg = new frmBranchStaffAdd(_branch.Name);
             if (dlg.ShowDialog(this) == DialogResult.OK && dlg.ResultStaff != null)
             {
+                BranchService.Instance.AddStaffToBranch(_branch.Id, dlg.ResultStaff);
                 _staffList.Add(dlg.ResultStaff);
                 _branch.StaffCount = _staffList.Count;
                 HasChanged = true;
@@ -1166,6 +1200,7 @@ namespace QuanLyGym.UI.Forms.Admin
             using var dlg = new frmBranchMemberAdd(_branch.Name);
             if (dlg.ShowDialog(this) == DialogResult.OK && dlg.ResultMember != null)
             {
+                BranchService.Instance.AddMemberToBranch(_branch.Id, dlg.ResultMember);
                 _memberList.Add(dlg.ResultMember);
                 _branch.MemberCount = _memberList.Count;
                 HasChanged = true;

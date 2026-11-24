@@ -5,6 +5,8 @@ using System.Drawing.Drawing2D;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
+using QuanLyGym.BLL.Models;
+using QuanLyGym.BLL.Services;
 
 namespace QuanLyGym.UI.Forms.Admin
 {
@@ -29,7 +31,7 @@ namespace QuanLyGym.UI.Forms.Admin
         private static readonly CultureInfo ViCulture = new CultureInfo("vi-VN");
 
         // =====================================================================
-        // DATA REPOSITORY
+        // DATA REPOSITORY (TRUY XUẤT TRỰC TIẾP TỪ DATABASE)
         // =====================================================================
         private readonly List<BranchModel> _branches = new List<BranchModel>();
         private readonly Dictionary<int, List<BranchStaffItem>> _branchStaffMap = new Dictionary<int, List<BranchStaffItem>>();
@@ -73,146 +75,30 @@ namespace QuanLyGym.UI.Forms.Admin
         }
 
         // =====================================================================
-        // KHỞI TẠO DỮ LIỆU BAN ĐẦU
+        // KHỞI TẠO DỮ LIỆU TỪ DATABASE
         // =====================================================================
         private void InitializeData()
         {
-            var b1 = new BranchModel
+            _branches.Clear();
+            _branchStaffMap.Clear();
+            _branchMemberMap.Clear();
+
+            // Truy xuất danh sách chi nhánh và doanh thu tính theo PriceAtPurchase từ bảng Memberships
+            var list = BranchService.Instance.GetAllBranches();
+            _branches.AddRange(list);
+
+            foreach (var b in _branches)
             {
-                Id = 1,
-                Code = "CN-Q1",
-                Name = "GymFit Quận 1 - Bến Nghé",
-                Address = "Số 12 Mạc Đĩnh Chi, P. Bến Nghé, Quận 1, TP.HCM",
-                Phone = "028 3822 9988",
-                Email = "quan1@gymfit.vn",
-                Manager = "Nguyễn Hải Long",
-                OpenTime = "05:30",
-                CloseTime = "22:30",
-                AreaSqM = 1500,
-                IsOnline = true,
-                Note = "Trụ sở chính tiêu chuẩn 5 sao: Bể bơi bốn mùa, Sauna đá muối Himalaya, Boxing Ring & Yoga Studio",
-                MemberCount = 420,
-                StaffCount = 12,
-                MonthlyRevenue = 380000000
-            };
-
-            var b2 = new BranchModel
-            {
-                Id = 2,
-                Code = "CN-HK",
-                Name = "GymFit Hoàn Kiếm - Tràng Tiền",
-                Address = "Số 24 Tràng Tiền, Q. Hoàn Kiếm, Hà Nội",
-                Phone = "024 3936 7788",
-                Email = "hoankiem@gymfit.vn",
-                Manager = "Hoàng Thu Thảo",
-                OpenTime = "06:00",
-                CloseTime = "22:00",
-                AreaSqM = 1200,
-                IsOnline = true,
-                Note = "Vị trí trung tâm thủ đô, trang bị máy Technogym thế hệ mới, phòng tập nhóm GroupX hiện đại",
-                MemberCount = 350,
-                StaffCount = 10,
-                MonthlyRevenue = 285000000
-            };
-
-            var b3 = new BranchModel
-            {
-                Id = 3,
-                Code = "CN-CG",
-                Name = "GymFit Cầu Giấy - Duy Tân",
-                Address = "Số 88 Duy Tân, P. Dịch Vọng Hậu, Q. Cầu Giấy, Hà Nội",
-                Phone = "024 3795 6677",
-                Email = "caugiay@gymfit.vn",
-                Manager = "Đặng Quang Huy",
-                OpenTime = "05:30",
-                CloseTime = "22:00",
-                AreaSqM = 1800,
-                IsOnline = true,
-                Note = "Tổ hợp thể thao diện tích lớn, chuyên về cử tạ Powerlifting, khu Functional Training và Crossfit",
-                MemberCount = 480,
-                StaffCount = 14,
-                MonthlyRevenue = 410000000
-            };
-
-            var b4 = new BranchModel
-            {
-                Id = 4,
-                Code = "CN-BT",
-                Name = "GymFit Bình Thạnh - Landmark",
-                Address = "Số 208 Nguyễn Hữu Cảnh, P. 22, Q. Bình Thạnh, TP.HCM",
-                Phone = "028 3514 8899",
-                Email = "binhthanh@gymfit.vn",
-                Manager = "Lê Thị Mai Chi",
-                OpenTime = "06:00",
-                CloseTime = "23:00",
-                AreaSqM = 1100,
-                IsOnline = false, // Tạm đóng bảo dưỡng
-                Note = "Đang tiến hành bảo trì định kỳ hệ thống điều hòa trung tâm & nâng cấp sàn gỗ phòng Yoga Studio",
-                MemberCount = 230,
-                StaffCount = 9,
-                MonthlyRevenue = 195000000
-            };
-
-            var b5 = new BranchModel
-            {
-                Id = 5,
-                Code = "CN-HC",
-                Name = "GymFit Hải Châu - Bạch Đằng",
-                Address = "Số 150 Bạch Đằng, P. Hải Châu 1, Q. Hải Châu, Đà Nẵng",
-                Phone = "0236 3844 555",
-                Email = "danang@gymfit.vn",
-                Manager = "Vũ Đình Trọng",
-                OpenTime = "05:30",
-                CloseTime = "21:30",
-                AreaSqM = 950,
-                IsOnline = true,
-                Note = "View sông Hàn trực diện, không gian luyện tập ngập tràn ánh sáng tự nhiên và quầy Detox Bar cao cấp",
-                MemberCount = 210,
-                StaffCount = 8,
-                MonthlyRevenue = 160000000
-            };
-
-            _branches.AddRange(new[] { b1, b2, b3, b4, b5 });
-
-            // Seed nhân viên
-            SeedStaffData(b1.Id, "CN-Q1");
-            SeedStaffData(b2.Id, "CN-HK");
-            SeedStaffData(b3.Id, "CN-CG");
-            SeedStaffData(b4.Id, "CN-BT");
-            SeedStaffData(b5.Id, "CN-HC");
-
-            // Seed học viên
-            SeedMemberData(b1.Id);
-            SeedMemberData(b2.Id);
-            SeedMemberData(b3.Id);
-            SeedMemberData(b4.Id);
-            SeedMemberData(b5.Id);
+                _branchStaffMap[b.Id] = BranchService.Instance.GetBranchStaff(b.Id);
+                _branchMemberMap[b.Id] = BranchService.Instance.GetBranchMembers(b.Id);
+            }
         }
 
-        private void SeedStaffData(int branchId, string code)
+        public void ReloadFromDatabase()
         {
-            var list = new List<BranchStaffItem>
-            {
-                new BranchStaffItem { StaffId = $"NV-{code}-01", Name = "Trần Đình Trọng", Role = "PT", Phone = "0908 123 456", Shift = "Ca sáng (06:00 - 14:00)", JoinDate = "12/03/2023", IsWorking = true },
-                new BranchStaffItem { StaffId = $"NV-{code}-02", Name = "Nguyễn Thuỳ Dung", Role = "Thu ngân", Phone = "0934 567 890", Shift = "Ca chiều (14:00 - 22:00)", JoinDate = "05/06/2023", IsWorking = true },
-                new BranchStaffItem { StaffId = $"NV-{code}-03", Name = "Đặng Văn Lâm", Role = "PT", Phone = "0912 345 678", Shift = "Ca chiều (14:00 - 22:00)", JoinDate = "18/09/2023", IsWorking = true },
-                new BranchStaffItem { StaffId = $"NV-{code}-04", Name = "Phạm Thị Lan", Role = "Tạp vụ", Phone = "0978 901 234", Shift = "Ca sáng (06:00 - 14:00)", JoinDate = "01/11/2022", IsWorking = true },
-                new BranchStaffItem { StaffId = $"NV-{code}-05", Name = "Vũ Đình Toàn", Role = "Bảo vệ", Phone = "0989 012 345", Shift = "Ca xoay", JoinDate = "15/01/2024", IsWorking = true }
-            };
-            _branchStaffMap[branchId] = list;
-        }
-
-        private void SeedMemberData(int branchId)
-        {
-            var list = new List<BranchMemberItem>
-            {
-                new BranchMemberItem { MemberId = $"HV-{branchId}01", Name = "Lê Hoàng Yến", Phone = "0909 333 444", Package = "Gói VIP Diamond (12T)", AssignedPt = "Trần Đình Trọng", StartDate = "10/01/2026", ExpireDate = "10/01/2027", Status = "Đang tập" },
-                new BranchMemberItem { MemberId = $"HV-{branchId}02", Name = "Phạm Minh Cường", Phone = "0988 555 666", Package = "Gói Platinum 6 Tháng", AssignedPt = "Tự tập", StartDate = "15/08/2025", ExpireDate = "15/02/2026", Status = "Đang tập" },
-                new BranchMemberItem { MemberId = $"HV-{branchId}03", Name = "Vũ Thị Phương", Phone = "0912 777 888", Package = "Gói PT 1-1 Chuyên Sâu", AssignedPt = "Đặng Văn Lâm", StartDate = "01/09/2025", ExpireDate = "01/11/2025", Status = "Sắp hết hạn" },
-                new BranchMemberItem { MemberId = $"HV-{branchId}04", Name = "Hoàng Tuấn Khang", Phone = "0933 111 222", Package = "Gói Classic 3 Tháng", AssignedPt = "Tự tập", StartDate = "05/05/2025", ExpireDate = "05/08/2025", Status = "Đã hết hạn" },
-                new BranchMemberItem { MemberId = $"HV-{branchId}05", Name = "Ngô Bảo Châu", Phone = "0944 888 999", Package = "Gói VIP Diamond (12T)", AssignedPt = "Trần Đình Trọng", StartDate = "20/02/2026", ExpireDate = "20/02/2027", Status = "Đang tập" }
-            };
-            _branchMemberMap[branchId] = list;
+            InitializeData();
+            UpdateKpiCards();
+            RefreshBranchGrid();
         }
 
         // =====================================================================
@@ -277,9 +163,9 @@ namespace QuanLyGym.UI.Forms.Admin
             var pnl = new Panel
             {
                 Dock = DockStyle.Top,
-                Height = 60,
+                Height = 52,
                 BackColor = CardBg,
-                Padding = new Padding(16, 10, 16, 10)
+                Padding = new Padding(16, 8, 16, 8)
             };
             pnl.Paint += (s, e) =>
             {
@@ -289,20 +175,10 @@ namespace QuanLyGym.UI.Forms.Admin
 
             var lblTitle = new Label
             {
-                Text = "🏢  QUẢN LÝ HỆ THỐNG CHI NHÁNH & TRẠM VẬN HÀNH",
-                Font = new Font("Segoe UI", 12.5F, FontStyle.Bold),
+                Text = "QUẢN LÝ HỆ THỐNG CHI NHÁNH",
+                Font = new Font("Segoe UI", 12F, FontStyle.Bold),
                 ForeColor = TextColor,
-                Location = new Point(14, 8),
-                AutoSize = true,
-                UseMnemonic = false
-            };
-
-            var lblSub = new Label
-            {
-                Text = "Kiểm soát mạng lưới cơ sở, theo dõi trạng thái hoạt động & phân quyền nhân sự, hội viên",
-                Font = new Font("Segoe UI", 8.5F),
-                ForeColor = MutedColor,
-                Location = new Point(16, 32),
+                Location = new Point(14, 15),
                 AutoSize = true,
                 UseMnemonic = false
             };
@@ -326,7 +202,6 @@ namespace QuanLyGym.UI.Forms.Admin
 
             pnl.Controls.Add(btnAddBranch);
             pnl.Controls.Add(lblTitle);
-            pnl.Controls.Add(lblSub);
             return pnl;
         }
 
@@ -338,7 +213,7 @@ namespace QuanLyGym.UI.Forms.Admin
             var pnlWrapper = new Panel
             {
                 Dock = DockStyle.Top,
-                Height = 96,
+                Height = 72,
                 BackColor = Color.Transparent,
                 Padding = new Padding(0)
             };
@@ -357,24 +232,24 @@ namespace QuanLyGym.UI.Forms.Admin
             tbl.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
             tbl.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
 
-            tbl.Controls.Add(CreateKpiCard("🏢  TỔNG CHI NHÁNH", out _lblKpiTotalVal, "Toàn bộ hệ thống", TextColor), 0, 0);
-            tbl.Controls.Add(CreateKpiCard("🟢  ĐANG HOẠT ĐỘNG", out _lblKpiOnlineVal, "Đang mở cửa đón khách", Green), 1, 0);
-            tbl.Controls.Add(CreateKpiCard("🔴  TẠM ĐÓNG / BẢO TRÌ", out _lblKpiOfflineVal, "Tạm dừng phục vụ", Red), 2, 0);
-            tbl.Controls.Add(CreateKpiCard("👥  TỔNG HỌC VIÊN", out _lblKpiMembersVal, "Hội viên toàn chuỗi", Blue), 3, 0);
-            tbl.Controls.Add(CreateKpiCard("👔  ĐỘI NGŨ NHÂN SỰ", out _lblKpiStaffVal, "HLV, Quản lý & Lễ tân", Purple), 4, 0);
+            tbl.Controls.Add(CreateKpiCard("🏢  TỔNG CHI NHÁNH", out _lblKpiTotalVal, TextColor), 0, 0);
+            tbl.Controls.Add(CreateKpiCard("🟢  ĐANG HOẠT ĐỘNG", out _lblKpiOnlineVal, Green), 1, 0);
+            tbl.Controls.Add(CreateKpiCard("🔴  TẠM ĐÓNG / BẢO TRÌ", out _lblKpiOfflineVal, Red), 2, 0);
+            tbl.Controls.Add(CreateKpiCard("👥  TỔNG HỌC VIÊN", out _lblKpiMembersVal, Blue), 3, 0);
+            tbl.Controls.Add(CreateKpiCard("👔  ĐỘI NGŨ NHÂN SỰ", out _lblKpiStaffVal, Purple), 4, 0);
 
             pnlWrapper.Controls.Add(tbl);
             return pnlWrapper;
         }
 
-        private Panel CreateKpiCard(string title, out Label lblVal, string subtitle, Color accentColor)
+        private Panel CreateKpiCard(string title, out Label lblVal, Color accentColor)
         {
             var pnl = new Panel
             {
                 Dock = DockStyle.Fill,
                 BackColor = CardBg,
                 Margin = new Padding(3, 0, 3, 0),
-                Padding = new Padding(14, 10, 14, 8)
+                Padding = new Padding(14, 10, 14, 10)
             };
             pnl.Paint += (s, e) =>
             {
@@ -388,7 +263,7 @@ namespace QuanLyGym.UI.Forms.Admin
                 Font = new Font("Segoe UI", 8F, FontStyle.Bold),
                 ForeColor = MutedColor,
                 Dock = DockStyle.Top,
-                Height = 22,
+                Height = 20,
                 UseMnemonic = false
             };
 
@@ -397,23 +272,11 @@ namespace QuanLyGym.UI.Forms.Admin
                 Text = "0",
                 Font = new Font("Segoe UI", 15F, FontStyle.Bold),
                 ForeColor = accentColor,
-                Dock = DockStyle.Top,
-                Height = 32,
-                TextAlign = ContentAlignment.MiddleLeft,
-                UseMnemonic = false
-            };
-
-            var lblSub = new Label
-            {
-                Text = subtitle,
-                Font = new Font("Segoe UI", 7.5F),
-                ForeColor = DimColor,
                 Dock = DockStyle.Fill,
                 TextAlign = ContentAlignment.MiddleLeft,
                 UseMnemonic = false
             };
 
-            pnl.Controls.Add(lblSub);
             pnl.Controls.Add(lblVal);
             pnl.Controls.Add(lblT);
             return pnl;
@@ -582,7 +445,7 @@ namespace QuanLyGym.UI.Forms.Admin
                 Size = new Size(160, 34),
                 Margin = new Padding(8, 0, 6, 0)
             };
-            _ddRegion.SetItems(new[] { "Tất cả khu vực", "TP. Hồ Chí Minh", "Hà Nội", "Đà Nẵng" });
+            _ddRegion.SetItems(new[] { "Tất cả khu vực", "TP. Hồ Chí Minh", "Quận 1", "Bình Thạnh", "Quận 7" });
             _ddRegion.SelectedIndexChanged += (s, e) =>
             {
                 _regionFilter = _ddRegion.SelectedText;
@@ -646,7 +509,7 @@ namespace QuanLyGym.UI.Forms.Admin
         }
 
         // ---------------------------------------------------------------------
-        // E. LƯỚI BẢNG DỮ LIỆU CHI NHÁNH CHÍNH
+        // E. LƯỚI BẢNG DỮ LIỆU CHI NHÁNH CHÍNH (TỰ ĐỘNG DÃN THEO CỬA SỔ)
         // ---------------------------------------------------------------------
         private DataGridView BuildMainGridView()
         {
@@ -751,8 +614,8 @@ namespace QuanLyGym.UI.Forms.Admin
             dgv.Columns.Add(new DataGridViewTextBoxColumn
             {
                 Name = "Revenue",
-                HeaderText = "Doanh thu tháng",
-                FillWeight = 110,
+                HeaderText = "Doanh thu (Memberships)",
+                FillWeight = 120,
                 MinimumWidth = 110,
                 DefaultCellStyle = { Alignment = DataGridViewContentAlignment.MiddleRight }
             });
@@ -875,12 +738,7 @@ namespace QuanLyGym.UI.Forms.Admin
             if (!string.IsNullOrEmpty(_regionFilter) && _regionFilter != "Tất cả khu vực")
             {
                 string r = _regionFilter.ToLower();
-                if (r.Contains("hồ chí minh") || r.Contains("tp.hcm") || r.Contains("hcm"))
-                    query = query.Where(b => b.Address.Contains("TP.HCM") || b.Address.Contains("Quận") || b.Address.Contains("Bình Thạnh"));
-                else if (r.Contains("hà nội"))
-                    query = query.Where(b => b.Address.Contains("Hà Nội") || b.Address.Contains("Cầu Giấy") || b.Address.Contains("Hoàn Kiếm"));
-                else if (r.Contains("đà nẵng"))
-                    query = query.Where(b => b.Address.Contains("Đà Nẵng") || b.Address.Contains("Hải Châu"));
+                query = query.Where(b => b.Address.ToLower().Contains(r) || b.Name.ToLower().Contains(r));
             }
 
             // 3. Tìm kiếm tự do
@@ -959,23 +817,22 @@ namespace QuanLyGym.UI.Forms.Admin
         }
 
         // =====================================================================
-        // CÁC THAO TÁC NGHIỆP VỤ (CRUD, CHI TIẾT, BẬT/TẮT)
+        // CÁC THAO TÁC NGHIỆP VỤ (CRUD, CHI TIẾT, BẬT/TẮT DATABASE)
         // =====================================================================
         private void OpenBranchDetailModal(BranchModel branch)
         {
             if (!_branchStaffMap.ContainsKey(branch.Id))
-                _branchStaffMap[branch.Id] = new List<BranchStaffItem>();
+                _branchStaffMap[branch.Id] = BranchService.Instance.GetBranchStaff(branch.Id);
 
             if (!_branchMemberMap.ContainsKey(branch.Id))
-                _branchMemberMap[branch.Id] = new List<BranchMemberItem>();
+                _branchMemberMap[branch.Id] = BranchService.Instance.GetBranchMembers(branch.Id);
 
             using var dlg = new frmBranchDetail(branch, _branchStaffMap[branch.Id], _branchMemberMap[branch.Id]);
             dlg.ShowDialog(this);
 
             if (dlg.HasChanged)
             {
-                UpdateKpiCards();
-                RefreshBranchGrid();
+                ReloadFromDatabase();
             }
         }
 
@@ -983,14 +840,13 @@ namespace QuanLyGym.UI.Forms.Admin
         {
             string actionName = branch.IsOnline ? "TẠM ĐÓNG CỬA (OFFLINE)" : "BẬT HOẠT ĐỘNG (ONLINE)";
             string prompt = branch.IsOnline
-                ? $"Bạn có chắc chắn muốn TẠM ĐÓNG cửa chi nhánh '{branch.Name}'?\n(Hệ thống sẽ chuyển cơ sở sang trạng thái bảo trì/ngoại tuyến)"
+                ? $"Bạn có chắc chắn muốn TẠM ĐÓNG cửa chi nhánh '{branch.Name}'?\n(Hệ thống sẽ cập nhật trạng thái cơ sở vào Database)"
                 : $"Bạn có chắc chắn muốn MỞ CỬA HOẠT ĐỘNG lại cho chi nhánh '{branch.Name}'?";
 
             if (MessageBox.Show(prompt, "Xác nhận chuyển trạng thái", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                branch.IsOnline = !branch.IsOnline;
-                UpdateKpiCards();
-                RefreshBranchGrid();
+                BranchService.Instance.ToggleBranchStatus(branch.Id);
+                ReloadFromDatabase();
                 MessageBox.Show($"Đã chuyển trạng thái chi nhánh '{branch.Name}' thành: {actionName} thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
@@ -1000,17 +856,16 @@ namespace QuanLyGym.UI.Forms.Admin
             using var dlg = new frmBranchEdit(null);
             if (dlg.ShowDialog(this) == DialogResult.OK && dlg.ResultBranch != null)
             {
-                _branches.Add(dlg.ResultBranch);
-                _branchStaffMap[dlg.ResultBranch.Id] = new List<BranchStaffItem>();
-                _branchMemberMap[dlg.ResultBranch.Id] = new List<BranchMemberItem>();
-
-                // Tự động gán nhân sự & học viên mẫu ban đầu
-                SeedStaffData(dlg.ResultBranch.Id, dlg.ResultBranch.Code);
-                SeedMemberData(dlg.ResultBranch.Id);
-
-                UpdateKpiCards();
-                RefreshBranchGrid();
-                MessageBox.Show($"Thêm mới chi nhánh '{dlg.ResultBranch.Name}' thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                bool success = BranchService.Instance.AddBranch(dlg.ResultBranch);
+                if (success)
+                {
+                    ReloadFromDatabase();
+                    MessageBox.Show($"Thêm mới chi nhánh '{dlg.ResultBranch.Name}' vào Database thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show("Có lỗi xảy ra khi lưu chi nhánh vào Database!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
@@ -1019,9 +874,16 @@ namespace QuanLyGym.UI.Forms.Admin
             using var dlg = new frmBranchEdit(branch);
             if (dlg.ShowDialog(this) == DialogResult.OK && dlg.ResultBranch != null)
             {
-                UpdateKpiCards();
-                RefreshBranchGrid();
-                MessageBox.Show($"Cập nhật thông tin chi nhánh '{branch.Name}' thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                bool success = BranchService.Instance.UpdateBranch(branch);
+                if (success)
+                {
+                    ReloadFromDatabase();
+                    MessageBox.Show($"Cập nhật thông tin chi nhánh '{branch.Name}' trong Database thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show("Có lỗi xảy ra khi cập nhật chi nhánh vào Database!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
@@ -1036,18 +898,20 @@ namespace QuanLyGym.UI.Forms.Admin
             int mCount = _branchMemberMap.ContainsKey(branch.Id) ? _branchMemberMap[branch.Id].Count : 0;
             int sCount = _branchStaffMap.ContainsKey(branch.Id) ? _branchStaffMap[branch.Id].Count : 0;
 
-            string warning = $"Xác nhận XÓA VĨNH VIỄN chi nhánh:\n👉 '{branch.Name}' ({branch.Code})?\n\nHiện chi nhánh đang quản lý: {mCount} học viên và {sCount} nhân sự.";
+            string warning = $"Xác nhận XÓA VĨNH VIỄN chi nhánh khỏi Database:\n👉 '{branch.Name}' ({branch.Code})?\n\nHiện chi nhánh đang quản lý: {mCount} học viên và {sCount} nhân sự.";
 
             if (MessageBox.Show(warning, "Cảnh báo xóa chi nhánh", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
             {
-                int delId = branch.Id;
-                _branches.RemoveAll(x => x.Id == delId);
-                _branchStaffMap.Remove(delId);
-                _branchMemberMap.Remove(delId);
-
-                UpdateKpiCards();
-                RefreshBranchGrid();
-                MessageBox.Show("Đã xóa chi nhánh thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                bool success = BranchService.Instance.DeleteBranch(branch.Id);
+                if (success)
+                {
+                    ReloadFromDatabase();
+                    MessageBox.Show("Đã xóa chi nhánh khỏi Database thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show("Không thể xóa chi nhánh do phát sinh lỗi Database!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
     }

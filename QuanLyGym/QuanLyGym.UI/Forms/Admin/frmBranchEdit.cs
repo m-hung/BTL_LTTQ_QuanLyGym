@@ -3,28 +3,10 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using QuanLyGym.BLL.Models;
 
 namespace QuanLyGym.UI.Forms.Admin
 {
-    public class BranchModel
-    {
-        public int Id { get; set; }
-        public string Code { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
-        public string Address { get; set; } = string.Empty;
-        public string Phone { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string Manager { get; set; } = string.Empty;
-        public string OpenTime { get; set; } = "05:30";
-        public string CloseTime { get; set; } = "22:30";
-        public int AreaSqM { get; set; } = 1000;
-        public bool IsOnline { get; set; } = true;
-        public string Note { get; set; } = string.Empty;
-        public int MemberCount { get; set; } = 0;
-        public int StaffCount { get; set; } = 0;
-        public long MonthlyRevenue { get; set; } = 0;
-    }
-
     public sealed class frmBranchEdit : Form
     {
         // P/Invoke để kéo thả form không viền
@@ -51,7 +33,6 @@ namespace QuanLyGym.UI.Forms.Admin
         private TextBox _txtCloseTime = null!;
         private NumericUpDown _numArea = null!;
         private CheckBox _chkStatus = null!;
-        private TextBox _txtNote = null!;
 
         public frmBranchEdit(BranchModel? branchToEdit = null)
         {
@@ -66,7 +47,7 @@ namespace QuanLyGym.UI.Forms.Admin
         {
             FormBorderStyle = FormBorderStyle.None;
             StartPosition = FormStartPosition.CenterParent;
-            Size = new Size(580, 640);
+            Size = new Size(580, 480);
             BackColor = Color.FromArgb(15, 15, 17);
             ShowInTaskbar = false;
             DoubleBuffered = true;
@@ -213,7 +194,7 @@ namespace QuanLyGym.UI.Forms.Admin
                 AutoSize = true,
                 AutoSizeMode = AutoSizeMode.GrowAndShrink,
                 ColumnCount = 1,
-                RowCount = 3,
+                RowCount = 2,
                 BackColor = Color.Transparent,
                 Margin = new Padding(0)
             };
@@ -221,7 +202,6 @@ namespace QuanLyGym.UI.Forms.Admin
 
             stack.Controls.Add(BuildSection1(), 0, 0);
             stack.Controls.Add(BuildSection2(), 0, 1);
-            stack.Controls.Add(BuildSection3(), 0, 2);
 
             pnlBody.Controls.Add(stack);
 
@@ -246,7 +226,7 @@ namespace QuanLyGym.UI.Forms.Admin
             tbl.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 65F));
             tbl.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 35F));
 
-            _txtName = CreateTextBox("ví dụ: GymFit Cầu Giấy");
+            _txtName = CreateTextBox("ví dụ: QuanLyGym Cầu Giấy");
             tbl.Controls.Add(CreateFieldContainer("Tên chi nhánh (*):", _txtName), 0, 0);
 
             _txtCode = CreateTextBox("CN-CG");
@@ -281,13 +261,13 @@ namespace QuanLyGym.UI.Forms.Admin
             _txtManager = CreateTextBox("Họ tên quản lý chi nhánh");
             tbl.Controls.Add(CreateFieldContainer("Quản lý chi nhánh:", _txtManager), 0, 0);
 
-            _txtEmail = CreateTextBox("caugiay@gymfit.vn");
+            _txtEmail = CreateTextBox("caugiay@quanlygym.vn");
             tbl.Controls.Add(CreateFieldContainer("Email liên hệ:", _txtEmail), 1, 0);
 
-            _txtOpenTime = CreateTextBox("05:30");
+            _txtOpenTime = CreateTextBox("06:00");
             tbl.Controls.Add(CreateFieldContainer("Giờ mở cửa:", _txtOpenTime), 0, 1);
 
-            _txtCloseTime = CreateTextBox("22:30");
+            _txtCloseTime = CreateTextBox("22:00");
             tbl.Controls.Add(CreateFieldContainer("Giờ đóng cửa:", _txtCloseTime), 1, 1);
 
             _numArea = new NumericUpDown
@@ -335,40 +315,6 @@ namespace QuanLyGym.UI.Forms.Admin
             tbl.Controls.Add(CreateFieldContainer("Trạng thái cơ sở:", pnlStatus, false), 1, 2);
 
             card.Controls.Add(tbl);
-            return card;
-        }
-
-        private Control BuildSection3()
-        {
-            var card = CreateCardPanel("📝  GHI CHÚ & TIỆN ÍCH CƠ SỞ", Color.FromArgb(168, 85, 247));
-
-            _txtNote = new TextBox
-            {
-                Dock = DockStyle.Fill,
-                Multiline = true,
-                Height = 60,
-                BackColor = Color.FromArgb(20, 20, 23),
-                ForeColor = Color.White,
-                Font = new Font("Segoe UI", 9.5F),
-                BorderStyle = BorderStyle.None,
-                PlaceholderText = "Tiện ích đi kèm: Sauna, Bể bơi, Boxing, Yoga, Bãi đỗ xe ô tô..."
-            };
-
-            var pnlNoteBox = new Panel
-            {
-                Dock = DockStyle.Top,
-                Height = 68,
-                Padding = new Padding(8, 6, 8, 6),
-                BackColor = Color.FromArgb(20, 20, 23)
-            };
-            pnlNoteBox.Paint += (s, e) =>
-            {
-                using var p = new Pen(Color.FromArgb(45, 45, 50));
-                e.Graphics.DrawRectangle(p, 0, 0, pnlNoteBox.Width - 1, pnlNoteBox.Height - 1);
-            };
-            pnlNoteBox.Controls.Add(_txtNote);
-
-            card.Controls.Add(pnlNoteBox);
             return card;
         }
 
@@ -470,7 +416,6 @@ namespace QuanLyGym.UI.Forms.Admin
                 _txtCloseTime.Text = _target.CloseTime;
                 _numArea.Value = Math.Max(50, Math.Min(10000, _target.AreaSqM));
                 _chkStatus.Checked = _target.IsOnline;
-                _txtNote.Text = _target.Note;
             }
         }
 
@@ -501,7 +446,7 @@ namespace QuanLyGym.UI.Forms.Admin
             string phone = _txtPhone.Text.Trim();
             if (string.IsNullOrWhiteSpace(phone))
             {
-                phone = "1900 6868";
+                phone = "028 3822 1122";
             }
 
             if (_isEdit && _target != null)
@@ -516,14 +461,14 @@ namespace QuanLyGym.UI.Forms.Admin
                 _target.CloseTime = _txtCloseTime.Text.Trim();
                 _target.AreaSqM = (int)_numArea.Value;
                 _target.IsOnline = _chkStatus.Checked;
-                _target.Note = _txtNote.Text.Trim();
+                _target.Note = _target.Note ?? "";
                 ResultBranch = _target;
             }
             else
             {
                 ResultBranch = new BranchModel
                 {
-                    Id = new Random().Next(100, 999),
+                    Id = 0,
                     Name = name,
                     Code = code,
                     Address = address,
@@ -534,10 +479,10 @@ namespace QuanLyGym.UI.Forms.Admin
                     CloseTime = _txtCloseTime.Text.Trim(),
                     AreaSqM = (int)_numArea.Value,
                     IsOnline = _chkStatus.Checked,
-                    Note = _txtNote.Text.Trim(),
-                    MemberCount = 120,
-                    StaffCount = 6,
-                    MonthlyRevenue = 150000000
+                    Note = "",
+                    MemberCount = 0,
+                    StaffCount = 0,
+                    MonthlyRevenue = 0
                 };
             }
 
