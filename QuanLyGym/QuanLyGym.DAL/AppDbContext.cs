@@ -100,6 +100,9 @@ namespace QuanLyGym.DAL
                     sqlServerOptions => sqlServerOptions.CommandTimeout(180) // Tăng thời gian chờ lên 180 giây
                 );
             }
+
+            optionsBuilder.ConfigureWarnings(warnings =>
+                warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

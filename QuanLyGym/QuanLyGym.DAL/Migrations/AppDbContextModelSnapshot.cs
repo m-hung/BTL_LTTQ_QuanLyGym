@@ -17,7 +17,7 @@ namespace QuanLyGym.DAL.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.13")
+                .HasAnnotation("ProductVersion", "10.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -1698,7 +1698,7 @@ namespace QuanLyGym.DAL.Migrations
                         new
                         {
                             PackageID = 1,
-                            Benefits = "Tập không giới hạn khung giờ, Sử dụng đầy đủ máy tạ & Cardio, Tủ đồ cá nhân",
+                            Benefits = "Tập luyện không giới hạn khung giờ toàn hệ thống, Sử dụng đầy đủ hệ thống máy tạ & Cardio, Đo & phân tích chỉ số InBody định kỳ, Trang bị Smart Locker tủ đồ cá nhân, Miễn phí phòng tắm nóng lạnh & tiện ích",
                             BranchID = 1,
                             Description = "Gói tập tự do tiêu chuẩn dành cho hội viên muốn duy trì rèn luyện hàng ngày.",
                             Duration = 30,
@@ -1711,7 +1711,7 @@ namespace QuanLyGym.DAL.Migrations
                         new
                         {
                             PackageID = 2,
-                            Benefits = "12 buổi tập 1-1 với HLV, Thiết lập lộ trình cá nhân hóa, Kiểm tra chỉ số InBody hàng tháng",
+                            Benefits = "12 buổi tập 1-1 với Huấn luyện viên, Thiết lập lộ trình cá nhân hóa, Kiểm tra chỉ số InBody hàng tháng, Luyện tập tự do toàn hệ thống Titan Fitness, Miễn phí tủ đồ Smart Locker & nước uống",
                             BranchID = 1,
                             Description = "Gói rèn luyện chuyên sâu 3 tháng cùng HLV, phù hợp người mới bắt đầu cần định hướng.",
                             Duration = 90,
@@ -1724,7 +1724,7 @@ namespace QuanLyGym.DAL.Migrations
                         new
                         {
                             PackageID = 3,
-                            Benefits = "24 buổi tập 1-1 với HLV, Tư vấn dinh dưỡng chuyên sâu, Đo InBody định kỳ, Sử dụng phòng xông hơi Sauna",
+                            Benefits = "24 buổi tập 1-1 với Huấn luyện viên, Tư vấn dinh dưỡng chuyên sâu, Đo InBody định kỳ & theo sát vóc dáng, Sử dụng phòng xông hơi Sauna & Smart Locker riêng, Luyện tập tự do toàn hệ thống Titan Fitness, Miễn phí nước uống mỗi buổi tập",
                             BranchID = 1,
                             Description = "Gói nâng cao toàn diện giúp cải thiện thể hình nhanh chóng và thư giãn sau giờ tập.",
                             Duration = 90,
@@ -1737,7 +1737,7 @@ namespace QuanLyGym.DAL.Migrations
                         new
                         {
                             PackageID = 4,
-                            Benefits = "36 buổi tập 1-1 với HLV cao cấp, Full dịch vụ Sauna & VIP Locker, Miễn phí khăn tập & nước uống mỗi buổi",
+                            Benefits = "36 buổi tập 1-1 cùng Huấn luyện viên cao cấp, Bác sĩ dinh dưỡng & HLV theo sát 24/7, Full dịch vụ Sauna VIP & VIP Locker riêng biệt, Miễn phí khăn tập & nước uống mỗi buổi, Luyện tập tự do toàn hệ thống Titan Fitness, Cam kết cải thiện thể hình bằng văn bản",
                             BranchID = 1,
                             Description = "Gói tập thượng lưu cao cấp nhất, cam kết kết quả và trải nghiệm dịch vụ chuẩn 5 sao.",
                             Duration = 90,
