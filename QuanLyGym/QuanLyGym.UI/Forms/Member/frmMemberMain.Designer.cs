@@ -1,16 +1,9 @@
-﻿namespace QuanLyGym.UI.Forms.Member
+namespace QuanLyGym.UI.Forms.Member
 {
     partial class frmMemberMain
     {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -22,16 +15,20 @@
 
         #region Windows Form Designer generated code
 
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Text = "frmMemberMain";
+            SuspendLayout();
+            // 
+            // frmMemberMain
+            // 
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(1366, 820);
+            MinimumSize = new Size(1100, 680);
+            Name = "frmMemberMain";
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "TITAN FITNESS CLUB - HỆ THỐNG QUẢN LÝ DÀNH CHO HỘI VIÊN";
+            ResumeLayout(false);
         }
 
         #endregion

@@ -16,6 +16,8 @@ namespace QuanLyGym.DAL.Entities
         [ForeignKey("PackageID")]
         public Package? Package { get; set; }
 
+        public decimal PriceAtPurchase { get; set; }
+
         public DateTime RegisterDate { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
@@ -23,7 +25,7 @@ namespace QuanLyGym.DAL.Entities
         [Column(TypeName = "decimal(18,2)")]
         public decimal Price { get; set; }
 
-        public int UsedSessions { get; set; }
+        public int UsedPTSessions { get; set; }
 
         [StringLength(20)]
         public string Status { get; set; } = "Active";

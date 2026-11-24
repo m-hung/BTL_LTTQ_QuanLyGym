@@ -11,6 +11,7 @@ namespace QuanLyGym.UI.Forms.PT
         private System.Windows.Forms.Button btnMenuMembers;
         private System.Windows.Forms.Button btnMenuPhysical;
         private System.Windows.Forms.Panel pnlPTProfile;
+        private System.Windows.Forms.Button btnDangXuat;
         private System.Windows.Forms.Panel pnlMainArea;
         private System.Windows.Forms.Panel pnlTopHeader;
         private System.Windows.Forms.Label lblHeaderTitle;
@@ -30,6 +31,7 @@ namespace QuanLyGym.UI.Forms.PT
         {
             this.pnlSidebar = new System.Windows.Forms.Panel();
             this.pnlPTProfile = new System.Windows.Forms.Panel();
+            this.btnDangXuat = new System.Windows.Forms.Button();
             this.btnMenuPhysical = new System.Windows.Forms.Button();
             this.btnMenuMembers = new System.Windows.Forms.Button();
             this.btnMenuSchedule = new System.Windows.Forms.Button();
@@ -48,6 +50,7 @@ namespace QuanLyGym.UI.Forms.PT
             // pnlSidebar
             // 
             this.pnlSidebar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(11)))), ((int)(((byte)(13)))), ((int)(((byte)(16)))));
+            this.pnlSidebar.Controls.Add(this.btnDangXuat);
             this.pnlSidebar.Controls.Add(this.pnlPTProfile);
             this.pnlSidebar.Controls.Add(this.btnMenuPhysical);
             this.pnlSidebar.Controls.Add(this.btnMenuMembers);
@@ -67,6 +70,28 @@ namespace QuanLyGym.UI.Forms.PT
             this.pnlPTProfile.Name = "pnlPTProfile";
             this.pnlPTProfile.Size = new System.Drawing.Size(250, 75);
             this.pnlPTProfile.TabIndex = 5;
+            // 
+            // btnDangXuat
+            // 
+            this.btnDangXuat.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnDangXuat.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(11)))), ((int)(((byte)(13)))), ((int)(((byte)(16)))));
+            this.btnDangXuat.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnDangXuat.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(69)))), ((int)(((byte)(39)))), ((int)(((byte)(42)))));
+            this.btnDangXuat.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(24)))), ((int)(((byte)(27)))));
+            this.btnDangXuat.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(42)))), ((int)(((byte)(20)))), ((int)(((byte)(23)))));
+            this.btnDangXuat.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnDangXuat.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
+            this.btnDangXuat.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(113)))), ((int)(((byte)(113)))));
+            this.btnDangXuat.Location = new System.Drawing.Point(14, 692);
+            this.btnDangXuat.Name = "btnDangXuat";
+            this.btnDangXuat.Padding = new System.Windows.Forms.Padding(12, 0, 0, 0);
+            this.btnDangXuat.Size = new System.Drawing.Size(222, 44);
+            this.btnDangXuat.TabIndex = 6;
+            this.btnDangXuat.Text = "⇥  Đăng Xuất";
+            this.btnDangXuat.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnDangXuat.UseMnemonic = false;
+            this.btnDangXuat.UseVisualStyleBackColor = false;
+            this.btnDangXuat.Click += new System.EventHandler(this.btnDangXuat_Click);
             // 
             // btnMenuPhysical
             // 

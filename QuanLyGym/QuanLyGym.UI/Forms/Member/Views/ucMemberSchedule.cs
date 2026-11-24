@@ -1,0 +1,1150 @@
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Reflection;
+using System.Windows.Forms;
+using QuanLyGym.UI.Services;
+using QuanLyGym.UI.Utils;
+
+namespace QuanLyGym.UI.Forms.Member.Views
+{
+    public class ScheduleItem
+    {
+        public int ScheduleID { get; set; }
+        public DateTime Date { get; set; }
+        public string DateDisplay => Date.ToString("dd/MM/yyyy");
+        public string DayOfWeekVN
+        {
+            get
+            {
+                return Date.DayOfWeek switch
+                {
+                    DayOfWeek.Monday => "Thứ 2",
+                    DayOfWeek.Tuesday => "Thứ 3",
+                    DayOfWeek.Wednesday => "Thứ 4",
+                    DayOfWeek.Thursday => "Thứ 5",
+                    DayOfWeek.Friday => "Thứ 6",
+                    DayOfWeek.Saturday => "Thứ 7",
+                    DayOfWeek.Sunday => "Chủ nhật",
+                    _ => ""
+                };
+            }
+        }
+        public string TimeRange { get; set; } = "";
+        public string WorkoutType { get; set; } = "";
+        public string TrainerName { get; set; } = "";
+        public string Room { get; set; } = "";
+        public string Source { get; set; } = ""; // "Lộ trình PT xếp" hoặc "Hội viên tự đặt"
+        public string Status { get; set; } = ""; // "Đã xác nhận", "Chờ HLV duyệt", "Hoàn thành"
+        public string Note { get; set; } = "";
+    }
+
+    public class ucMemberSchedule : UserControl
+    {
+        private class ComboBoxItem
+        {
+            public string Text { get; set; } = "";
+            public int Value { get; set; }
+            public override string ToString() => Text;
+        }
+
+        // Internal holder for each of the 42 calendar grid cells (reused, never destroyed)
+        private class DayCellView
+        {
+            public Panel Panel = null!;
+            public Label LblDayNum = null!;
+            public Label[] EventLabels = new Label[3];
+            public DateTime? Date;
+            public List<ScheduleItem> DaySchedules = new List<ScheduleItem>();
+        }
+
+        // Data Store
+        private readonly List<ScheduleItem> _schedules = new List<ScheduleItem>();
+        private DateTime _currentMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+        private string _selectedFilter = "Tất cả";
+        private bool _isCalendarMode = false;
+
+        // UI Controls - Left View
+        private DataGridView dgvSchedule = null!;
+        private Panel pnlTableView = null!;
+        private Panel pnlCalendarView = null!;
+        private Panel pnlViewContainer = null!;
+        private TableLayoutPanel pnlCalendarGrid = null!;
+        private readonly DayCellView[,] _gridCells = new DayCellView[6, 7];
+        private Label lblMonthYear = null!;
+        private Label lblSelectedDayDetail = null!;
+        private Label lblListTitle = null!;
+        private Label lblTotalStats = null!;
+        private Button btnModeTable = null!;
+        private Button btnModeCalendar = null!;
+        private FlowLayoutPanel pnlFilterButtons = null!;
+
+        // UI Controls - Right Booking Form
+        private DateTimePicker dtpDate = null!;
+        private ComboBox cboTime = null!;
+        private ComboBox cboType = null!;
+        private ComboBox cboTrainer = null!;
+        private ComboBox cboRoom = null!;
+        private TextBox txtNote = null!;
+        private Button btnSubmit = null!;
+
+        public ucMemberSchedule()
+        {
+            EnableDoubleBuffer(this);
+            LoadSchedulesFromDatabase();
+            InitializeComponent();
+            RefreshAllViews();
+        }
+
+        private static void EnableDoubleBuffer(Control c)
+        {
+            try
+            {
+                typeof(Control).GetProperty("DoubleBuffered", BindingFlags.NonPublic | BindingFlags.Instance)
+                    ?.SetValue(c, true, null);
+            }
+            catch { }
+        }
+
+        private void LoadSchedulesFromDatabase()
+        {
+            _schedules.Clear();
+            var list = MemberService.Instance.GetAllSchedules();
+            foreach (var s in list)
+            {
+                string source = s.Note?.Contains("tự đặt") == true || s.Status == "Pending" ? "Hội viên tự đặt" : "Lộ trình PT xếp";
+                string statusDisplay = s.Status switch
+                {
+                    "Confirmed" => "Đã xác nhận",
+                    "Pending" => "Chờ HLV duyệt",
+                    "Completed" => "Hoàn thành",
+                    "Scheduled" => "Đã xác nhận",
+                    "Cancelled" => "Đã hủy",
+                    _ => s.Status ?? "Đã xác nhận"
+                };
+
+                _schedules.Add(new ScheduleItem
+                {
+                    ScheduleID = s.ScheduleID,
+                    Date = s.TrainingDate,
+                    TimeRange = $"{s.StartTime:hh\\:mm} - {s.EndTime:hh\\:mm}",
+                    WorkoutType = !string.IsNullOrEmpty(s.TrainingType) ? s.TrainingType : "Gym Thể hình",
+                    TrainerName = s.PT?.FullName ?? "HLV Titan",
+                    Room = s.Branch?.BranchName ?? (s.PT?.Branch?.BranchName ?? "Chi nhánh"),
+                    Source = source,
+                    Status = statusDisplay,
+                    Note = s.Note ?? ""
+                });
+            }
+        }
+
+        private void InitializeComponent()
+        {
+            this.SuspendLayout();
+            this.AutoScaleMode = AutoScaleMode.None;
+            this.BackColor = UITheme.Background;
+            this.Dock = DockStyle.Fill;
+            this.AutoScroll = true;
+            this.AutoScrollMinSize = new Size(1000, 640);
+
+            float scale = Math.Max(1.0f, (float)this.DeviceDpi / 96f);
+
+            // Two Column Layout — Left (64% Table/Calendar), Right (36% Booking Form)
+            TableLayoutPanel pnlCols = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                ColumnCount = 2,
+                RowCount = 1,
+                Padding = new Padding((int)(16 * scale), (int)(12 * scale), (int)(16 * scale), (int)(14 * scale)),
+                BackColor = UITheme.Background
+            };
+            pnlCols.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 64f));
+            pnlCols.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 36f));
+            pnlCols.RowStyles.Clear();
+            pnlCols.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
+
+            // Left: Schedule List Card with Table / Calendar toggle
+            RoundedPanel cardLeft = CreateScheduleLeftCard();
+            cardLeft.Dock = DockStyle.Fill;
+            cardLeft.Margin = new Padding(0, 0, (int)(8 * scale), 0);
+
+            // Right: Booking Form Card
+            RoundedPanel cardRight = CreateBookingFormCard();
+            cardRight.Dock = DockStyle.Fill;
+            cardRight.Margin = new Padding((int)(8 * scale), 0, 0, 0);
+
+            pnlCols.Controls.Add(cardLeft, 0, 0);
+            pnlCols.Controls.Add(cardRight, 1, 0);
+
+            this.Controls.Add(pnlCols);
+            this.ResumeLayout(true);
+        }
+
+        #region Left Side: Schedule Views (Table & Calendar)
+
+        private RoundedPanel CreateScheduleLeftCard()
+        {
+            RoundedPanel card = new RoundedPanel
+            {
+                CornerRadius = 12,
+                BackColor = UITheme.CardBg,
+                BorderColor = UITheme.Border,
+                Padding = new Padding(20)
+            };
+
+            // Top Toolbar: Title + View Mode Switcher
+            Panel pnlTopBar = new Panel { Dock = DockStyle.Top, Height = 48 };
+
+            lblListTitle = new Label
+            {
+                Text = "DANH SÁCH LỊCH TẬP ĐÃ LÊN LỊCH",
+                Font = UITheme.FontSection,
+                ForeColor = UITheme.TextDark,
+                AutoSize = true,
+                Location = new Point(0, 12)
+            };
+
+            // Segmented Switcher Buttons
+            Panel pnlModeSwitcher = new Panel
+            {
+                Dock = DockStyle.Right,
+                Width = 240,
+                Height = 36,
+                Location = new Point(card.Width - 260, 6)
+            };
+
+            btnModeTable = new Button
+            {
+                Text = "📋 Dạng Bảng",
+                Font = UITheme.FontSmallBold,
+                Width = 115,
+                Height = 34,
+                Location = new Point(0, 2),
+                FlatStyle = FlatStyle.Flat,
+                Cursor = Cursors.Hand,
+                BackColor = UITheme.Primary,
+                ForeColor = Color.White
+            };
+            btnModeTable.FlatAppearance.BorderSize = 0;
+
+            btnModeCalendar = new Button
+            {
+                Text = "📅 Lịch Tháng",
+                Font = UITheme.FontSmallBold,
+                Width = 115,
+                Height = 34,
+                Location = new Point(120, 2),
+                FlatStyle = FlatStyle.Flat,
+                Cursor = Cursors.Hand,
+                BackColor = Color.FromArgb(241, 245, 249),
+                ForeColor = UITheme.TextRegular
+            };
+            btnModeCalendar.FlatAppearance.BorderSize = 0;
+
+            btnModeTable.Click += (s, e) => SwitchViewMode(false);
+            btnModeCalendar.Click += (s, e) => SwitchViewMode(true);
+
+            pnlModeSwitcher.Controls.Add(btnModeTable);
+            pnlModeSwitcher.Controls.Add(btnModeCalendar);
+
+            pnlTopBar.Controls.Add(lblListTitle);
+            pnlTopBar.Controls.Add(pnlModeSwitcher);
+
+            // Filter Tabs Row
+            pnlFilterButtons = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Top,
+                Height = 38,
+                FlowDirection = FlowDirection.LeftToRight,
+                Padding = new Padding(0, 2, 0, 4)
+            };
+
+            string[] filterNames = {
+                "Tất cả",
+                "🏋️ Lộ trình PT xếp",
+                "🙋 Hội viên tự đặt",
+                "⏳ Chờ HLV duyệt",
+                "✅ Đã xác nhận"
+            };
+
+            foreach (var f in filterNames)
+            {
+                Button btnF = new Button
+                {
+                    Text = f,
+                    Font = UITheme.FontSmallBold,
+                    Height = 30,
+                    AutoSize = true,
+                    BackColor = f == _selectedFilter ? UITheme.PrimaryLight : Color.FromArgb(248, 250, 252),
+                    ForeColor = f == _selectedFilter ? UITheme.Primary : UITheme.TextMuted,
+                    FlatStyle = FlatStyle.Flat,
+                    Cursor = Cursors.Hand,
+                    Margin = new Padding(0, 0, 8, 0)
+                };
+                btnF.FlatAppearance.BorderSize = 0;
+                btnF.Click += (s, e) =>
+                {
+                    _selectedFilter = f;
+                    foreach (Control c in pnlFilterButtons.Controls)
+                    {
+                        if (c is Button b)
+                        {
+                            bool isActive = b.Text == _selectedFilter;
+                            b.BackColor = isActive ? UITheme.PrimaryLight : Color.FromArgb(248, 250, 252);
+                            b.ForeColor = isActive ? UITheme.Primary : UITheme.TextMuted;
+                        }
+                    }
+                    RefreshAllViews();
+                };
+                pnlFilterButtons.Controls.Add(btnF);
+            }
+
+            // Container for views
+            pnlViewContainer = new Panel { Dock = DockStyle.Fill };
+            EnableDoubleBuffer(pnlViewContainer);
+
+            // 1. Table View Setup
+            pnlTableView = BuildTableView();
+            pnlTableView.Dock = DockStyle.Fill;
+            EnableDoubleBuffer(pnlTableView);
+
+            // 2. Calendar View Setup
+            pnlCalendarView = BuildCalendarView();
+            pnlCalendarView.Dock = DockStyle.Fill;
+            EnableDoubleBuffer(pnlCalendarView);
+            pnlCalendarView.Visible = false;
+
+            pnlViewContainer.Controls.Add(pnlCalendarView);
+            pnlViewContainer.Controls.Add(pnlTableView);
+
+            card.Controls.Add(pnlViewContainer);
+            card.Controls.Add(pnlFilterButtons);
+            card.Controls.Add(pnlTopBar);
+
+            return card;
+        }
+
+        private void SwitchViewMode(bool calendarMode)
+        {
+            _isCalendarMode = calendarMode;
+
+            pnlViewContainer.SuspendLayout();
+
+            if (_isCalendarMode)
+            {
+                pnlTableView.Visible = false;
+                pnlCalendarView.Visible = true;
+                lblListTitle.Text = "📅 LỊCH TẬP THEO THÁNG (CALENDAR VIEW)";
+                btnModeCalendar.BackColor = UITheme.Primary;
+                btnModeCalendar.ForeColor = Color.White;
+                btnModeTable.BackColor = Color.FromArgb(241, 245, 249);
+                btnModeTable.ForeColor = UITheme.TextRegular;
+                RenderCalendarMonth();
+            }
+            else
+            {
+                pnlCalendarView.Visible = false;
+                pnlTableView.Visible = true;
+                lblListTitle.Text = "DANH SÁCH LỊCH TẬP ĐÃ LÊN LỊCH";
+                btnModeTable.BackColor = UITheme.Primary;
+                btnModeTable.ForeColor = Color.White;
+                btnModeCalendar.BackColor = Color.FromArgb(241, 245, 249);
+                btnModeCalendar.ForeColor = UITheme.TextRegular;
+                RenderTableData();
+            }
+
+            pnlViewContainer.ResumeLayout(true);
+        }
+
+        private Panel BuildTableView()
+        {
+            float scale = Math.Max(1.0f, (float)this.DeviceDpi / 96f);
+            Panel pnl = new Panel { Dock = DockStyle.Fill };
+
+            dgvSchedule = new DataGridView { Dock = DockStyle.Fill };
+            UITheme.StyleDataGridView(dgvSchedule);
+            dgvSchedule.RowTemplate.Height = (int)Math.Round(36f * scale);
+            dgvSchedule.ColumnHeadersHeight = (int)Math.Round(34f * scale);
+
+            dgvSchedule.Columns.Add(UITheme.CreateFillColumn("Date", "Ngày tập", 13f, 85));
+            dgvSchedule.Columns.Add(UITheme.CreateFillColumn("Time", "Khung giờ", 16f, 95));
+            dgvSchedule.Columns.Add(UITheme.CreateFillColumn("Type", "Bộ môn & Mục tiêu", 22f, 110));
+            dgvSchedule.Columns.Add(UITheme.CreateFillColumn("Trainer", "HLV phụ trách", 18f, 110));
+            dgvSchedule.Columns.Add(UITheme.CreateFillColumn("Source", "Nguồn gốc lịch", 14f, 90));
+            dgvSchedule.Columns.Add(UITheme.CreateFillColumn("Room", "Chi nhánh", 11f, 85));
+            dgvSchedule.Columns.Add(UITheme.CreateFillColumn("Status", "Trạng thái", 12f, 85));
+
+            dgvSchedule.CellFormatting += (s, e) =>
+            {
+                if (e.RowIndex < 0 || e.Value == null) return;
+
+                string colName = dgvSchedule.Columns[e.ColumnIndex].Name;
+
+                if (colName == "Source")
+                {
+                    string source = e.Value.ToString() ?? "";
+                    if (source.Contains("Lộ trình PT"))
+                    {
+                        e.CellStyle.ForeColor = UITheme.Primary;
+                        e.CellStyle.Font = UITheme.FontBold;
+                    }
+                    else
+                    {
+                        e.CellStyle.ForeColor = UITheme.Secondary;
+                        e.CellStyle.Font = UITheme.FontBold;
+                    }
+                }
+                else if (colName == "Status")
+                {
+                    string status = e.Value.ToString() ?? "";
+                    if (status.Contains("Đã xác nhận"))
+                    {
+                        e.CellStyle.ForeColor = UITheme.Success;
+                        e.CellStyle.Font = UITheme.FontBold;
+                    }
+                    else if (status.Contains("Chờ"))
+                    {
+                        e.CellStyle.ForeColor = UITheme.Warning;
+                        e.CellStyle.Font = UITheme.FontBold;
+                    }
+                    else if (status.Contains("Hoàn thành"))
+                    {
+                        e.CellStyle.ForeColor = UITheme.TextMuted;
+                    }
+                }
+            };
+
+            // Bottom action & Stats panel
+            Panel pnlBottom = new Panel { Dock = DockStyle.Bottom, Height = 48, Padding = new Padding(0, 8, 0, 0) };
+
+            Button btnCancel = new Button
+            {
+                Text = "❌ Hủy buổi tập đã chọn",
+                Font = UITheme.FontBold,
+                Height = 36,
+                Width = 200,
+                BackColor = UITheme.DangerLight,
+                ForeColor = UITheme.Danger,
+                FlatStyle = FlatStyle.Flat,
+                Cursor = Cursors.Hand,
+                Dock = DockStyle.Left
+            };
+            btnCancel.FlatAppearance.BorderSize = 0;
+            btnCancel.Click += BtnCancel_Click;
+
+            lblTotalStats = new Label
+            {
+                Text = "",
+                Font = UITheme.FontSmallBold,
+                ForeColor = UITheme.TextMuted,
+                Dock = DockStyle.Right,
+                TextAlign = ContentAlignment.MiddleRight,
+                AutoSize = true
+            };
+
+            pnlBottom.Controls.Add(btnCancel);
+            pnlBottom.Controls.Add(lblTotalStats);
+
+            pnl.Controls.Add(dgvSchedule);
+            pnl.Controls.Add(pnlBottom);
+            return pnl;
+        }
+
+        private Panel BuildCalendarView()
+        {
+            Panel pnl = new Panel { Dock = DockStyle.Fill };
+
+            // 1. Month Navigation & Legend Bar
+            Panel pnlMonthNav = new Panel { Dock = DockStyle.Top, Height = 40 };
+
+            Button btnPrev = new Button
+            {
+                Text = "◀ Tháng trước",
+                Font = UITheme.FontSmallBold,
+                Width = 110,
+                Height = 32,
+                Location = new Point(0, 4),
+                FlatStyle = FlatStyle.Flat,
+                Cursor = Cursors.Hand,
+                BackColor = Color.FromArgb(241, 245, 249),
+                ForeColor = UITheme.TextRegular
+            };
+            btnPrev.FlatAppearance.BorderSize = 0;
+            btnPrev.Click += (s, e) =>
+            {
+                _currentMonth = _currentMonth.AddMonths(-1);
+                RenderCalendarMonth();
+            };
+
+            lblMonthYear = new Label
+            {
+                Text = "Tháng 10 / 2026",
+                Font = UITheme.FontSubtitle,
+                ForeColor = UITheme.Primary,
+                TextAlign = ContentAlignment.MiddleCenter,
+                Location = new Point(120, 6),
+                Width = 170
+            };
+
+            Button btnNext = new Button
+            {
+                Text = "Tháng sau ▶",
+                Font = UITheme.FontSmallBold,
+                Width = 110,
+                Height = 32,
+                Location = new Point(300, 4),
+                FlatStyle = FlatStyle.Flat,
+                Cursor = Cursors.Hand,
+                BackColor = Color.FromArgb(241, 245, 249),
+                ForeColor = UITheme.TextRegular
+            };
+            btnNext.FlatAppearance.BorderSize = 0;
+            btnNext.Click += (s, e) =>
+            {
+                _currentMonth = _currentMonth.AddMonths(1);
+                RenderCalendarMonth();
+            };
+
+            // Legend on right
+            Label lblLegend = new Label
+            {
+                Text = "🟣 PT xếp (Đã chốt)   |   🟠 Hội viên đặt (Chờ duyệt)",
+                Font = UITheme.FontSmallBold,
+                ForeColor = UITheme.TextMuted,
+                Dock = DockStyle.Right,
+                TextAlign = ContentAlignment.MiddleRight,
+                AutoSize = true
+            };
+
+            pnlMonthNav.Controls.Add(btnPrev);
+            pnlMonthNav.Controls.Add(lblMonthYear);
+            pnlMonthNav.Controls.Add(btnNext);
+            pnlMonthNav.Controls.Add(lblLegend);
+
+            // 2. Day-of-week Header
+            TableLayoutPanel pnlWeekDays = new TableLayoutPanel
+            {
+                Dock = DockStyle.Top,
+                Height = 28,
+                ColumnCount = 7,
+                RowCount = 1,
+                BackColor = Color.FromArgb(248, 250, 252)
+            };
+            EnableDoubleBuffer(pnlWeekDays);
+            for (int i = 0; i < 7; i++)
+                pnlWeekDays.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f / 7f));
+            pnlWeekDays.RowStyles.Clear();
+            pnlWeekDays.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
+
+            string[] dayHeaders = { "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ nhật" };
+            for (int i = 0; i < 7; i++)
+            {
+                Label lblDay = new Label
+                {
+                    Text = dayHeaders[i],
+                    Dock = DockStyle.Fill,
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    Font = UITheme.FontSmallBold,
+                    ForeColor = (i == 6) ? UITheme.Danger : UITheme.TextRegular
+                };
+                pnlWeekDays.Controls.Add(lblDay, i, 0);
+            }
+
+            // 3. Pre-create Fixed Calendar Grid Panel (7 cols x 6 rows = 42 cells created once)
+            pnlCalendarGrid = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                ColumnCount = 7,
+                RowCount = 6,
+                BackColor = Color.White,
+                CellBorderStyle = TableLayoutPanelCellBorderStyle.Single
+            };
+            EnableDoubleBuffer(pnlCalendarGrid);
+
+            for (int i = 0; i < 7; i++)
+                pnlCalendarGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f / 7f));
+            for (int i = 0; i < 6; i++)
+                pnlCalendarGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 100f / 6f));
+
+            pnlCalendarGrid.SuspendLayout();
+
+            for (int row = 0; row < 6; row++)
+            {
+                for (int col = 0; col < 7; col++)
+                {
+                    Panel cellPanel = new Panel
+                    {
+                        Dock = DockStyle.Fill,
+                        BackColor = Color.White,
+                        Margin = new Padding(0),
+                        Padding = new Padding(2)
+                    };
+                    EnableDoubleBuffer(cellPanel);
+
+                    Label lblDayNum = new Label
+                    {
+                        Text = "",
+                        Font = UITheme.FontSmallBold,
+                        ForeColor = (col == 6) ? UITheme.Danger : UITheme.TextDark,
+                        Dock = DockStyle.Top,
+                        Height = 16,
+                        TextAlign = ContentAlignment.TopLeft
+                    };
+                    cellPanel.Controls.Add(lblDayNum);
+
+                    DayCellView cellView = new DayCellView
+                    {
+                        Panel = cellPanel,
+                        LblDayNum = lblDayNum
+                    };
+
+                    // Pre-create up to 3 event label slots in each cell
+                    for (int evIdx = 2; evIdx >= 0; evIdx--)
+                    {
+                        Label lblEvent = new Label
+                        {
+                            Dock = DockStyle.Top,
+                            Height = 18,
+                            AutoEllipsis = true,
+                            Margin = new Padding(0, 1, 0, 1),
+                            Font = new Font("Segoe UI", 7.5f, FontStyle.Bold),
+                            Visible = false,
+                            Cursor = Cursors.Hand
+                        };
+
+                        int capturedIndex = evIdx;
+                        lblEvent.Click += (s, e) =>
+                        {
+                            if (cellView.Date.HasValue && capturedIndex < cellView.DaySchedules.Count)
+                            {
+                                ShowDayScheduleDetail(cellView.Date.Value, cellView.DaySchedules[capturedIndex]);
+                            }
+                        };
+
+                        cellView.EventLabels[evIdx] = lblEvent;
+                        cellPanel.Controls.Add(lblEvent);
+                    }
+
+                    cellPanel.Click += (s, e) => HandleDayCellClick(cellView);
+                    lblDayNum.Click += (s, e) => HandleDayCellClick(cellView);
+
+                    _gridCells[row, col] = cellView;
+                    pnlCalendarGrid.Controls.Add(cellPanel, col, row);
+                }
+            }
+
+            pnlCalendarGrid.ResumeLayout(false);
+
+            // 4. Bottom Selected Day Detail Panel
+            Panel pnlDetail = new Panel
+            {
+                Dock = DockStyle.Bottom,
+                Height = 62,
+                BackColor = UITheme.PrimaryLight,
+                Padding = new Padding(12, 8, 12, 8)
+            };
+
+            lblSelectedDayDetail = new Label
+            {
+                Dock = DockStyle.Fill,
+                Text = "💡 Bấm vào một ngày trên lịch để xem nhanh các buổi tập chi tiết.",
+                Font = UITheme.FontRegular,
+                ForeColor = UITheme.TextDark,
+                TextAlign = ContentAlignment.MiddleLeft
+            };
+            pnlDetail.Controls.Add(lblSelectedDayDetail);
+
+            pnl.Controls.Add(pnlCalendarGrid);
+            pnl.Controls.Add(pnlDetail);
+            pnl.Controls.Add(pnlWeekDays);
+            pnl.Controls.Add(pnlMonthNav);
+
+            return pnl;
+        }
+
+        private void HandleDayCellClick(DayCellView cellView)
+        {
+            if (!cellView.Date.HasValue) return;
+
+            DateTime cellDate = cellView.Date.Value;
+            if (cellView.DaySchedules.Count > 0)
+            {
+                ShowDayScheduleDetail(cellDate, cellView.DaySchedules[0]);
+            }
+            else
+            {
+                lblSelectedDayDetail.Text = $"📅 Ngày {cellDate:dd/MM/yyyy}: Không có buổi tập nào.";
+            }
+        }
+
+        private void RenderTableData()
+        {
+            if (dgvSchedule == null) return;
+            dgvSchedule.Rows.Clear();
+
+            var filtered = GetFilteredSchedules();
+
+            foreach (var item in filtered)
+            {
+                string dateCol = $"{item.DayOfWeekVN}, {item.Date:dd/MM}";
+                dgvSchedule.Rows.Add(
+                    dateCol,
+                    item.TimeRange,
+                    item.WorkoutType,
+                    item.TrainerName,
+                    item.Source,
+                    item.Room,
+                    item.Status
+                );
+            }
+
+            int countPT = _schedules.Count(x => x.Source == "Lộ trình PT xếp");
+            int countMember = _schedules.Count(x => x.Source == "Hội viên tự đặt");
+            int countPending = _schedules.Count(x => x.Status == "Chờ HLV duyệt");
+
+            if (lblTotalStats != null)
+            {
+                lblTotalStats.Text = $"📊 Tổng: {_schedules.Count} buổi  |  🏋️ PT xếp: {countPT}  |  🙋 Tự đặt: {countMember}  |  ⏳ Chờ duyệt: {countPending}";
+            }
+        }
+
+        /// <summary>
+        /// Renders Calendar month instantaneously with ZERO flicker/lag:
+        /// Reuses the existing 42 cells, does NOT clear or recreate controls.
+        /// </summary>
+        private void RenderCalendarMonth()
+        {
+            if (pnlCalendarGrid == null) return;
+
+            lblMonthYear.Text = $"Tháng {_currentMonth:MM / yyyy}";
+
+            DateTime firstDayOfMonth = new DateTime(_currentMonth.Year, _currentMonth.Month, 1);
+            int daysInMonth = DateTime.DaysInMonth(_currentMonth.Year, _currentMonth.Month);
+
+            // Day of week offset: Monday = 0, Sunday = 6
+            int startCol = ((int)firstDayOfMonth.DayOfWeek + 6) % 7;
+
+            // Only show Confirmed and Pending for Calendar View
+            var monthItems = _schedules.Where(x =>
+                x.Date.Year == _currentMonth.Year &&
+                x.Date.Month == _currentMonth.Month &&
+                (x.Status == "Đã xác nhận" || x.Status == "Chờ HLV duyệt")
+            ).ToList();
+
+            // Apply active source filter if user selected one
+            if (_selectedFilter.Contains("Lộ trình PT"))
+                monthItems = monthItems.Where(x => x.Source == "Lộ trình PT xếp").ToList();
+            else if (_selectedFilter.Contains("Hội viên tự đặt"))
+                monthItems = monthItems.Where(x => x.Source == "Hội viên tự đặt").ToList();
+            else if (_selectedFilter.Contains("Chờ"))
+                monthItems = monthItems.Where(x => x.Status == "Chờ HLV duyệt").ToList();
+
+            int currentDay = 1;
+            DateTime today = DateTime.Today;
+
+            pnlCalendarGrid.SuspendLayout();
+
+            for (int row = 0; row < 6; row++)
+            {
+                for (int col = 0; col < 7; col++)
+                {
+                    var cell = _gridCells[row, col];
+                    if (cell == null) continue;
+
+                    // Out of month bounds (blank cell)
+                    if ((row == 0 && col < startCol) || (currentDay > daysInMonth))
+                    {
+                        cell.Date = null;
+                        cell.DaySchedules.Clear();
+                        cell.LblDayNum.Text = "";
+                        cell.Panel.BackColor = Color.FromArgb(250, 250, 252);
+
+                        for (int i = 0; i < 3; i++)
+                        {
+                            cell.EventLabels[i].Visible = false;
+                        }
+                        continue;
+                    }
+
+                    // In month bounds (active day cell)
+                    DateTime cellDate = new DateTime(_currentMonth.Year, _currentMonth.Month, currentDay);
+                    var daySchedules = monthItems.Where(x => x.Date.Date == cellDate.Date).ToList();
+
+                    cell.Date = cellDate;
+                    cell.DaySchedules = daySchedules;
+                    cell.LblDayNum.Text = currentDay.ToString();
+
+                    bool isToday = (cellDate.Date == today);
+                    cell.Panel.BackColor = isToday ? Color.FromArgb(254, 249, 195) : Color.White;
+                    cell.LblDayNum.Font = isToday ? UITheme.FontBold : UITheme.FontSmallBold;
+                    cell.LblDayNum.ForeColor = (col == 6) ? UITheme.Danger : (isToday ? UITheme.PrimaryDark : UITheme.TextDark);
+
+                    // Update event labels (instant visibility & property update)
+                    for (int i = 0; i < 3; i++)
+                    {
+                        if (i < daySchedules.Count)
+                        {
+                            var s = daySchedules[i];
+                            bool isFixedPT = s.Source == "Lộ trình PT xếp";
+                            bool isPending = s.Status == "Chờ HLV duyệt";
+
+                            Color pillBg = isPending ? Color.FromArgb(254, 243, 199) : (isFixedPT ? UITheme.PrimaryLight : UITheme.SuccessLight);
+                            Color pillText = isPending ? Color.FromArgb(180, 83, 9) : (isFixedPT ? UITheme.Primary : UITheme.Success);
+                            string icon = isPending ? "⏳" : (isFixedPT ? "🏋️" : "✅");
+
+                            cell.EventLabels[i].Text = $"{icon} {s.TimeRange.Split('-')[0].Trim()} {s.WorkoutType.Split('(')[0].Trim()}";
+                            cell.EventLabels[i].BackColor = pillBg;
+                            cell.EventLabels[i].ForeColor = pillText;
+                            cell.EventLabels[i].Visible = true;
+                        }
+                        else
+                        {
+                            cell.EventLabels[i].Visible = false;
+                        }
+                    }
+
+                    currentDay++;
+                }
+            }
+
+            pnlCalendarGrid.ResumeLayout(true);
+        }
+
+        private void ShowDayScheduleDetail(DateTime date, ScheduleItem item)
+        {
+            string statusIcon = item.Status == "Đã xác nhận" ? "✅" : (item.Status == "Chờ HLV duyệt" ? "⏳" : "✔️");
+            string sourceIcon = item.Source == "Lộ trình PT xếp" ? "🏋️ [PT xếp cố định]" : "🙋 [Hội viên tự đặt thêm]";
+
+            lblSelectedDayDetail.Text =
+                $"📅 Ngày {date:dd/MM/yyyy} ({item.DayOfWeekVN}): {item.TimeRange} | Bộ môn: {item.WorkoutType}\n" +
+                $"👨‍🏫 HLV: {item.TrainerName} | Phòng: {item.Room} | Nguồn gốc: {sourceIcon} | Trạng thái: {statusIcon} {item.Status}";
+        }
+
+        private IEnumerable<ScheduleItem> GetFilteredSchedules()
+        {
+            var query = _schedules.AsEnumerable();
+
+            if (_selectedFilter.Contains("Lộ trình PT"))
+            {
+                query = query.Where(x => x.Source == "Lộ trình PT xếp");
+            }
+            else if (_selectedFilter.Contains("Hội viên tự đặt"))
+            {
+                query = query.Where(x => x.Source == "Hội viên tự đặt");
+            }
+            else if (_selectedFilter.Contains("Chờ"))
+            {
+                query = query.Where(x => x.Status == "Chờ HLV duyệt");
+            }
+            else if (_selectedFilter.Contains("Đã xác nhận"))
+            {
+                query = query.Where(x => x.Status == "Đã xác nhận");
+            }
+
+            return query.OrderByDescending(x => x.Date);
+        }
+
+        private void RefreshAllViews()
+        {
+            RenderTableData();
+            if (_isCalendarMode)
+            {
+                RenderCalendarMonth();
+            }
+        }
+
+        private void BtnCancel_Click(object? sender, EventArgs e)
+        {
+            if (dgvSchedule.SelectedRows.Count > 0)
+            {
+                int idx = dgvSchedule.SelectedRows[0].Index;
+                var filtered = GetFilteredSchedules().ToList();
+                if (idx >= 0 && idx < filtered.Count)
+                {
+                    var target = filtered[idx];
+                    var res = MessageBox.Show(
+                        $"Bạn có chắc chắn muốn hủy buổi tập ngày {target.Date:dd/MM/yyyy} ({target.TimeRange})?\n\n• Nguồn gốc: {target.Source}\n• HLV: {target.TrainerName}",
+                        "Xác nhận hủy lịch",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Question
+                    );
+
+                    if (res == DialogResult.Yes)
+                    {
+                        if (target.ScheduleID > 0)
+                        {
+                            MemberService.Instance.CancelSchedule(target.ScheduleID, out var msg);
+                        }
+                        LoadSchedulesFromDatabase();
+                        RefreshAllViews();
+                        MessageBox.Show("Đã hủy buổi tập thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("Vui lòng chọn một dòng lịch tập trong bảng để hủy.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        #endregion
+
+        #region Right Side: Booking Form Card
+
+        private RoundedPanel CreateBookingFormCard()
+        {
+            float scale = Math.Max(1.0f, (float)this.DeviceDpi / 96f);
+
+            RoundedPanel card = new RoundedPanel
+            {
+                CornerRadius = 12,
+                BackColor = UITheme.CardBg,
+                BorderColor = UITheme.Border,
+                Padding = new Padding((int)(18 * scale))
+            };
+
+            Label lblTitle = new Label
+            {
+                Text = "📝 ĐĂNG KÝ / ĐẶT LỊCH HẸN PT",
+                Font = UITheme.FontSection,
+                ForeColor = UITheme.TextDark,
+                Dock = DockStyle.Top,
+                Height = (int)(30 * scale),
+                UseMnemonic = false
+            };
+
+            TableLayoutPanel pnlForm = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                ColumnCount = 1,
+                RowCount = 14,
+                AutoScroll = true,
+                Padding = new Padding(0, (int)(4 * scale), 0, 0)
+            };
+            pnlForm.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
+
+            // Notice Box
+            Panel pnlNotice = new Panel
+            {
+                Dock = DockStyle.Top,
+                Height = (int)(46 * scale),
+                BackColor = Color.FromArgb(254, 243, 199),
+                Padding = new Padding((int)(8 * scale)),
+                Margin = new Padding(0, 0, 0, (int)(6 * scale))
+            };
+            Label lblNotice = new Label
+            {
+                Text = "💡 Lịch Hội viên đặt thêm sẽ đi qua luồng duyệt (Chờ HLV duyệt) trước khi chốt lịch chính thức.",
+                Font = UITheme.FontSmallBold,
+                ForeColor = Color.FromArgb(180, 83, 9),
+                Dock = DockStyle.Fill,
+                UseMnemonic = false
+            };
+            pnlNotice.Controls.Add(lblNotice);
+
+            // 1. Date
+            Label lblDate = new Label { Text = "1. Chọn ngày tập:", Font = UITheme.FontSmallBold, AutoSize = true, Margin = new Padding(0, 0, 0, (int)(2 * scale)), UseMnemonic = false };
+            dtpDate = new DateTimePicker
+            {
+                Format = DateTimePickerFormat.Short,
+                Dock = DockStyle.Top,
+                Height = (int)(30 * scale),
+                Font = UITheme.FontRegular,
+                MinDate = DateTime.Today
+            };
+
+            // 2. Time
+            Label lblTime = new Label { Text = "2. Khung giờ ca tập:", Font = UITheme.FontSmallBold, AutoSize = true, Margin = new Padding(0, (int)(4 * scale), 0, (int)(2 * scale)), UseMnemonic = false };
+            cboTime = new ComboBox
+            {
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Dock = DockStyle.Top,
+                Height = (int)(30 * scale),
+                Font = UITheme.FontRegular
+            };
+            cboTime.Items.AddRange(new object[] {
+                "06:00 - 07:30 (Ca sáng sớm)",
+                "08:00 - 09:30 (Ca sáng)",
+                "15:00 - 16:30 (Ca chiều)",
+                "17:30 - 19:00 (Ca tan tầm)",
+                "18:00 - 19:30 (Ca tối phổ biến)",
+                "19:30 - 21:00 (Ca muộn)"
+            });
+            cboTime.SelectedIndex = 4;
+
+            // 3. Type
+            Label lblType = new Label { Text = "3. Bộ môn & Mục tiêu rèn luyện:", Font = UITheme.FontSmallBold, AutoSize = true, Margin = new Padding(0, (int)(4 * scale), 0, (int)(2 * scale)), UseMnemonic = false };
+            cboType = new ComboBox
+            {
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Dock = DockStyle.Top,
+                Height = (int)(30 * scale),
+                Font = UITheme.FontRegular
+            };
+            cboType.Items.AddRange(new object[] {
+                "Gym Thể hình (Tăng cơ giảm mỡ)",
+                "Kèm PT 1-1 chuyên sâu",
+                "Cardio & HIIT đốt mỡ cấp tốc",
+                "Boxing / Kickfit đối kháng",
+                "Yoga & Giãn cơ phục hồi"
+            });
+            cboType.SelectedIndex = 1;
+
+            // 4. Trainer
+            Label lblTrainer = new Label { Text = "4. Huấn luyện viên phụ trách:", Font = UITheme.FontSmallBold, AutoSize = true, Margin = new Padding(0, (int)(4 * scale), 0, (int)(2 * scale)), UseMnemonic = false };
+            cboTrainer = new ComboBox
+            {
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Dock = DockStyle.Top,
+                Height = (int)(30 * scale),
+                Font = UITheme.FontRegular
+            };
+            var pts = MemberService.Instance.GetAllPTs();
+            foreach (var pt in pts)
+            {
+                cboTrainer.Items.Add(new ComboBoxItem { Text = $"{pt.FullName} ({pt.Specialization})", Value = pt.PTID });
+            }
+            if (cboTrainer.Items.Count > 0) cboTrainer.SelectedIndex = 0;
+
+            // 5. Room / Branch
+            Label lblRoom = new Label { Text = "5. Chi nhánh tập:", Font = UITheme.FontSmallBold, AutoSize = true, Margin = new Padding(0, (int)(4 * scale), 0, (int)(2 * scale)), UseMnemonic = false };
+            cboRoom = new ComboBox
+            {
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Dock = DockStyle.Top,
+                Height = (int)(30 * scale),
+                Font = UITheme.FontRegular
+            };
+            var branches = MemberService.Instance.GetAllBranches();
+            foreach (var b in branches)
+            {
+                cboRoom.Items.Add(new ComboBoxItem { Text = b.BranchName, Value = b.BranchID });
+            }
+            if (cboRoom.Items.Count > 0) cboRoom.SelectedIndex = 0;
+
+            // 6. Note
+            Label lblNote = new Label { Text = "6. Ghi chú mục tiêu buổi tập & Yêu cầu HLV:", Font = UITheme.FontSmallBold, AutoSize = true, Margin = new Padding(0, (int)(4 * scale), 0, (int)(2 * scale)), UseMnemonic = false };
+            txtNote = new TextBox
+            {
+                Multiline = true,
+                Height = (int)(75 * scale),
+                Dock = DockStyle.Top,
+                Font = UITheme.FontRegular,
+                ScrollBars = ScrollBars.Vertical,
+                Text = "Cần HLV hỗ trợ kỹ thuật và kiểm tra form động tác."
+            };
+
+            // Submit Button
+            btnSubmit = new Button
+            {
+                Text = "🚀 Gửi yêu cầu đặt lịch hẹn",
+                Font = UITheme.FontBold,
+                Height = (int)(42 * scale),
+                Dock = DockStyle.Top,
+                Margin = new Padding(0, (int)(8 * scale), 0, 0),
+                BackColor = UITheme.Primary,
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Cursor = Cursors.Hand,
+                UseMnemonic = false
+            };
+            btnSubmit.FlatAppearance.BorderSize = 0;
+            btnSubmit.Click += BtnSubmit_Click;
+
+            pnlForm.Controls.Add(pnlNotice);
+            pnlForm.Controls.Add(lblDate);
+            pnlForm.Controls.Add(dtpDate);
+            pnlForm.Controls.Add(lblTime);
+            pnlForm.Controls.Add(cboTime);
+            pnlForm.Controls.Add(lblType);
+            pnlForm.Controls.Add(cboType);
+            pnlForm.Controls.Add(lblTrainer);
+            pnlForm.Controls.Add(cboTrainer);
+            pnlForm.Controls.Add(lblRoom);
+            pnlForm.Controls.Add(cboRoom);
+            pnlForm.Controls.Add(lblNote);
+            pnlForm.Controls.Add(txtNote);
+            pnlForm.Controls.Add(btnSubmit);
+
+            card.Controls.Add(pnlForm);
+            card.Controls.Add(lblTitle);
+
+            return card;
+        }
+
+        private void BtnSubmit_Click(object? sender, EventArgs e)
+        {
+            DateTime chosenDate = dtpDate.Value.Date;
+            string timeStr = cboTime.Text.Split('(')[0].Trim();
+            string typeStr = cboType.Text.Split('(')[0].Trim();
+            int ptId = (cboTrainer.SelectedItem as ComboBoxItem)?.Value ?? 1;
+            int branchId = (cboRoom.SelectedItem as ComboBoxItem)?.Value ?? 1;
+            string trainerStr = (cboTrainer.SelectedItem as ComboBoxItem)?.Text ?? cboTrainer.Text;
+            string roomStr = (cboRoom.SelectedItem as ComboBoxItem)?.Text ?? cboRoom.Text;
+            string noteStr = txtNote.Text.Trim();
+
+            // Check if there is already a schedule on that date and time slot
+            bool isDuplicate = _schedules.Any(x => x.Date.Date == chosenDate && x.TimeRange == timeStr && x.Status != "Đã hủy");
+            if (isDuplicate)
+            {
+                MessageBox.Show(
+                    $"Bạn đã có lịch tập vào khung giờ {timeStr} ngày {chosenDate:dd/MM/yyyy}!\nVui lòng chọn khung giờ hoặc ngày khác.",
+                    "Trùng lịch tập",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+                return;
+            }
+
+            TimeSpan start = new TimeSpan(8, 0, 0);
+            TimeSpan end = new TimeSpan(9, 30, 0);
+            var parts = timeStr.Split('-');
+            if (parts.Length == 2 && TimeSpan.TryParse(parts[0].Trim(), out var s) && TimeSpan.TryParse(parts[1].Trim(), out var ee))
+            {
+                start = s;
+                end = ee;
+            }
+
+            bool saved = MemberService.Instance.BookSchedule(chosenDate, start, end, typeStr, ptId, branchId, noteStr);
+            if (saved)
+            {
+                LoadSchedulesFromDatabase();
+                RefreshAllViews();
+
+                MessageBox.Show(
+                    $"✅ Gửi yêu cầu đặt lịch hẹn thành công!\n\n" +
+                    $"• Ngày tập: {chosenDate:dd/MM/yyyy}\n" +
+                    $"• Khung giờ: {timeStr}\n" +
+                    $"• HLV phụ trách: {trainerStr}\n" +
+                    $"• Chi nhánh: {roomStr}\n" +
+                    $"• Nguồn gốc: Hội viên tự đặt\n" +
+                    $"• Trạng thái: Chờ HLV duyệt (HLV sẽ phản hồi sớm nhất)",
+                    "Đặt lịch thành công",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
+            }
+            else
+            {
+                MessageBox.Show("Không thể lưu lịch tập vào cơ sở dữ liệu.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private Label CreateFormLabel(string text, ref int y)
+        {
+            Label lbl = new Label
+            {
+                Text = text,
+                Font = UITheme.FontSmallBold,
+                ForeColor = UITheme.TextDark,
+                AutoSize = true,
+                Location = new Point(4, y)
+            };
+            y += 22;
+            return lbl;
+        }
+
+        #endregion
+    }
+}

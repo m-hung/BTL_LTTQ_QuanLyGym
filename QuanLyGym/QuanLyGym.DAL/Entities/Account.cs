@@ -15,6 +15,9 @@ namespace QuanLyGym.DAL.Entities
         [StringLength(255)]
         public string PasswordHash { get; set; } = string.Empty;
 
+        [StringLength(100)]
+        public string? Email { get; set; }
+
         [StringLength(20)]
         public string Role { get; set; } = "Member"; // Admin / Member / PT
 

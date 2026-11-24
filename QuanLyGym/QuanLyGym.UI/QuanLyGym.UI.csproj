@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
+    <NoWarn>$(NoWarn);WFO1000;NU1902;NU1903;CS8602;CS0414</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,6 +14,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="WinForms.DataVisualization" Version="1.10.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -21,10 +23,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Forms\Admin\" />
     <Folder Include="Forms\Member\" />
     <Folder Include="Forms\Common\" />
     <Folder Include="Forms\PT\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- File cấu hình gửi mail (chứa mật khẩu, KHÔNG đưa lên git). Có file thì tự chép sang thư mục chạy. -->
+    <None Update="mail.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

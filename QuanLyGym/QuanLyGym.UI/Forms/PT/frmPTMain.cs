@@ -1,3 +1,4 @@
+﻿using QuanLyGym.UI.Helpers;
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -74,6 +75,14 @@ namespace QuanLyGym.UI.Forms.PT
                     }
                 }
             };
+        }
+
+        private static string GetInitials(string name)
+        {
+            var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length == 0) return "PT";
+            if (parts.Length == 1) return parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpper();
+            return (parts[^2][0].ToString() + parts[^1][0]).ToUpper();
         }
 
         private void InitViews()
@@ -192,13 +201,14 @@ namespace QuanLyGym.UI.Forms.PT
             {
                 g.FillEllipse(b, avRect);
             }
-            TextRenderer.DrawText(g, "TM", PTUITheme.FontBold, avRect, PTUITheme.PrimaryLime,
+            string ptName = string.IsNullOrWhiteSpace(UserSession.DisplayName) ? "Huấn luyện viên" : UserSession.DisplayName;
+            TextRenderer.DrawText(g, GetInitials(ptName), PTUITheme.FontBold, avRect, PTUITheme.PrimaryLime,
                 TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
 
             // PT Name
             Rectangle nameRect = new Rectangle(68, 18, r.Width - 85, 20);
-            TextRenderer.DrawText(g, "Tuấn Minh", PTUITheme.FontBold, nameRect, PTUITheme.TextWhite,
-                TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
+            TextRenderer.DrawText(g, ptName, PTUITheme.FontBold, nameRect, PTUITheme.TextWhite,
+                TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix | TextFormatFlags.EndEllipsis);
 
             // PT Status
             Rectangle dotRect = new Rectangle(68, 43, 8, 8);
@@ -257,6 +267,17 @@ namespace QuanLyGym.UI.Forms.PT
                 _pendingBookingCount = modal.PendingCount;
                 btnNotificationBell.Invalidate();
             }
+        }
+
+        private void frmPTMain_Load(object? sender, EventArgs e)
+        {
+            //lblXinChao.Text = $"Xin chào, {UserSession.DisplayName}";
+            //lblTenDangNhap.Text = $"Tên đăng nhập: {UserSession.Username}";
+        }
+
+        private void btnDangXuat_Click(object? sender, EventArgs e)
+        {
+            UserSession.Logout(this);
         }
     }
 }
