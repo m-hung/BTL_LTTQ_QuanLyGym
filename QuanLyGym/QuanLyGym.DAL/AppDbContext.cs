@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using QuanLyGym.DAL.Entities;
 
 namespace QuanLyGym.DAL
@@ -20,6 +20,7 @@ namespace QuanLyGym.DAL
         public DbSet<CheckIn> CheckIns { get; set; }
         public DbSet<CheckInImage> CheckInImages { get; set; }
         public DbSet<Progress> Progresses { get; set; }
+        public DbSet<PasswordReset> PasswordResets { get; set; }
 
         private static string? _resolvedConnectionString;
         private static readonly object _lock = new object();

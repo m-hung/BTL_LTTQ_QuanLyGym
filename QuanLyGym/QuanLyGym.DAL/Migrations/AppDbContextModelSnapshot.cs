@@ -33,6 +33,10 @@ namespace QuanLyGym.DAL.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Email")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -53,6 +57,10 @@ namespace QuanLyGym.DAL.Migrations
 
                     b.HasKey("AccountID");
 
+                    b.HasIndex("Email")
+                        .IsUnique()
+                        .HasFilter("[Email] IS NOT NULL");
+
                     b.ToTable("Accounts");
 
                     b.HasData(
@@ -60,7 +68,8 @@ namespace QuanLyGym.DAL.Migrations
                         {
                             AccountID = 1,
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "123456",
+                            Email = "admingym5@gmail.com",
+                            PasswordHash = "PBKDF2$100000$6nqYawHporBDCQpOTdXZdA==$HJcSl22pVMBm2pEqQMq0C/h8wthaCgMd1P2n7IfzI7o=",
                             Role = "Admin",
                             Status = true,
                             Username = "admin"
@@ -69,7 +78,8 @@ namespace QuanLyGym.DAL.Migrations
                         {
                             AccountID = 2,
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "123456",
+                            Email = "nam.nguyen@quanlygym.vn",
+                            PasswordHash = "PBKDF2$100000$6nqYawHporBDCQpOTdXZdA==$HJcSl22pVMBm2pEqQMq0C/h8wthaCgMd1P2n7IfzI7o=",
                             Role = "PT",
                             Status = true,
                             Username = "pt_nam"
@@ -78,7 +88,8 @@ namespace QuanLyGym.DAL.Migrations
                         {
                             AccountID = 3,
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "123456",
+                            Email = "bich.tran@quanlygym.vn",
+                            PasswordHash = "PBKDF2$100000$6nqYawHporBDCQpOTdXZdA==$HJcSl22pVMBm2pEqQMq0C/h8wthaCgMd1P2n7IfzI7o=",
                             Role = "PT",
                             Status = true,
                             Username = "pt_bichtran"
@@ -87,7 +98,8 @@ namespace QuanLyGym.DAL.Migrations
                         {
                             AccountID = 4,
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "123456",
+                            Email = "minh.duc@quanlygym.vn",
+                            PasswordHash = "PBKDF2$100000$6nqYawHporBDCQpOTdXZdA==$HJcSl22pVMBm2pEqQMq0C/h8wthaCgMd1P2n7IfzI7o=",
                             Role = "PT",
                             Status = true,
                             Username = "pt_ducminh"
@@ -96,7 +108,8 @@ namespace QuanLyGym.DAL.Migrations
                         {
                             AccountID = 5,
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "123456",
+                            Email = "thao.phan@quanlygym.vn",
+                            PasswordHash = "PBKDF2$100000$6nqYawHporBDCQpOTdXZdA==$HJcSl22pVMBm2pEqQMq0C/h8wthaCgMd1P2n7IfzI7o=",
                             Role = "PT",
                             Status = true,
                             Username = "pt_thaophan"
@@ -105,7 +118,8 @@ namespace QuanLyGym.DAL.Migrations
                         {
                             AccountID = 6,
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "123456",
+                            Email = "long.vu@quanlygym.vn",
+                            PasswordHash = "PBKDF2$100000$6nqYawHporBDCQpOTdXZdA==$HJcSl22pVMBm2pEqQMq0C/h8wthaCgMd1P2n7IfzI7o=",
                             Role = "PT",
                             Status = true,
                             Username = "pt_hoanglong"
@@ -114,7 +128,8 @@ namespace QuanLyGym.DAL.Migrations
                         {
                             AccountID = 7,
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "123456",
+                            Email = "nguyenkhanhhung2512@gmail.com",
+                            PasswordHash = "PBKDF2$100000$6nqYawHporBDCQpOTdXZdA==$HJcSl22pVMBm2pEqQMq0C/h8wthaCgMd1P2n7IfzI7o=",
                             Role = "Member",
                             Status = true,
                             Username = "member_khanhhung"
@@ -123,7 +138,8 @@ namespace QuanLyGym.DAL.Migrations
                         {
                             AccountID = 8,
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "123456",
+                            Email = "minhhungthai7@gmail.com",
+                            PasswordHash = "PBKDF2$100000$6nqYawHporBDCQpOTdXZdA==$HJcSl22pVMBm2pEqQMq0C/h8wthaCgMd1P2n7IfzI7o=",
                             Role = "Member",
                             Status = true,
                             Username = "member_minhhung"
@@ -132,7 +148,8 @@ namespace QuanLyGym.DAL.Migrations
                         {
                             AccountID = 9,
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "123456",
+                            Email = "hoa.pham@gmail.com",
+                            PasswordHash = "PBKDF2$100000$6nqYawHporBDCQpOTdXZdA==$HJcSl22pVMBm2pEqQMq0C/h8wthaCgMd1P2n7IfzI7o=",
                             Role = "Member",
                             Status = true,
                             Username = "member_hoa"
@@ -141,7 +158,8 @@ namespace QuanLyGym.DAL.Migrations
                         {
                             AccountID = 10,
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "123456",
+                            Email = "dung.hoang@gmail.com",
+                            PasswordHash = "PBKDF2$100000$6nqYawHporBDCQpOTdXZdA==$HJcSl22pVMBm2pEqQMq0C/h8wthaCgMd1P2n7IfzI7o=",
                             Role = "Member",
                             Status = true,
                             Username = "member_dung"
@@ -150,7 +168,8 @@ namespace QuanLyGym.DAL.Migrations
                         {
                             AccountID = 11,
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "123456",
+                            Email = "phuong.do@gmail.com",
+                            PasswordHash = "PBKDF2$100000$6nqYawHporBDCQpOTdXZdA==$HJcSl22pVMBm2pEqQMq0C/h8wthaCgMd1P2n7IfzI7o=",
                             Role = "Member",
                             Status = true,
                             Username = "member_phuong"
@@ -159,7 +178,8 @@ namespace QuanLyGym.DAL.Migrations
                         {
                             AccountID = 12,
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "123456",
+                            Email = "tuan.ngo@gmail.com",
+                            PasswordHash = "PBKDF2$100000$6nqYawHporBDCQpOTdXZdA==$HJcSl22pVMBm2pEqQMq0C/h8wthaCgMd1P2n7IfzI7o=",
                             Role = "Member",
                             Status = true,
                             Username = "member_tuan"
@@ -168,7 +188,8 @@ namespace QuanLyGym.DAL.Migrations
                         {
                             AccountID = 13,
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "123456",
+                            Email = "mai.bui@gmail.com",
+                            PasswordHash = "PBKDF2$100000$6nqYawHporBDCQpOTdXZdA==$HJcSl22pVMBm2pEqQMq0C/h8wthaCgMd1P2n7IfzI7o=",
                             Role = "Member",
                             Status = true,
                             Username = "member_mai"
@@ -177,7 +198,8 @@ namespace QuanLyGym.DAL.Migrations
                         {
                             AccountID = 14,
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "123456",
+                            Email = "vy.trinh@gmail.com",
+                            PasswordHash = "PBKDF2$100000$6nqYawHporBDCQpOTdXZdA==$HJcSl22pVMBm2pEqQMq0C/h8wthaCgMd1P2n7IfzI7o=",
                             Role = "Member",
                             Status = true,
                             Username = "member_vy"
@@ -186,7 +208,8 @@ namespace QuanLyGym.DAL.Migrations
                         {
                             AccountID = 15,
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "123456",
+                            Email = "khoa.dang@gmail.com",
+                            PasswordHash = "PBKDF2$100000$6nqYawHporBDCQpOTdXZdA==$HJcSl22pVMBm2pEqQMq0C/h8wthaCgMd1P2n7IfzI7o=",
                             Role = "Member",
                             Status = true,
                             Username = "member_khoa"
@@ -195,7 +218,8 @@ namespace QuanLyGym.DAL.Migrations
                         {
                             AccountID = 16,
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PasswordHash = "123456",
+                            Email = "tram.vo@gmail.com",
+                            PasswordHash = "PBKDF2$100000$6nqYawHporBDCQpOTdXZdA==$HJcSl22pVMBm2pEqQMq0C/h8wthaCgMd1P2n7IfzI7o=",
                             Role = "Member",
                             Status = true,
                             Username = "member_tram"
@@ -1725,6 +1749,41 @@ namespace QuanLyGym.DAL.Migrations
                         });
                 });
 
+            modelBuilder.Entity("QuanLyGym.DAL.Entities.PasswordReset", b =>
+                {
+                    b.Property<int>("PasswordResetID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PasswordResetID"));
+
+                    b.Property<int>("AccountID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CodeHash")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("FailedAttempts")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("bit");
+
+                    b.HasKey("PasswordResetID");
+
+                    b.HasIndex("AccountID", "CreatedAt");
+
+                    b.ToTable("PasswordResets");
+                });
+
             modelBuilder.Entity("QuanLyGym.DAL.Entities.Progress", b =>
                 {
                     b.Property<int>("ProgressID")
@@ -3101,6 +3160,17 @@ namespace QuanLyGym.DAL.Migrations
                         .HasForeignKey("BranchID");
 
                     b.Navigation("Branch");
+                });
+
+            modelBuilder.Entity("QuanLyGym.DAL.Entities.PasswordReset", b =>
+                {
+                    b.HasOne("QuanLyGym.DAL.Entities.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
                 });
 
             modelBuilder.Entity("QuanLyGym.DAL.Entities.Progress", b =>

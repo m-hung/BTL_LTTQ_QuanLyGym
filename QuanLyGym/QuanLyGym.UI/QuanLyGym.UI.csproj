@@ -28,4 +28,11 @@
     <Folder Include="Forms\PT\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- File cấu hình gửi mail (chứa mật khẩu, KHÔNG đưa lên git). Có file thì tự chép sang thư mục chạy. -->
+    <None Update="mail.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

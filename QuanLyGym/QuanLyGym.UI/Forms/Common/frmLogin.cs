@@ -99,8 +99,13 @@ namespace QuanLyGym.UI.Forms.Common
 
         private void lnkQuenMatKhau_LinkClicked(object? sender, LinkLabelLinkClickedEventArgs e)
         {
-            using var f = new frmQuenMatKhau(txtTenDangNhap.Text.Trim());
-            f.ShowDialog(this);
+            using var f = new frmQuenMatKhau();
+            if (f.ShowDialog(this) == DialogResult.OK && !string.IsNullOrEmpty(f.ResetUsername))
+            {
+                txtTenDangNhap.Text = f.ResetUsername;
+                txtMatKhau.Clear();
+                txtMatKhau.Focus();
+            }
         }
 
         // Đổi màu viền ô nhập khi đang gõ
