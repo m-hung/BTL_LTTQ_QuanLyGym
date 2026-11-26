@@ -130,7 +130,7 @@ namespace QuanLyGym.UI.Forms.PT
             this.btnViewGrid.FlatAppearance.BorderSize = 0;
             this.btnViewGrid.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnViewGrid.Font = new System.Drawing.Font("Segoe UI", 9.5F);
-            this.btnViewGrid.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(142)))), ((int)(((byte)(149)))), ((int)(((byte)(165)))));
+            this.btnViewGrid.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(204)))), ((int)(((byte)(218)))));
             this.btnViewGrid.Location = new System.Drawing.Point(1008, 9);
             this.btnViewGrid.Name = "btnViewGrid";
             this.btnViewGrid.Size = new System.Drawing.Size(144, 36);

@@ -59,7 +59,7 @@ namespace QuanLyGym.UI.Forms.PT
             // 
             this.lblMember.AutoSize = true;
             this.lblMember.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.lblMember.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(142)))), ((int)(((byte)(149)))), ((int)(((byte)(165)))));
+            this.lblMember.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(204)))), ((int)(((byte)(218)))));
             this.lblMember.Location = new System.Drawing.Point(24, 65);
             this.lblMember.Name = "lblMember";
             this.lblMember.Size = new System.Drawing.Size(107, 15);
@@ -88,7 +88,7 @@ namespace QuanLyGym.UI.Forms.PT
             // 
             this.lblDate.AutoSize = true;
             this.lblDate.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.lblDate.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(142)))), ((int)(((byte)(149)))), ((int)(((byte)(165)))));
+            this.lblDate.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(204)))), ((int)(((byte)(218)))));
             this.lblDate.Location = new System.Drawing.Point(24, 125);
             this.lblDate.Name = "lblDate";
             this.lblDate.Size = new System.Drawing.Size(74, 15);
@@ -111,7 +111,7 @@ namespace QuanLyGym.UI.Forms.PT
             // 
             this.lblTimeSlot.AutoSize = true;
             this.lblTimeSlot.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.lblTimeSlot.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(142)))), ((int)(((byte)(149)))), ((int)(((byte)(165)))));
+            this.lblTimeSlot.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(204)))), ((int)(((byte)(218)))));
             this.lblTimeSlot.Location = new System.Drawing.Point(240, 125);
             this.lblTimeSlot.Name = "lblTimeSlot";
             this.lblTimeSlot.Size = new System.Drawing.Size(89, 15);
@@ -141,7 +141,7 @@ namespace QuanLyGym.UI.Forms.PT
             // 
             this.lblLocation.AutoSize = true;
             this.lblLocation.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.lblLocation.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(142)))), ((int)(((byte)(149)))), ((int)(((byte)(165)))));
+            this.lblLocation.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(204)))), ((int)(((byte)(218)))));
             this.lblLocation.Location = new System.Drawing.Point(24, 185);
             this.lblLocation.Name = "lblLocation";
             this.lblLocation.Size = new System.Drawing.Size(135, 15);
@@ -170,7 +170,7 @@ namespace QuanLyGym.UI.Forms.PT
             // 
             this.lblPlan.AutoSize = true;
             this.lblPlan.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.lblPlan.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(142)))), ((int)(((byte)(149)))), ((int)(((byte)(165)))));
+            this.lblPlan.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(204)))), ((int)(((byte)(218)))));
             this.lblPlan.Location = new System.Drawing.Point(24, 245);
             this.lblPlan.Name = "lblPlan";
             this.lblPlan.Size = new System.Drawing.Size(183, 15);

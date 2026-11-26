@@ -222,7 +222,7 @@ namespace QuanLyGym.UI.Forms.PT
             // 
             this.lblWaist.AutoSize = true;
             this.lblWaist.Font = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold);
-            this.lblWaist.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(142)))), ((int)(((byte)(149)))), ((int)(((byte)(165)))));
+            this.lblWaist.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(204)))), ((int)(((byte)(218)))));
             this.lblWaist.Location = new System.Drawing.Point(298, 116);
             this.lblWaist.Name = "lblWaist";
             this.lblWaist.Size = new System.Drawing.Size(89, 13);
@@ -246,7 +246,7 @@ namespace QuanLyGym.UI.Forms.PT
             // 
             this.lblBodyFat.AutoSize = true;
             this.lblBodyFat.Font = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold);
-            this.lblBodyFat.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(142)))), ((int)(((byte)(149)))), ((int)(((byte)(165)))));
+            this.lblBodyFat.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(204)))), ((int)(((byte)(218)))));
             this.lblBodyFat.Location = new System.Drawing.Point(20, 116);
             this.lblBodyFat.Name = "lblBodyFat";
             this.lblBodyFat.Size = new System.Drawing.Size(124, 13);
@@ -270,7 +270,7 @@ namespace QuanLyGym.UI.Forms.PT
             // 
             this.lblHeight.AutoSize = true;
             this.lblHeight.Font = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold);
-            this.lblHeight.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(142)))), ((int)(((byte)(149)))), ((int)(((byte)(165)))));
+            this.lblHeight.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(204)))), ((int)(((byte)(218)))));
             this.lblHeight.Location = new System.Drawing.Point(298, 56);
             this.lblHeight.Name = "lblHeight";
             this.lblHeight.Size = new System.Drawing.Size(95, 13);
@@ -294,7 +294,7 @@ namespace QuanLyGym.UI.Forms.PT
             // 
             this.lblWeight.AutoSize = true;
             this.lblWeight.Font = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold);
-            this.lblWeight.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(142)))), ((int)(((byte)(149)))), ((int)(((byte)(165)))));
+            this.lblWeight.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(204)))), ((int)(((byte)(218)))));
             this.lblWeight.Location = new System.Drawing.Point(20, 56);
             this.lblWeight.Name = "lblWeight";
             this.lblWeight.Size = new System.Drawing.Size(94, 13);

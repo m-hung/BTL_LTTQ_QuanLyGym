@@ -2,17 +2,32 @@
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.IO;
 using System.Windows.Forms;
+using QuanLyGym.BLL.DTOs.PT;
+using QuanLyGym.BLL.Helpers;
+using QuanLyGym.BLL.Services.PT;
 
 namespace QuanLyGym.UI.Forms.PT
 {
     public partial class frmPTMain : Form
     {
+        private readonly PTProfileService _profileService = new PTProfileService();
+        private readonly PTBookingApprovalService _bookingService = new PTBookingApprovalService();
+
         private ucLichTap? _viewLichTap;
+        private ucYeuCauDatLich? _viewYeuCauDatLich;
         private ucHoiVien? _viewHoiVien;
         private ucTheoDoiTheChat? _viewTheoDoiTheChat;
-        private int _currentTabIndex = 0; // 0: Lịch làm việc, 1: Nhật ký HV đã dạy, 2: InBody
-        private int _pendingBookingCount = 3; // Số lượng thông báo đặt lịch chờ xác nhận
+        private ucThongTinCaNhan? _viewThongTinCaNhan;
+
+        private int _currentTabIndex = 0; // 0: Lịch, 1: Yêu cầu đặt lịch, 2: Nhật ký HV, 3: InBody, 4: Thông tin cá nhân
+        private int _currentPTId = 1;
+        private int _pendingBookingCount = 0;
+        private PTProfileDto _currentPTProfile = new PTProfileDto();
+        private Image? _sidebarAvatarImage;
+        private bool _isProfileHovered;
+        private readonly ToolTip _sidebarToolTip = new ToolTip();
 
         public frmPTMain()
         {
@@ -23,9 +38,63 @@ namespace QuanLyGym.UI.Forms.PT
             this.Size = new Size(1380, 840);
             this.BackColor = PTUITheme.BgDark;
 
+            _currentPTId = _profileService.GetPTIdByAccountId(UserSession.AccountID);
+            RefreshSidebarState();
             SetupSidebar();
             InitViews();
             SwitchTab(0);
+
+            PTPortalSync.DataChanged += OnSharedDataChanged;
+            this.FormClosed += (s, e) =>
+            {
+                PTPortalSync.DataChanged -= OnSharedDataChanged;
+                _sidebarAvatarImage?.Dispose();
+                _sidebarToolTip.Dispose();
+            };
+        }
+
+        private void OnSharedDataChanged()
+        {
+            if (IsDisposed) return;
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action(RefreshSidebarState));
+                return;
+            }
+            RefreshSidebarState();
+        }
+
+        private void RefreshSidebarState()
+        {
+            _pendingBookingCount = _bookingService.GetPendingCount(_currentPTId);
+            _currentPTProfile = _profileService.GetProfile(_currentPTId);
+
+            _sidebarAvatarImage?.Dispose();
+            _sidebarAvatarImage = null;
+            if (!string.IsNullOrWhiteSpace(_currentPTProfile.AvatarPath) && File.Exists(_currentPTProfile.AvatarPath))
+            {
+                try
+                {
+                    byte[] bytes = File.ReadAllBytes(_currentPTProfile.AvatarPath);
+                    using var ms = new MemoryStream(bytes);
+                    _sidebarAvatarImage = Image.FromStream(ms);
+                }
+                catch
+                {
+                    _sidebarAvatarImage = null;
+                }
+            }
+
+            btnMenuRequests?.Invalidate();
+            btnNotificationBell?.Invalidate();
+            pnlPTProfile?.Invalidate();
+
+            string tipName = string.IsNullOrWhiteSpace(_currentPTProfile.FullName) ? "Tuấn Minh" : _currentPTProfile.FullName;
+            string tipSpec = string.IsNullOrWhiteSpace(_currentPTProfile.Specialization) ? "Sẵn Sàng Nhận Lịch" : _currentPTProfile.Specialization;
+            if (pnlPTProfile != null)
+            {
+                _sidebarToolTip.SetToolTip(pnlPTProfile, $"{tipName}\nChuyên môn: {tipSpec}\nNhấn để mở Thông Tin Cá Nhân");
+            }
         }
 
         private void SetupSidebar()
@@ -34,6 +103,26 @@ namespace QuanLyGym.UI.Forms.PT
             pnlBrand.Paint += PnlBrand_Paint;
             pnlPTProfile.Paint += PnlPTProfile_Paint;
             pnlTopHeader.Paint += PnlTopHeader_Paint;
+
+            // Cho phép bấm trực tiếp vào thẻ PT ở cuối sidebar để mở trang Thông Tin Cá Nhân
+            pnlPTProfile.MouseEnter += (s, e) => { _isProfileHovered = true; pnlPTProfile.Invalidate(); };
+            pnlPTProfile.MouseLeave += (s, e) => { _isProfileHovered = false; pnlPTProfile.Invalidate(); };
+            pnlPTProfile.Click += (s, e) => SwitchTab(4);
+
+            // Vẽ badge số lượng yêu cầu chờ duyệt trên nút menu Yêu Cầu Đặt Lịch
+            btnMenuRequests.Paint += (s, pe) =>
+            {
+                if (_pendingBookingCount <= 0) return;
+
+                pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                string badgeText = _pendingBookingCount > 99 ? "99+" : _pendingBookingCount.ToString();
+                int badgeW = badgeText.Length > 2 ? 28 : 22;
+                Rectangle badgeRect = new Rectangle(btnMenuRequests.Width - badgeW - 10, (btnMenuRequests.Height - 20) / 2, badgeW, 20);
+
+                Color bgBadge = _currentTabIndex == 1 ? PTUITheme.PrimaryLime : Color.FromArgb(245, 158, 11);
+                PTUITheme.DrawBadge(pe.Graphics, badgeText, badgeRect, bgBadge, Color.Black,
+                    new Font("Segoe UI", 8f, FontStyle.Bold), 10);
+            };
 
             // Nút Chuông Thông Báo
             btnNotificationBell.MouseEnter += (s, e) => { btnNotificationBell.BackColor = Color.FromArgb(36, 44, 62); btnNotificationBell.Invalidate(); };
@@ -51,12 +140,11 @@ namespace QuanLyGym.UI.Forms.PT
                 Rectangle bellRect = new Rectangle(br.X + (br.Width - bellSize) / 2 - 2, br.Y + (br.Height - bellSize) / 2 + 2, bellSize, bellSize);
                 PTUITheme.DrawVectorBell(pe.Graphics, bellRect, PTUITheme.PrimaryLime);
 
-                // Badge số lượng thông báo
                 if (_pendingBookingCount > 0)
                 {
                     int badgeSize = 22;
                     Rectangle badgeRect = new Rectangle(br.Right - badgeSize - 3, br.Y + 3, badgeSize, badgeSize);
-                    
+
                     using (Pen pBorder = new Pen(btnNotificationBell.BackColor, 2.2f))
                     {
                         pe.Graphics.DrawEllipse(pBorder, badgeRect);
@@ -88,19 +176,26 @@ namespace QuanLyGym.UI.Forms.PT
         private void InitViews()
         {
             _viewLichTap = new ucLichTap { Dock = DockStyle.Fill };
+            _viewYeuCauDatLich = new ucYeuCauDatLich(_currentPTId) { Dock = DockStyle.Fill };
             _viewHoiVien = new ucHoiVien { Dock = DockStyle.Fill };
             _viewTheoDoiTheChat = new ucTheoDoiTheChat { Dock = DockStyle.Fill };
+            _viewThongTinCaNhan = new ucThongTinCaNhan(_currentPTId) { Dock = DockStyle.Fill };
 
-            // Liên kết sự kiện: Khi bấm "Xem Hồ Sơ & Lịch Sử" ở tab Hội Viên, chuyển sang tab Thể Chất & PR của hội viên đó
+            _viewYeuCauDatLich.OnViewScheduleRequested += () => SwitchTab(0);
+
             _viewHoiVien.OnViewMemberHistoryRequested += (memberName) =>
             {
-                SwitchTab(2);
+                SwitchTab(3);
                 _viewTheoDoiTheChat?.SelectMemberByName(memberName);
             };
 
+            _viewThongTinCaNhan.OnProfileSaved += RefreshSidebarState;
+
             pnlMainContainer.Controls.Add(_viewLichTap);
+            pnlMainContainer.Controls.Add(_viewYeuCauDatLich);
             pnlMainContainer.Controls.Add(_viewHoiVien);
             pnlMainContainer.Controls.Add(_viewTheoDoiTheChat);
+            pnlMainContainer.Controls.Add(_viewThongTinCaNhan);
         }
 
         public void SwitchTab(int tabIndex)
@@ -108,8 +203,10 @@ namespace QuanLyGym.UI.Forms.PT
             _currentTabIndex = tabIndex;
 
             _viewLichTap?.Hide();
+            _viewYeuCauDatLich?.Hide();
             _viewHoiVien?.Hide();
             _viewTheoDoiTheChat?.Hide();
+            _viewThongTinCaNhan?.Hide();
 
             UpdateButtonStyles();
 
@@ -121,25 +218,40 @@ namespace QuanLyGym.UI.Forms.PT
                     _viewLichTap?.BringToFront();
                     break;
                 case 1:
+                    lblHeaderTitle.Text = "YÊU CẦU ĐẶT LỊCH TỪ HỌC VIÊN";
+                    _viewYeuCauDatLich?.RefreshView();
+                    _viewYeuCauDatLich?.Show();
+                    _viewYeuCauDatLich?.BringToFront();
+                    break;
+                case 2:
                     lblHeaderTitle.Text = "NHẬT KÝ HỘI VIÊN ĐÃ DẠY";
                     _viewHoiVien?.Show();
                     _viewHoiVien?.BringToFront();
                     break;
-                case 2:
+                case 3:
                     lblHeaderTitle.Text = "TRA CỨU CHỈ SỐ INBODY HỘI VIÊN";
                     _viewTheoDoiTheChat?.Show();
                     _viewTheoDoiTheChat?.BringToFront();
                     break;
+                case 4:
+                    lblHeaderTitle.Text = "THÔNG TIN CÁ NHÂN HUẤN LUYỆN VIÊN";
+                    _viewThongTinCaNhan?.LoadProfileData();
+                    _viewThongTinCaNhan?.Show();
+                    _viewThongTinCaNhan?.BringToFront();
+                    break;
             }
 
             pnlTopHeader.Invalidate();
+            pnlPTProfile.Invalidate();
         }
 
         private void UpdateButtonStyles()
         {
             SetMenuButtonStyle(btnMenuSchedule, _currentTabIndex == 0);
-            SetMenuButtonStyle(btnMenuMembers, _currentTabIndex == 1);
-            SetMenuButtonStyle(btnMenuPhysical, _currentTabIndex == 2);
+            SetMenuButtonStyle(btnMenuRequests, _currentTabIndex == 1);
+            SetMenuButtonStyle(btnMenuMembers, _currentTabIndex == 2);
+            SetMenuButtonStyle(btnMenuPhysical, _currentTabIndex == 3);
+            SetMenuButtonStyle(btnMenuProfile, _currentTabIndex == 4);
         }
 
         private void SetMenuButtonStyle(Button btn, bool isActive)
@@ -166,59 +278,116 @@ namespace QuanLyGym.UI.Forms.PT
             Graphics g = e.Graphics;
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
-            // Brand Icon (Lime rounded square)
-            Rectangle iconRect = new Rectangle(20, 22, 34, 34);
+            int h = pnlBrand.ClientSize.Height;
+            int iconSize = 36;
+            Rectangle iconRect = new Rectangle(18, (h - iconSize) / 2, iconSize, iconSize);
             using (SolidBrush b = new SolidBrush(PTUITheme.PrimaryLime))
             {
                 PTUITheme.FillRoundedRectangle(g, b, iconRect, 8);
             }
-            TextRenderer.DrawText(g, "T", new Font("Segoe UI", 16f, FontStyle.Bold), iconRect, Color.Black,
+            using var iconFont = new Font("Segoe UI", 15f, FontStyle.Bold);
+            TextRenderer.DrawText(g, "T", iconFont, iconRect, Color.Black,
                 TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
 
-            // Title: TITAN GYM
-            Rectangle titleRect = new Rectangle(62, 20, 170, 22);
-            TextRenderer.DrawText(g, "TITAN GYM", new Font("Segoe UI", 13f, FontStyle.Bold), titleRect, PTUITheme.TextWhite,
-                TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
+            using var titleFont = new Font("Segoe UI", 12.5f, FontStyle.Bold);
+            using var subFont = new Font("Segoe UI", 8.25f, FontStyle.Bold);
 
-            // Subtitle: TRAINER SUITE
-            Rectangle subRect = new Rectangle(62, 40, 170, 16);
-            TextRenderer.DrawText(g, "TRAINER SUITE", PTUITheme.FontSmallBold, subRect, PTUITheme.PrimaryLime,
-                TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
+            int titleH = TextRenderer.MeasureText(g, "TITAN GYM", titleFont, Size.Empty, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix).Height;
+            int subH = TextRenderer.MeasureText(g, "TRAINER SUITE", subFont, Size.Empty, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix).Height;
+            int gap = 3;
+            int totalTextH = titleH + gap + subH;
+            int startY = Math.Max(8, (h - totalTextH) / 2);
+
+            int textX = iconRect.Right + 11;
+            int textW = Math.Max(80, pnlBrand.ClientSize.Width - textX - 10);
+
+            Rectangle titleRect = new Rectangle(textX, startY, textW, titleH);
+            TextRenderer.DrawText(g, "TITAN GYM", titleFont, titleRect, PTUITheme.TextWhite,
+                TextFormatFlags.Left | TextFormatFlags.Top | TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+
+            Rectangle subRect = new Rectangle(textX + 1, startY + titleH + gap, textW, subH);
+            TextRenderer.DrawText(g, "TRAINER SUITE", subFont, subRect, PTUITheme.PrimaryLime,
+                TextFormatFlags.Left | TextFormatFlags.Top | TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
         }
 
         private void PnlPTProfile_Paint(object? sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
             g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
             Rectangle r = pnlPTProfile.ClientRectangle;
-            PTUITheme.DrawCard(g, new Rectangle(14, 10, r.Width - 28, r.Height - 20), radius: 10,
-                customBg: Color.FromArgb(19, 23, 31), customBorder: Color.FromArgb(35, 42, 56));
+            bool isActiveProfile = _currentTabIndex == 4;
 
-            // PT Avatar circle
-            Rectangle avRect = new Rectangle(24, 20, 36, 36);
-            using (SolidBrush b = new SolidBrush(Color.FromArgb(35, 45, 60)))
+            using (Pen topLine = new Pen(Color.FromArgb(32, 38, 50), 1f))
             {
-                g.FillEllipse(b, avRect);
+                g.DrawLine(topLine, 14, 1, r.Width - 14, 1);
             }
-            string ptName = string.IsNullOrWhiteSpace(UserSession.DisplayName) ? "Huấn luyện viên" : UserSession.DisplayName;
-            TextRenderer.DrawText(g, GetInitials(ptName), PTUITheme.FontBold, avRect, PTUITheme.PrimaryLime,
-                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
 
-            // PT Name
-            Rectangle nameRect = new Rectangle(68, 18, r.Width - 85, 20);
-            TextRenderer.DrawText(g, ptName, PTUITheme.FontBold, nameRect, PTUITheme.TextWhite,
-                TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix | TextFormatFlags.EndEllipsis);
+            Rectangle cardRect = new Rectangle(12, 9, r.Width - 24, r.Height - 18);
+            if (isActiveProfile || _isProfileHovered)
+            {
+                Color bg = isActiveProfile ? Color.FromArgb(26, 33, 24) : Color.FromArgb(24, 28, 38);
+                Color border = isActiveProfile ? PTUITheme.PrimaryLime : Color.FromArgb(52, 62, 82);
+                PTUITheme.DrawCard(g, cardRect, radius: 8, customBg: bg, customBorder: border);
+            }
 
-            // PT Status
-            Rectangle dotRect = new Rectangle(68, 43, 8, 8);
+            int avSize = 38;
+            Rectangle avRect = new Rectangle(cardRect.X + 8, cardRect.Y + (cardRect.Height - avSize) / 2, avSize, avSize);
+
+            if (_sidebarAvatarImage != null)
+            {
+                using GraphicsPath clip = PTUITheme.CreateRoundedPath(avRect, 8);
+                g.SetClip(clip);
+                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                g.DrawImage(_sidebarAvatarImage, avRect);
+                g.ResetClip();
+
+                using Pen pAv = new Pen(isActiveProfile ? PTUITheme.PrimaryLime : Color.FromArgb(58, 68, 88), 1f);
+                PTUITheme.DrawRoundedRectangle(g, pAv, avRect, 8);
+            }
+            else
+            {
+                using (SolidBrush b = new SolidBrush(Color.FromArgb(26, 31, 42)))
+                {
+                    PTUITheme.FillRoundedRectangle(g, b, avRect, 8);
+                }
+                using (Pen pAv = new Pen(isActiveProfile ? PTUITheme.PrimaryLime : Color.FromArgb(52, 62, 80), 1f))
+                {
+                    PTUITheme.DrawRoundedRectangle(g, pAv, avRect, 8);
+                }
+                TextRenderer.DrawText(g, PTDisplayHelper.Initials(_currentPTProfile.FullName), PTUITheme.FontBold, avRect, PTUITheme.PrimaryLime,
+                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
+            }
+
+            // Chấm trạng thái online ở góc dưới phải avatar (không chiếm chiều ngang dòng text)
+            Rectangle dotRect = new Rectangle(avRect.Right - 9, avRect.Bottom - 9, 9, 9);
+            using (SolidBrush bRing = new SolidBrush(PTUITheme.BgSidebar))
+                g.FillEllipse(bRing, dotRect.X - 2, dotRect.Y - 2, dotRect.Width + 4, dotRect.Height + 4);
             using (SolidBrush bGreen = new SolidBrush(PTUITheme.Green))
-            {
                 g.FillEllipse(bGreen, dotRect);
-            }
-            Rectangle statusRect = new Rectangle(80, 38, r.Width - 95, 18);
-            TextRenderer.DrawText(g, "Sẵn Sàng Nhận Lịch", PTUITheme.FontSmall, statusRect, PTUITheme.Green,
-                TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
+
+            int textLeft = avRect.Right + 11;
+            int textWidth = Math.Max(60, cardRect.Right - textLeft - 8);
+
+            string displayName = string.IsNullOrWhiteSpace(_currentPTProfile.FullName) ? "Tuấn Minh" : _currentPTProfile.FullName;
+            string specText = string.IsNullOrWhiteSpace(_currentPTProfile.Specialization)
+                ? "Sẵn Sàng Nhận Lịch"
+                : _currentPTProfile.Specialization;
+
+            using var specFont = new Font("Segoe UI", 8.25f, FontStyle.Regular);
+            int nameH = TextRenderer.MeasureText(g, displayName, PTUITheme.FontBold, Size.Empty, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix).Height;
+            int specH = TextRenderer.MeasureText(g, specText, specFont, Size.Empty, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix).Height;
+            int textGap = 3;
+            int textStartY = cardRect.Y + Math.Max(4, (cardRect.Height - (nameH + textGap + specH)) / 2);
+
+            Rectangle nameRect = new Rectangle(textLeft, textStartY, textWidth, nameH + 2);
+            TextRenderer.DrawText(g, displayName, PTUITheme.FontBold, nameRect, PTUITheme.TextWhite,
+                TextFormatFlags.Left | TextFormatFlags.Top | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+
+            Rectangle statusRect = new Rectangle(textLeft, textStartY + nameH + textGap, textWidth, specH + 2);
+            TextRenderer.DrawText(g, specText, specFont, statusRect, PTUITheme.TextMuted,
+                TextFormatFlags.Left | TextFormatFlags.Top | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
         }
 
         private void PnlSidebar_Paint(object? sender, PaintEventArgs e)
@@ -244,28 +413,33 @@ namespace QuanLyGym.UI.Forms.PT
             SwitchTab(0);
         }
 
-        private void btnMenuMembers_Click(object sender, EventArgs e)
+        private void btnMenuRequests_Click(object sender, EventArgs e)
         {
             SwitchTab(1);
         }
 
-        private void btnMenuPhysical_Click(object sender, EventArgs e)
+        private void btnMenuMembers_Click(object sender, EventArgs e)
         {
             SwitchTab(2);
         }
 
+        private void btnMenuPhysical_Click(object sender, EventArgs e)
+        {
+            SwitchTab(3);
+        }
+
+        private void btnMenuProfile_Click(object sender, EventArgs e)
+        {
+            SwitchTab(4);
+        }
+
         private void btnNotificationBell_Click(object sender, EventArgs e)
         {
-            using (var modal = new frmXacNhanLichModal())
+            using (var modal = new frmXacNhanLichModal(_currentPTId))
             {
-                modal.OnBookingsChanged += () =>
-                {
-                    _pendingBookingCount = modal.PendingCount;
-                    btnNotificationBell.Invalidate();
-                };
+                modal.OnBookingsChanged += RefreshSidebarState;
                 modal.ShowDialog(this);
-                _pendingBookingCount = modal.PendingCount;
-                btnNotificationBell.Invalidate();
+                RefreshSidebarState();
             }
         }
 

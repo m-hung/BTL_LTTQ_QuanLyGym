@@ -8,8 +8,10 @@ namespace QuanLyGym.UI.Forms.PT
         private System.Windows.Forms.Panel pnlBrand;
         private System.Windows.Forms.Label lblMenuCategory;
         private System.Windows.Forms.Button btnMenuSchedule;
+        private System.Windows.Forms.Button btnMenuRequests;
         private System.Windows.Forms.Button btnMenuMembers;
         private System.Windows.Forms.Button btnMenuPhysical;
+        private System.Windows.Forms.Button btnMenuProfile;
         private System.Windows.Forms.Panel pnlPTProfile;
         private System.Windows.Forms.Button btnDangXuat;
         private System.Windows.Forms.Panel pnlMainArea;
@@ -32,8 +34,10 @@ namespace QuanLyGym.UI.Forms.PT
             this.pnlSidebar = new System.Windows.Forms.Panel();
             this.pnlPTProfile = new System.Windows.Forms.Panel();
             this.btnDangXuat = new System.Windows.Forms.Button();
+            this.btnMenuProfile = new System.Windows.Forms.Button();
             this.btnMenuPhysical = new System.Windows.Forms.Button();
             this.btnMenuMembers = new System.Windows.Forms.Button();
+            this.btnMenuRequests = new System.Windows.Forms.Button();
             this.btnMenuSchedule = new System.Windows.Forms.Button();
             this.lblMenuCategory = new System.Windows.Forms.Label();
             this.pnlBrand = new System.Windows.Forms.Panel();
@@ -52,8 +56,10 @@ namespace QuanLyGym.UI.Forms.PT
             this.pnlSidebar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(11)))), ((int)(((byte)(13)))), ((int)(((byte)(16)))));
             this.pnlSidebar.Controls.Add(this.btnDangXuat);
             this.pnlSidebar.Controls.Add(this.pnlPTProfile);
+            this.pnlSidebar.Controls.Add(this.btnMenuProfile);
             this.pnlSidebar.Controls.Add(this.btnMenuPhysical);
             this.pnlSidebar.Controls.Add(this.btnMenuMembers);
+            this.pnlSidebar.Controls.Add(this.btnMenuRequests);
             this.pnlSidebar.Controls.Add(this.btnMenuSchedule);
             this.pnlSidebar.Controls.Add(this.lblMenuCategory);
             this.pnlSidebar.Controls.Add(this.pnlBrand);
@@ -65,11 +71,30 @@ namespace QuanLyGym.UI.Forms.PT
             // 
             // pnlPTProfile
             // 
+            this.pnlPTProfile.Cursor = System.Windows.Forms.Cursors.Hand;
             this.pnlPTProfile.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.pnlPTProfile.Location = new System.Drawing.Point(0, 746);
             this.pnlPTProfile.Name = "pnlPTProfile";
             this.pnlPTProfile.Size = new System.Drawing.Size(250, 75);
-            this.pnlPTProfile.TabIndex = 5;
+            this.pnlPTProfile.TabIndex = 7;
+            // 
+            // btnMenuProfile
+            // 
+            this.btnMenuProfile.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnMenuProfile.FlatAppearance.BorderSize = 0;
+            this.btnMenuProfile.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnMenuProfile.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.btnMenuProfile.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(204)))), ((int)(((byte)(218)))));
+            this.btnMenuProfile.Location = new System.Drawing.Point(14, 300);
+            this.btnMenuProfile.Name = "btnMenuProfile";
+            this.btnMenuProfile.Padding = new System.Windows.Forms.Padding(12, 0, 0, 0);
+            this.btnMenuProfile.Size = new System.Drawing.Size(222, 44);
+            this.btnMenuProfile.TabIndex = 6;
+            this.btnMenuProfile.Text = "Thông Tin Cá Nhân";
+            this.btnMenuProfile.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnMenuProfile.UseMnemonic = false;
+            this.btnMenuProfile.UseVisualStyleBackColor = true;
+            this.btnMenuProfile.Click += new System.EventHandler(this.btnMenuProfile_Click);
             // 
             // btnDangXuat
             // 
@@ -99,13 +124,13 @@ namespace QuanLyGym.UI.Forms.PT
             this.btnMenuPhysical.FlatAppearance.BorderSize = 0;
             this.btnMenuPhysical.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnMenuPhysical.Font = new System.Drawing.Font("Segoe UI", 9.5F);
-            this.btnMenuPhysical.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(142)))), ((int)(((byte)(149)))), ((int)(((byte)(165)))));
-            this.btnMenuPhysical.Location = new System.Drawing.Point(14, 206);
+            this.btnMenuPhysical.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(204)))), ((int)(((byte)(218)))));
+            this.btnMenuPhysical.Location = new System.Drawing.Point(14, 250);
             this.btnMenuPhysical.Name = "btnMenuPhysical";
             this.btnMenuPhysical.Padding = new System.Windows.Forms.Padding(12, 0, 0, 0);
             this.btnMenuPhysical.Size = new System.Drawing.Size(222, 44);
-            this.btnMenuPhysical.TabIndex = 4;
-            this.btnMenuPhysical.Text = "TRA CỨU CHỈ SỐ INBODY HỘI VIÊN";
+            this.btnMenuPhysical.TabIndex = 5;
+            this.btnMenuPhysical.Text = "Tra Cứu Chỉ Số InBody";
             this.btnMenuPhysical.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnMenuPhysical.UseMnemonic = false;
             this.btnMenuPhysical.UseVisualStyleBackColor = true;
@@ -117,17 +142,35 @@ namespace QuanLyGym.UI.Forms.PT
             this.btnMenuMembers.FlatAppearance.BorderSize = 0;
             this.btnMenuMembers.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnMenuMembers.Font = new System.Drawing.Font("Segoe UI", 9.5F);
-            this.btnMenuMembers.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(142)))), ((int)(((byte)(149)))), ((int)(((byte)(165)))));
-            this.btnMenuMembers.Location = new System.Drawing.Point(14, 154);
+            this.btnMenuMembers.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(204)))), ((int)(((byte)(218)))));
+            this.btnMenuMembers.Location = new System.Drawing.Point(14, 200);
             this.btnMenuMembers.Name = "btnMenuMembers";
             this.btnMenuMembers.Padding = new System.Windows.Forms.Padding(12, 0, 0, 0);
             this.btnMenuMembers.Size = new System.Drawing.Size(222, 44);
-            this.btnMenuMembers.TabIndex = 3;
-            this.btnMenuMembers.Text = "NHẬT KÝ HỘI VIÊN ĐÃ DẠY";
+            this.btnMenuMembers.TabIndex = 4;
+            this.btnMenuMembers.Text = "Nhật Ký Hội Viên Đã Dạy";
             this.btnMenuMembers.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnMenuMembers.UseMnemonic = false;
             this.btnMenuMembers.UseVisualStyleBackColor = true;
             this.btnMenuMembers.Click += new System.EventHandler(this.btnMenuMembers_Click);
+            // 
+            // btnMenuRequests
+            // 
+            this.btnMenuRequests.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnMenuRequests.FlatAppearance.BorderSize = 0;
+            this.btnMenuRequests.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnMenuRequests.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.btnMenuRequests.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(204)))), ((int)(((byte)(218)))));
+            this.btnMenuRequests.Location = new System.Drawing.Point(14, 150);
+            this.btnMenuRequests.Name = "btnMenuRequests";
+            this.btnMenuRequests.Padding = new System.Windows.Forms.Padding(12, 0, 38, 0);
+            this.btnMenuRequests.Size = new System.Drawing.Size(222, 44);
+            this.btnMenuRequests.TabIndex = 3;
+            this.btnMenuRequests.Text = "Yêu Cầu Đặt Lịch";
+            this.btnMenuRequests.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnMenuRequests.UseMnemonic = false;
+            this.btnMenuRequests.UseVisualStyleBackColor = true;
+            this.btnMenuRequests.Click += new System.EventHandler(this.btnMenuRequests_Click);
             // 
             // btnMenuSchedule
             // 
@@ -151,7 +194,7 @@ namespace QuanLyGym.UI.Forms.PT
             // 
             this.lblMenuCategory.AutoSize = true;
             this.lblMenuCategory.Font = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold);
-            this.lblMenuCategory.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(90)))), ((int)(((byte)(96)))), ((int)(((byte)(110)))));
+            this.lblMenuCategory.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(162)))), ((int)(((byte)(172)))), ((int)(((byte)(192)))));
             this.lblMenuCategory.Location = new System.Drawing.Point(24, 82);
             this.lblMenuCategory.Name = "lblMenuCategory";
             this.lblMenuCategory.Size = new System.Drawing.Size(74, 13);
