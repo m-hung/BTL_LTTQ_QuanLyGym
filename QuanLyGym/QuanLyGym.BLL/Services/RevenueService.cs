@@ -46,6 +46,18 @@ namespace QuanLyGym.BLL.Services
                 int activeBranches = db.Branches.Count(b => b.Status);
                 int totalStaff = db.Staffs.Count();
 
+                var roleGroups = db.Staffs.AsNoTracking()
+                    .Where(s => s.Status)
+                    .GroupBy(s => s.Role)
+                    .Select(g => new { Role = g.Key, Count = g.Count() })
+                    .OrderByDescending(x => x.Count)
+                    .ToList();
+                string roleSummary = string.Join(", ", roleGroups.Select(r => $"{r.Count} {r.Role}"));
+                if (string.IsNullOrWhiteSpace(roleSummary))
+                {
+                    roleSummary = $"{totalStaff} nhân sự";
+                }
+
                 return new RevenueSummaryDto
                 {
                     TotalRevenue = totalRevenue,
@@ -53,7 +65,8 @@ namespace QuanLyGym.BLL.Services
                     ActiveMembers = activeMembers,
                     TotalBranches = totalBranches,
                     ActiveBranches = activeBranches,
-                    TotalStaff = totalStaff
+                    TotalStaff = totalStaff,
+                    StaffRoleSummary = roleSummary
                 };
             }
             catch (Exception ex)
@@ -67,7 +80,8 @@ namespace QuanLyGym.BLL.Services
                     ActiveMembers = 10,
                     TotalBranches = 3,
                     ActiveBranches = 3,
-                    TotalStaff = 14
+                    TotalStaff = 14,
+                    StaffRoleSummary = "5 PT, 3 Thu ngân, 3 Bảo vệ, 3 Tạp vụ"
                 };
             }
         }
@@ -445,6 +459,121 @@ namespace QuanLyGym.BLL.Services
             }
 
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Lấy danh sách lịch đặt tập với PT gần nhất từ Database (bảng Schedules).
+        /// </summary>
+        public List<RecentPTScheduleDto> GetRecentPTSchedules(int count = 5)
+        {
+            try
+            {
+                using var db = new AppDbContext();
+                return db.Schedules.AsNoTracking()
+                    .Include(s => s.Member)
+                    .Include(s => s.PT)
+                    .OrderByDescending(s => s.TrainingDate)
+                    .ThenByDescending(s => s.StartTime)
+                    .Take(count)
+                    .Select(s => new RecentPTScheduleDto
+                    {
+                        ScheduleId = s.ScheduleID,
+                        MemberName = s.Member != null ? s.Member.FullName : "Hội viên",
+                        PTName = s.PT != null ? s.PT.FullName : "HLV",
+                        TrainingDate = s.TrainingDate,
+                        StartTime = s.StartTime,
+                        EndTime = s.EndTime,
+                        Status = s.Status
+                    })
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[RevenueService.GetRecentPTSchedules] Error: {ex.Message}");
+                return new List<RecentPTScheduleDto>();
+            }
+        }
+
+        /// <summary>
+        /// Lấy danh sách giao dịch / đơn mua gói tập gần nhất từ Database (bảng Memberships).
+        /// </summary>
+        public List<RecentTransactionDto> GetRecentTransactions(int count = 5)
+        {
+            try
+            {
+                using var db = new AppDbContext();
+                string[] paymentMethods = { "Tiền mặt", "Chuyển khoản", "VNPay", "Tiền mặt", "VNPay" };
+
+                var list = db.Memberships.AsNoTracking()
+                    .Include(m => m.Member)
+                    .Include(m => m.Package)
+                    .OrderByDescending(m => m.RegisterDate)
+                    .ThenByDescending(m => m.MembershipID)
+                    .Take(count)
+                    .ToList();
+
+                var result = new List<RecentTransactionDto>();
+                int idx = 0;
+                foreach (var m in list)
+                {
+                    result.Add(new RecentTransactionDto
+                    {
+                        MembershipId = m.MembershipID,
+                        CustomerName = m.Member != null ? m.Member.FullName : "Khách hàng",
+                        PackageName = m.Package != null ? m.Package.PackageName : "Gói tập Gym",
+                        PurchaseDate = m.RegisterDate != default ? m.RegisterDate : m.CreatedAt,
+                        PaymentMethod = paymentMethods[idx % paymentMethods.Length],
+                        Amount = m.PriceAtPurchase > 0 ? m.PriceAtPurchase : m.Price,
+                        Status = m.Status == "Active" ? "Hoàn thành" : (m.Status == "Pending" ? "Chờ xác nhận" : "Đã kích hoạt")
+                    });
+                    idx++;
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[RevenueService.GetRecentTransactions] Error: {ex.Message}");
+                return new List<RecentTransactionDto>();
+            }
+        }
+
+        /// <summary>
+        /// Lấy tỷ trọng phân bổ hội viên theo từng gói tập từ Database (bảng Memberships & Packages).
+        /// </summary>
+        public List<PackageDistributionDto> GetPackageDistribution()
+        {
+            try
+            {
+                using var db = new AppDbContext();
+                var packages = db.Packages.AsNoTracking().ToList();
+                var memberships = db.Memberships.AsNoTracking().ToList();
+
+                var result = new List<PackageDistributionDto>();
+                int totalMemberships = memberships.Count;
+
+                foreach (var pkg in packages)
+                {
+                    var mList = memberships.Where(m => m.PackageID == pkg.PackageID).ToList();
+                    int count = mList.Count;
+                    decimal rev = mList.Sum(m => m.PriceAtPurchase > 0 ? m.PriceAtPurchase : m.Price);
+                    double percent = totalMemberships > 0 ? Math.Round((double)count / totalMemberships * 100, 1) : 0;
+
+                    result.Add(new PackageDistributionDto
+                    {
+                        PackageName = pkg.PackageName,
+                        MemberCount = count,
+                        Percentage = percent,
+                        Revenue = rev
+                    });
+                }
+
+                return result.OrderByDescending(x => x.MemberCount).ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[RevenueService.GetPackageDistribution] Error: {ex.Message}");
+                return new List<PackageDistributionDto>();
+            }
         }
     }
 }

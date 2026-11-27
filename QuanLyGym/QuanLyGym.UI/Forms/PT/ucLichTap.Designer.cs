@@ -156,7 +156,7 @@ namespace QuanLyGym.UI.Forms.PT
             // 
             this.lblTodaySessionsHeader.AutoSize = true;
             this.lblTodaySessionsHeader.Font = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Bold);
-            this.lblTodaySessionsHeader.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(142)))), ((int)(((byte)(149)))), ((int)(((byte)(165)))));
+            this.lblTodaySessionsHeader.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(204)))), ((int)(((byte)(218)))));
             this.lblTodaySessionsHeader.Location = new System.Drawing.Point(20, 430);
             this.lblTodaySessionsHeader.Name = "lblTodaySessionsHeader";
             this.lblTodaySessionsHeader.Size = new System.Drawing.Size(309, 15);
@@ -213,7 +213,7 @@ namespace QuanLyGym.UI.Forms.PT
             this.btnDayView.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(50)))), ((int)(((byte)(65)))));
             this.btnDayView.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnDayView.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.btnDayView.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(142)))), ((int)(((byte)(149)))), ((int)(((byte)(165)))));
+            this.btnDayView.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(204)))), ((int)(((byte)(218)))));
             this.btnDayView.Location = new System.Drawing.Point(648, 8);
             this.btnDayView.Name = "btnDayView";
             this.btnDayView.Size = new System.Drawing.Size(90, 32);

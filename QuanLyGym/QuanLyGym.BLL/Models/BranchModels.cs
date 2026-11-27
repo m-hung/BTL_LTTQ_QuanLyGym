@@ -52,6 +52,7 @@ namespace QuanLyGym.BLL.Models
         public int TotalBranches { get; set; }
         public int ActiveBranches { get; set; }
         public int TotalStaff { get; set; }
+        public string StaffRoleSummary { get; set; } = string.Empty;
     }
 
     public class MonthlyRevenueDto
@@ -99,5 +100,45 @@ namespace QuanLyGym.BLL.Models
         public int MembershipCount { get; set; }
         public string TopPackage { get; set; } = "-";
         public double SharePercent { get; set; }
+    }
+
+    public class RecentPTScheduleDto
+    {
+        public int ScheduleId { get; set; }
+        public string MemberName { get; set; } = string.Empty;
+        public string PTName { get; set; } = string.Empty;
+        public DateTime TrainingDate { get; set; }
+        public TimeSpan StartTime { get; set; }
+        public TimeSpan EndTime { get; set; }
+        public string TimeDisplay => $"{TrainingDate:dd/MM/yyyy}\n{StartTime:hh\\:mm} - {EndTime:hh\\:mm}";
+        public string Status { get; set; } = "Scheduled";
+        public string StatusDisplay => Status switch
+        {
+            "Scheduled" => "Đã duyệt",
+            "Pending" => "Chờ duyệt",
+            "Completed" => "Hoàn thành",
+            "Cancelled" => "Đã hủy",
+            _ => Status
+        };
+    }
+
+    public class RecentTransactionDto
+    {
+        public int MembershipId { get; set; }
+        public string OrderCode => $"#OD-{MembershipId:D4}";
+        public string CustomerName { get; set; } = string.Empty;
+        public string PackageName { get; set; } = string.Empty;
+        public DateTime PurchaseDate { get; set; }
+        public string PaymentMethod { get; set; } = "Tiền mặt";
+        public decimal Amount { get; set; }
+        public string Status { get; set; } = "Hoàn thành";
+    }
+
+    public class PackageDistributionDto
+    {
+        public string PackageName { get; set; } = string.Empty;
+        public int MemberCount { get; set; }
+        public double Percentage { get; set; }
+        public decimal Revenue { get; set; }
     }
 }

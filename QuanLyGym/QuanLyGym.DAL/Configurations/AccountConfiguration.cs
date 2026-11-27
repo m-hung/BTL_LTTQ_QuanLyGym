@@ -18,12 +18,19 @@ namespace QuanLyGym.DAL.Configurations
                 // 1 Admin
                 new Account { AccountID = 1, Username = "admin", Email = "admingym5@gmail.com", PasswordHash = SeedPasswordHash, Role = "Admin", Status = true, CreatedAt = new DateTime(2026, 1, 1) },
 
-                // 5 PTs
+                // 12 PTs (AccountID 2..6, 17..23)
                 new Account { AccountID = 2, Username = "pt_nam", Email = "nam.nguyen@quanlygym.vn", PasswordHash = SeedPasswordHash, Role = "PT", Status = true, CreatedAt = new DateTime(2026, 1, 1) },
                 new Account { AccountID = 3, Username = "pt_bichtran", Email = "bich.tran@quanlygym.vn", PasswordHash = SeedPasswordHash, Role = "PT", Status = true, CreatedAt = new DateTime(2026, 1, 1) },
                 new Account { AccountID = 4, Username = "pt_ducminh", Email = "minh.duc@quanlygym.vn", PasswordHash = SeedPasswordHash, Role = "PT", Status = true, CreatedAt = new DateTime(2026, 1, 1) },
                 new Account { AccountID = 5, Username = "pt_thaophan", Email = "thao.phan@quanlygym.vn", PasswordHash = SeedPasswordHash, Role = "PT", Status = true, CreatedAt = new DateTime(2026, 1, 1) },
                 new Account { AccountID = 6, Username = "pt_hoanglong", Email = "long.vu@quanlygym.vn", PasswordHash = SeedPasswordHash, Role = "PT", Status = true, CreatedAt = new DateTime(2026, 1, 1) },
+                new Account { AccountID = 17, Username = "pt_hoangnam", Email = "hoangnam.le@quanlygym.vn", PasswordHash = SeedPasswordHash, Role = "PT", Status = true, CreatedAt = new DateTime(2026, 1, 1) },
+                new Account { AccountID = 18, Username = "pt_thuthao", Email = "thuthao.dang@quanlygym.vn", PasswordHash = SeedPasswordHash, Role = "PT", Status = true, CreatedAt = new DateTime(2026, 1, 1) },
+                new Account { AccountID = 19, Username = "pt_ngocanh", Email = "ngocanh.pham@quanlygym.vn", PasswordHash = SeedPasswordHash, Role = "PT", Status = true, CreatedAt = new DateTime(2026, 1, 1) },
+                new Account { AccountID = 20, Username = "pt_quocbao", Email = "quocbao.tran@quanlygym.vn", PasswordHash = SeedPasswordHash, Role = "PT", Status = true, CreatedAt = new DateTime(2026, 1, 1) },
+                new Account { AccountID = 21, Username = "pt_khanhlinh", Email = "khanhlinh.do@quanlygym.vn", PasswordHash = SeedPasswordHash, Role = "PT", Status = true, CreatedAt = new DateTime(2026, 1, 1) },
+                new Account { AccountID = 22, Username = "pt_tiendat", Email = "tiendat.nguyen@quanlygym.vn", PasswordHash = SeedPasswordHash, Role = "PT", Status = true, CreatedAt = new DateTime(2026, 1, 1) },
+                new Account { AccountID = 23, Username = "pt_kimngan", Email = "kimngan.hoang@quanlygym.vn", PasswordHash = SeedPasswordHash, Role = "PT", Status = true, CreatedAt = new DateTime(2026, 1, 1) },
 
                 // 10 Members
                 new Account { AccountID = 7, Username = "member_khanhhung", Email = "nguyenkhanhhung2512@gmail.com", PasswordHash = SeedPasswordHash, Role = "Member", Status = true, CreatedAt = new DateTime(2026, 1, 1) },

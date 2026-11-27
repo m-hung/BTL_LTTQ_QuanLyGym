@@ -24,6 +24,36 @@ namespace QuanLyGym.UI
                 return;
             }
 
+            if (args != null && args.Length > 0 && args[0] == "--test-equipment")
+            {
+                RunTestEquipment();
+                return;
+            }
+
+            if (args != null && args.Length > 0 && args[0] == "--test-maintenance")
+            {
+                RunTestMaintenance();
+                return;
+            }
+
+            if (args != null && args.Length > 0 && args[0] == "--test-package")
+            {
+                RunTestPackage();
+                return;
+            }
+
+            if (args != null && args.Length > 0 && args[0] == "--test-ptschedule")
+            {
+                RunTestPTSchedule();
+                return;
+            }
+
+            if (args != null && args.Length > 0 && args[0] == "--test-room")
+            {
+                RunTestRoom();
+                return;
+            }
+
             while (true)
             {
                 if (!ShowLogin())
@@ -230,6 +260,229 @@ namespace QuanLyGym.UI
             catch (Exception ex)
             {
                 File.WriteAllText(Path.Combine(artifactDir, "testshot_err.txt"), ex.ToString());
+            }
+        }
+
+        private static void RunTestEquipment()
+        {
+            string artifactDir = @"C:\Users\nguye\.gemini\antigravity\brain\5a3d5ae3-f8cd-4657-8577-1cb0eb9d48bf";
+            try
+            {
+                UserSession.Role = UserSession.ROLE_ADMIN;
+                UserSession.FullName = "Nguyễn Quản Trị";
+                UserSession.AccountID = 1;
+
+                using var form = new frmAdminMain();
+                form.WindowState = FormWindowState.Maximized;
+                form.Shown += (s, e) =>
+                {
+                    var t = new System.Windows.Forms.Timer { Interval = 1000 };
+                    t.Tick += (ts, te) =>
+                    {
+                        try
+                        {
+                            t.Stop();
+                            var btnEquipment = form.Controls.Find("btnNavEquipment", true).FirstOrDefault() as Button;
+                            btnEquipment?.PerformClick();
+                            form.Update();
+                            Application.DoEvents();
+
+                            using var bmp = new Bitmap(form.Width, form.Height);
+                            form.DrawToBitmap(bmp, new Rectangle(0, 0, form.Width, form.Height));
+                            bmp.Save(Path.Combine(artifactDir, "equipment_management_view.png"), ImageFormat.Png);
+                            form.Close();
+                        }
+                        catch (Exception ex)
+                        {
+                            File.WriteAllText(Path.Combine(artifactDir, "err_equipment.txt"), ex.ToString());
+                            form.Close();
+                        }
+                    };
+                    t.Start();
+                };
+                Application.Run(form);
+            }
+            catch (Exception ex)
+            {
+                File.WriteAllText(Path.Combine(artifactDir, "err_equipment_outer.txt"), ex.ToString());
+            }
+        }
+
+        private static void RunTestMaintenance()
+        {
+            string artifactDir = @"C:\Users\nguye\.gemini\antigravity\brain\5a3d5ae3-f8cd-4657-8577-1cb0eb9d48bf";
+            try
+            {
+                UserSession.Role = UserSession.ROLE_ADMIN;
+                UserSession.FullName = "Nguyễn Quản Trị";
+                UserSession.AccountID = 1;
+
+                using var form = new frmAdminMain();
+                form.WindowState = FormWindowState.Maximized;
+                form.Shown += (s, e) =>
+                {
+                    var t = new System.Windows.Forms.Timer { Interval = 1000 };
+                    t.Tick += (ts, te) =>
+                    {
+                        try
+                        {
+                            t.Stop();
+                            var btnMaint = form.Controls.Find("btnNavMaintenance", true).FirstOrDefault() as Button;
+                            btnMaint?.PerformClick();
+                            form.Update();
+                            Application.DoEvents();
+
+                            using var bmp = new Bitmap(form.Width, form.Height);
+                            form.DrawToBitmap(bmp, new Rectangle(0, 0, form.Width, form.Height));
+                            bmp.Save(Path.Combine(artifactDir, "maintenance_management_view.png"), ImageFormat.Png);
+                            form.Close();
+                        }
+                        catch (Exception ex)
+                        {
+                            File.WriteAllText(Path.Combine(artifactDir, "err_maintenance.txt"), ex.ToString());
+                            form.Close();
+                        }
+                    };
+                    t.Start();
+                };
+                Application.Run(form);
+            }
+            catch (Exception ex)
+            {
+                File.WriteAllText(Path.Combine(artifactDir, "err_maintenance_outer.txt"), ex.ToString());
+            }
+        }
+
+        private static void RunTestPackage()
+        {
+            string artifactDir = @"C:\Users\nguye\.gemini\antigravity\brain\5a3d5ae3-f8cd-4657-8577-1cb0eb9d48bf";
+            try
+            {
+                UserSession.Role = UserSession.ROLE_ADMIN;
+                UserSession.FullName = "Nguyễn Quản Trị";
+                UserSession.AccountID = 1;
+
+                using var form = new frmAdminMain();
+                form.WindowState = FormWindowState.Maximized;
+                form.Shown += (s, e) =>
+                {
+                    var t = new System.Windows.Forms.Timer { Interval = 1000 };
+                    t.Tick += (ts, te) =>
+                    {
+                        try
+                        {
+                            t.Stop();
+                            var btnPkg = form.Controls.Find("btnNavPackage", true).FirstOrDefault() as Button;
+                            btnPkg?.PerformClick();
+                            form.Update();
+                            Application.DoEvents();
+
+                            using var bmp = new Bitmap(form.Width, form.Height);
+                            form.DrawToBitmap(bmp, new Rectangle(0, 0, form.Width, form.Height));
+                            bmp.Save(Path.Combine(artifactDir, "package_management_view.png"), ImageFormat.Png);
+                            form.Close();
+                        }
+                        catch (Exception ex)
+                        {
+                            File.WriteAllText(Path.Combine(artifactDir, "err_package.txt"), ex.ToString());
+                            form.Close();
+                        }
+                    };
+                    t.Start();
+                };
+                Application.Run(form);
+            }
+            catch (Exception ex)
+            {
+                File.WriteAllText(Path.Combine(artifactDir, "err_package_outer.txt"), ex.ToString());
+            }
+        }
+        private static void RunTestPTSchedule()
+        {
+            string artifactDir = @"C:\Users\nguye\.gemini\antigravity\brain\5a3d5ae3-f8cd-4657-8577-1cb0eb9d48bf";
+            try
+            {
+                UserSession.Role = UserSession.ROLE_ADMIN;
+                UserSession.FullName = "Nguyễn Quản Trị";
+                UserSession.AccountID = 1;
+
+                using var form = new frmAdminMain();
+                form.WindowState = FormWindowState.Maximized;
+                form.Shown += (s, e) =>
+                {
+                    var t = new System.Windows.Forms.Timer { Interval = 1200 };
+                    t.Tick += (ts, te) =>
+                    {
+                        try
+                        {
+                            t.Stop();
+                            var btnPTSchedule = form.Controls.Find("btnNavPTSchedule", true).FirstOrDefault() as Button;
+                            btnPTSchedule?.PerformClick();
+                            form.Update();
+                            Application.DoEvents();
+
+                            using var bmp = new Bitmap(form.Width, form.Height);
+                            form.DrawToBitmap(bmp, new Rectangle(0, 0, form.Width, form.Height));
+                            bmp.Save(Path.Combine(artifactDir, "pt_schedule_management_view.png"), ImageFormat.Png);
+                            form.Close();
+                        }
+                        catch (Exception ex)
+                        {
+                            File.WriteAllText(Path.Combine(artifactDir, "err_ptschedule.txt"), ex.ToString());
+                            form.Close();
+                        }
+                    };
+                    t.Start();
+                };
+                Application.Run(form);
+            }
+            catch (Exception ex)
+            {
+                File.WriteAllText(Path.Combine(artifactDir, "err_ptschedule_outer.txt"), ex.ToString());
+            }
+        }
+        private static void RunTestRoom()
+        {
+            string artifactDir = @"C:\Users\nguye\.gemini\antigravity\brain\5a3d5ae3-f8cd-4657-8577-1cb0eb9d48bf";
+            try
+            {
+                UserSession.Role = UserSession.ROLE_ADMIN;
+                UserSession.FullName = "Nguyễn Quản Trị";
+                UserSession.AccountID = 1;
+
+                using var form = new frmAdminMain();
+                form.WindowState = FormWindowState.Maximized;
+                form.Shown += (s, e) =>
+                {
+                    var t = new System.Windows.Forms.Timer { Interval = 1200 };
+                    t.Tick += (ts, te) =>
+                    {
+                        try
+                        {
+                            t.Stop();
+                            var btnRoom = form.Controls.Find("btnNavRoom", true).FirstOrDefault() as Button;
+                            btnRoom?.PerformClick();
+                            form.Update();
+                            Application.DoEvents();
+
+                            using var bmp = new Bitmap(form.Width, form.Height);
+                            form.DrawToBitmap(bmp, new Rectangle(0, 0, form.Width, form.Height));
+                            bmp.Save(Path.Combine(artifactDir, "room_management_view.png"), ImageFormat.Png);
+                            form.Close();
+                        }
+                        catch (Exception ex)
+                        {
+                            File.WriteAllText(Path.Combine(artifactDir, "err_room.txt"), ex.ToString());
+                            form.Close();
+                        }
+                    };
+                    t.Start();
+                };
+                Application.Run(form);
+            }
+            catch (Exception ex)
+            {
+                File.WriteAllText(Path.Combine(artifactDir, "err_room_outer.txt"), ex.ToString());
             }
         }
     }

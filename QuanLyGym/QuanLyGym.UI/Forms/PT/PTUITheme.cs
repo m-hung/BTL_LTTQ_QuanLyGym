@@ -23,8 +23,8 @@ namespace QuanLyGym.UI.Forms.PT
         public static readonly Color Green = Color.FromArgb(34, 197, 94);
         public static readonly Color GreenDark = Color.FromArgb(20, 48, 30);
         public static readonly Color TextWhite = Color.FromArgb(255, 255, 255);
-        public static readonly Color TextMuted = Color.FromArgb(142, 149, 165);
-        public static readonly Color TextDarkMuted = Color.FromArgb(90, 96, 110);
+        public static readonly Color TextMuted = Color.FromArgb(196, 204, 218);
+        public static readonly Color TextDarkMuted = Color.FromArgb(162, 172, 192);
         public static readonly Color InputBg = Color.FromArgb(27, 31, 42);       // #1B1F2A
         public static readonly Color InputBorder = Color.FromArgb(48, 54, 72);
 
