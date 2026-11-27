@@ -21,6 +21,9 @@ namespace QuanLyGym.DAL
         public DbSet<CheckInImage> CheckInImages { get; set; }
         public DbSet<Progress> Progresses { get; set; }
         public DbSet<PasswordReset> PasswordResets { get; set; }
+        public DbSet<Class> Classes { get; set; }
+        public DbSet<ClassEnrollment> ClassEnrollments { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         private static string? _resolvedConnectionString;
         private static readonly object _lock = new object();
@@ -116,6 +119,13 @@ namespace QuanLyGym.DAL
             modelBuilder.Entity<Incident>().HasOne(i => i.Account).WithMany().HasForeignKey(i => i.ReportedBy).OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<Staff>().HasOne(s => s.PT).WithMany().HasForeignKey(s => s.PTID).OnDelete(DeleteBehavior.SetNull);
             modelBuilder.Entity<Staff>().HasOne(s => s.Branch).WithMany().HasForeignKey(s => s.BranchID).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Class>().HasOne(c => c.PT).WithMany().HasForeignKey(c => c.PTID).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Class>().HasOne(c => c.Branch).WithMany().HasForeignKey(c => c.BranchID).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Class>().HasOne(c => c.Room).WithMany().HasForeignKey(c => c.RoomID).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<ClassEnrollment>().HasOne(e => e.Class).WithMany().HasForeignKey(e => e.ClassID).OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<ClassEnrollment>().HasOne(e => e.Member).WithMany().HasForeignKey(e => e.MemberID).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Notification>().HasOne(n => n.Account).WithMany().HasForeignKey(n => n.AccountID).OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Notification>().HasOne(n => n.Branch).WithMany().HasForeignKey(n => n.BranchID).OnDelete(DeleteBehavior.SetNull);
 
             // 2. TỰ ĐỘNG NẠP TẤT CẢ SEED DATA TỪ THƯ MỤC CONFIGURATIONS
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);

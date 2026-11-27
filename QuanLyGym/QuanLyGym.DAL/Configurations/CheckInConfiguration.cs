@@ -23,7 +23,18 @@ namespace QuanLyGym.DAL.Configurations
                 new CheckIn { CheckInID = 12, MemberID = 8, PTID = null, CheckInTime = new DateTime(2026, 10, 25, 19, 10, 0), Status = "Approved", Note = "Hội viên Classic tập tối", BranchID = 2 },
                 new CheckIn { CheckInID = 13, MemberID = 9, PTID = null, CheckInTime = new DateTime(2026, 10, 25, 6, 45, 0), Status = "Approved", Note = "Hội viên Classic tập tự do chi nhánh Q7", BranchID = 3 },
                 new CheckIn { CheckInID = 14, MemberID = 10, PTID = null, CheckInTime = new DateTime(2026, 10, 25, 18, 20, 0), Status = "Approved", Note = "Hội viên Classic tập tối chi nhánh Q7", BranchID = 3 },
-                new CheckIn { CheckInID = 15, MemberID = 1, PTID = 1, CheckInTime = new DateTime(2026, 10, 26, 8, 20, 0), Status = "Approved", Note = "Check-in buổi tập đầu tuần cùng PT Nam", BranchID = 1 }
+                new CheckIn { CheckInID = 15, MemberID = 1, PTID = 1, CheckInTime = new DateTime(2026, 10, 26, 8, 20, 0), Status = "Approved", Note = "Check-in buổi tập đầu tuần cùng PT Nam", BranchID = 1 },
+
+                // Tháng 11/2026
+                new CheckIn { CheckInID = 16, MemberID = 1, PTID = 1, CheckInTime = new DateTime(2026, 11, 2, 8, 25, 0), Status = "Approved", Note = "Check-in tập Vai & Bụng Core cùng PT Nam", BranchID = 1 },
+                new CheckIn { CheckInID = 17, MemberID = 2, PTID = 1, CheckInTime = new DateTime(2026, 11, 4, 13, 55, 0), Status = "Approved", Note = "Check-in tập Ngực nâng cao cùng PT Nam", BranchID = 1 },
+                new CheckIn { CheckInID = 18, MemberID = 3, PTID = 2, CheckInTime = new DateTime(2026, 11, 5, 15, 55, 0), Status = "Approved", Note = "Check-in tập Vai Nữ cùng PT Bích", BranchID = 1 },
+                new CheckIn { CheckInID = 19, MemberID = 1, PTID = 1, CheckInTime = new DateTime(2026, 11, 6, 8, 55, 0), Status = "Approved", Note = "Check-in Full Body Functional cùng PT Nam", BranchID = 1 },
+                new CheckIn { CheckInID = 20, MemberID = 6, PTID = 3, CheckInTime = new DateTime(2026, 11, 10, 8, 20, 0), Status = "Approved", Note = "Check-in Powerlifting cùng PT Minh", BranchID = 2 },
+                new CheckIn { CheckInID = 21, MemberID = 2, PTID = 1, CheckInTime = new DateTime(2026, 11, 18, 13, 50, 0), Status = "Approved", Note = "Check-in HIIT Tabata cùng PT Nam", BranchID = 1 },
+                new CheckIn { CheckInID = 22, MemberID = 1, PTID = 1, CheckInTime = new DateTime(2026, 11, 20, 8, 55, 0), Status = "Approved", Note = "Check-in Deadlift Lưng Dày cùng PT Nam", BranchID = 1 },
+                new CheckIn { CheckInID = 23, MemberID = 7, PTID = 4, CheckInTime = new DateTime(2026, 11, 24, 18, 25, 0), Status = "Approved", Note = "Check-in lớp Zumba Dance cùng PT Thảo", BranchID = 2 },
+                new CheckIn { CheckInID = 24, MemberID = 1, PTID = 1, CheckInTime = new DateTime(2026, 11, 27, 8, 20, 0), Status = "Approved", Note = "Check-in buổi tập sáng cùng PT Nam", BranchID = 1 }
             );
         }
     }

@@ -25,7 +25,9 @@ namespace QuanLyGym.DAL.Configurations
                 new Progress { ProgressID = 9, MemberID = 3, PTID = 2, RecordDate = new DateTime(2026, 7, 15), Height = 168m, Weight = 58.5m, BodyFat = 22.5m, MuscleMass = 26.2m, BMI = 20.7m, Chest = 89m, Waist = 66m, Hip = 94m, Arm = 26.5m, Thigh = 52m, Note = "Độ dẻo dai và thể lực cải thiện vượt bậc" },
 
                 // Theo dõi tiến độ Member 6
-                new Progress { ProgressID = 10, MemberID = 6, PTID = 3, RecordDate = new DateTime(2026, 3, 10), Height = 178m, Weight = 82.0m, BodyFat = 24.0m, MuscleMass = 35.0m, BMI = 25.9m, Chest = 100m, Waist = 88m, Hip = 101m, Arm = 35.0m, Thigh = 59m, Note = "Tập tăng cơ giảm mỡ ban đầu" }
+                new Progress { ProgressID = 10, MemberID = 6, PTID = 3, RecordDate = new DateTime(2026, 3, 10), Height = 178m, Weight = 82.0m, BodyFat = 24.0m, MuscleMass = 35.0m, BMI = 25.9m, Chest = 100m, Waist = 88m, Hip = 101m, Arm = 35.0m, Thigh = 59m, Note = "Tập tăng cơ giảm mỡ ban đầu" },
+                new Progress { ProgressID = 11, MemberID = 1, PTID = 1, RecordDate = new DateTime(2026, 11, 20), Height = 175m, Weight = 72.0m, BodyFat = 14.8m, MuscleMass = 36.2m, BMI = 23.5m, Chest = 104m, Waist = 75m, Hip = 95m, Arm = 38.0m, Thigh = 59m, Note = "Chỉ số thể hình đạt chuẩn vận động viên, cơ bắp sắc nét" },
+                new Progress { ProgressID = 12, MemberID = 2, PTID = 1, RecordDate = new DateTime(2026, 11, 22), Height = 162m, Weight = 51.5m, BodyFat = 20.0m, MuscleMass = 24.0m, BMI = 19.6m, Chest = 85m, Waist = 63m, Hip = 89m, Arm = 24.0m, Thigh = 48.5m, Note = "Vòng eo đạt chuẩn thon gọn lý tưởng, thể lực rất dẻo dai" }
             );
         }
     }
