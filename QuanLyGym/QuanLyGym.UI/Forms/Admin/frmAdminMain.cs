@@ -28,6 +28,16 @@ namespace QuanLyGym.UI.Forms.Admin
         private ToolTip? _chartToolTip;
         private string _activeToolTipText = "";
 
+        // Custom rows and controls for Overview Dashboard
+        private TableLayoutPanel _tblRow4 = null!;
+        private TableLayoutPanel _tblRow5 = null!;
+        private Panel _pnlCardPackage = null!;
+        private Chart _chartPackageShare = null!;
+        private Panel _pnlCardRecentPT = null!;
+        private DataGridView _gridRecentPT = null!;
+        private Panel _pnlCardRecentOrders = null!;
+        private DataGridView _gridRecentOrders = null!;
+
         public frmAdminMain()
         {
             InitializeComponent();
@@ -123,13 +133,17 @@ namespace QuanLyGym.UI.Forms.Admin
         {
             UpdateRevenueKpis();
             DrawRevenueChart();
+            DrawPackageDistributionChart();
             DrawBranchChart();
             DrawNewMemberChart();
+            LoadRecentPTSchedules();
             LoadExpiringMemberships();
+            LoadRecentTransactions();
         }
 
         /// <summary>
-        /// Cập nhật 4 thẻ KPI chỉ số doanh thu và quy mô từ Database
+        /// Cập nhật 4 thẻ KPI chỉ số doanh thu và quy mô từ Database.
+        /// Bỏ ghi chú nhỏ ở 3 thẻ đầu, thẻ Nhân viên hiển thị số lượng PT, Thu ngân, Bảo vệ, Tạp vụ...
         /// </summary>
         private void UpdateRevenueKpis()
         {
@@ -142,6 +156,7 @@ namespace QuanLyGym.UI.Forms.Admin
                     summary = RevenueService.Instance.GetRevenueSummary(null);
                 }
 
+                // 1. Thẻ Tổng doanh thu: Bỏ ghi chú nhỏ, căn giữa số liệu
                 lblKpiRevenueTitle.Text = $"TỔNG DOANH THU ({currentYear})";
                 if (summary.TotalRevenue >= 1_000_000_000m)
                     lblKpiRevenueValue.Text = $"{(summary.TotalRevenue / 1_000_000_000m):N2} tỷ đ";
@@ -149,20 +164,31 @@ namespace QuanLyGym.UI.Forms.Admin
                     lblKpiRevenueValue.Text = $"{(summary.TotalRevenue / 1_000_000m):N1} triệu đ";
                 else
                     lblKpiRevenueValue.Text = $"{summary.TotalRevenue:N0} đ";
+                lblKpiRevenueSub.Visible = false;
+                lblKpiRevenueValue.Location = new Point(10, 36);
 
-                lblKpiRevenueSub.Text = $"Cập nhật T{DateTime.Now.Month}/{currentYear}";
-
+                // 2. Thẻ Tổng hội viên: Bỏ ghi chú nhỏ, căn giữa số liệu
                 lblKpiMemberTitle.Text = "TỔNG HỘI VIÊN";
                 lblKpiMemberValue.Text = summary.TotalMembers.ToString("N0");
-                lblKpiMemberSub.Text = $"{summary.ActiveMembers} đang hoạt động";
+                lblKpiMemberSub.Visible = false;
+                lblKpiMemberValue.Location = new Point(10, 36);
 
+                // 3. Thẻ Chi nhánh: Bỏ ghi chú nhỏ, căn giữa số liệu
                 lblKpiBranchTitle.Text = "CHI NHÁNH";
                 lblKpiBranchValue.Text = summary.TotalBranches.ToString("N0");
-                lblKpiBranchSub.Text = $"{summary.ActiveBranches} đang hoạt động";
+                lblKpiBranchSub.Visible = false;
+                lblKpiBranchValue.Location = new Point(10, 36);
 
+                // 4. Thẻ Nhân viên: Hiển thị chi tiết số lượng thu ngân, bảo vệ, PT... từ Database
                 lblKpiStaffTitle.Text = "NHÂN VIÊN";
                 lblKpiStaffValue.Text = summary.TotalStaff.ToString("N0");
-                lblKpiStaffSub.Text = "Toàn hệ thống";
+                lblKpiStaffSub.Visible = true;
+                lblKpiStaffSub.Text = !string.IsNullOrWhiteSpace(summary.StaffRoleSummary)
+                    ? summary.StaffRoleSummary
+                    : "5 PT, 3 Thu ngân, 3 Bảo vệ, 3 Tạp vụ";
+                lblKpiStaffSub.ForeColor = Color.FromArgb(168, 85, 247);
+                lblKpiStaffSub.Font = new Font("Segoe UI", 7.5F, FontStyle.Regular);
+                lblKpiStaffSub.Location = new Point(12, 66);
             }
             catch (Exception ex)
             {
@@ -196,6 +222,23 @@ namespace QuanLyGym.UI.Forms.Admin
                 _ucBranch.Visible = false;
             }
 
+            // Trang Phòng tập & Studio
+            if (btn == btnNavRoom)
+            {
+                if (_ucRoom == null)
+                {
+                    _ucRoom = new ucAdminRoom { Dock = DockStyle.Fill };
+                    Controls.Add(_ucRoom);
+                    _ucRoom.BringToFront();
+                }
+                _ucRoom.Visible = true;
+                _ucRoom.LoadData();
+            }
+            else if (_ucRoom != null)
+            {
+                _ucRoom.Visible = false;
+            }
+
             // Trang Nhân viên
             if (btn == btnNavStaff)
             {
@@ -226,6 +269,74 @@ namespace QuanLyGym.UI.Forms.Admin
             else if (_ucMember != null)
             {
                 _ucMember.Visible = false;
+            }
+
+            // Trang Thiết bị
+            if (btn == btnNavEquipment)
+            {
+                if (_ucEquipment == null)
+                {
+                    _ucEquipment = new ucAdminEquipment { Dock = DockStyle.Fill };
+                    Controls.Add(_ucEquipment);
+                    _ucEquipment.BringToFront();
+                }
+                _ucEquipment.Visible = true;
+                _ucEquipment.ReloadFromDatabase();
+            }
+            else if (_ucEquipment != null)
+            {
+                _ucEquipment.Visible = false;
+            }
+
+            // Trang Lịch sử bảo trì - bảo dưỡng
+            if (btn == btnNavMaintenance)
+            {
+                if (_ucMaintenance == null)
+                {
+                    _ucMaintenance = new ucAdminMaintenance { Dock = DockStyle.Fill };
+                    Controls.Add(_ucMaintenance);
+                    _ucMaintenance.BringToFront();
+                }
+                _ucMaintenance.Visible = true;
+                _ucMaintenance.ReloadFromDatabase();
+            }
+            else if (_ucMaintenance != null)
+            {
+                _ucMaintenance.Visible = false;
+            }
+
+            // Trang Gói tập Gym
+            if (btn == btnNavPackage)
+            {
+                if (_ucPackage == null)
+                {
+                    _ucPackage = new ucAdminPackage { Dock = DockStyle.Fill };
+                    Controls.Add(_ucPackage);
+                    _ucPackage.BringToFront();
+                }
+                _ucPackage.Visible = true;
+                _ucPackage.ReloadFromDatabase();
+            }
+            else if (_ucPackage != null)
+            {
+                _ucPackage.Visible = false;
+            }
+
+            // Trang Lịch hẹn PT & Huấn luyện 1-1
+            if (btn == btnNavPTSchedule)
+            {
+                if (_ucPTSchedule == null)
+                {
+                    _ucPTSchedule = new ucAdminPTSchedule { Dock = DockStyle.Fill };
+                    Controls.Add(_ucPTSchedule);
+                    _ucPTSchedule.BringToFront();
+                }
+                _ucPTSchedule.Visible = true;
+                _ucPTSchedule.LoadData();
+            }
+            else if (_ucPTSchedule != null)
+            {
+                _ucPTSchedule.Visible = false;
             }
 
             // Trang Tài khoản
@@ -267,9 +378,14 @@ namespace QuanLyGym.UI.Forms.Admin
             // Cấu hình các nút điều hướng
             ConfigureNavButton(btnNavOverview, "btnNavOverview", "▦  Tổng quan");
             ConfigureNavButton(btnNavBranch, "btnNavBranch", "⌂  Chi nhánh");
+            ConfigureNavButton(btnNavRoom, "btnNavRoom", "🏢  Phòng tập");
             ConfigureNavButton(btnNavStaff, "btnNavStaff", "☺  Nhân viên");
             ConfigureNavButton(btnNavMember, "btnNavMember", "♙  Hội viên");
-            ConfigureNavButton(btnNavAccount, "btnNavAccount", "⚿  Tài khoản");
+            ConfigureNavButton(btnNavEquipment, "btnNavEquipment", "⚙  Thiết bị");
+            ConfigureNavButton(btnNavMaintenance, "btnNavMaintenance", "🔧  Bảo trì");
+            ConfigureNavButton(btnNavPackage, "btnNavPackage", "📦  Gói tập");
+            ConfigureNavButton(btnNavPTSchedule, "btnNavPTSchedule", "📅  Lịch hẹn PT");
+            ConfigureNavButton(btnNavAccount, "btnNavAccount", "🔑  Tài khoản");
 
             // Nút Xuất báo cáo
             if (btnExportReport != null)
@@ -278,23 +394,117 @@ namespace QuanLyGym.UI.Forms.Admin
             }
 
             // Cấu hình 4 thẻ chỉ số KPI
-            SetupKpiPanel(pnlKpiRevenue, lblKpiRevenueTitle, lblKpiRevenueValue, lblKpiRevenueSub, "TỔNG DOANH THU", "0 đ", "Đang tải...", Orange);
-            SetupKpiPanel(pnlKpiMember, lblKpiMemberTitle, lblKpiMemberValue, lblKpiMemberSub, "TỔNG HỘI VIÊN", "0", "0 đang hoạt động", Blue);
-            SetupKpiPanel(pnlKpiBranch, lblKpiBranchTitle, lblKpiBranchValue, lblKpiBranchSub, "CHI NHÁNH", "0", "0 đang hoạt động", Color.FromArgb(34, 197, 94));
-            SetupKpiPanel(pnlKpiStaff, lblKpiStaffTitle, lblKpiStaffValue, lblKpiStaffSub, "NHÂN VIÊN", "0", "Toàn hệ thống", Color.FromArgb(168, 85, 247));
+            SetupKpiPanel(pnlKpiRevenue, lblKpiRevenueTitle, lblKpiRevenueValue, lblKpiRevenueSub, "TỔNG DOANH THU", "0 đ", "", Orange);
+            SetupKpiPanel(pnlKpiMember, lblKpiMemberTitle, lblKpiMemberValue, lblKpiMemberSub, "TỔNG HỘI VIÊN", "0", "", Blue);
+            SetupKpiPanel(pnlKpiBranch, lblKpiBranchTitle, lblKpiBranchValue, lblKpiBranchSub, "CHI NHÁNH", "0", "", Color.FromArgb(34, 197, 94));
+            SetupKpiPanel(pnlKpiStaff, lblKpiStaffTitle, lblKpiStaffValue, lblKpiStaffSub, "NHÂN VIÊN", "0", "Đang tải...", Color.FromArgb(168, 85, 247));
 
-            // Cấu hình 4 thẻ Card biểu đồ & danh sách
+            // Cấu hình các thẻ Card biểu đồ có sẵn
             SetupCard(pnlCardRevenue, lblRevenueTitle, $"DOANH THU CÁC THÁNG ({DateTime.Now.Year})", chartRevenue);
             SetupCard(pnlCardExpiring, lblExpiringTitle, "HỘI VIÊN SẮP HẾT HẠN (30 NGÀY TỚI)", lvExpiring);
             SetupCard(pnlCardBranchRevenue, lblBranchTitle, "DOANH THU THEO CHI NHÁNH (TRIỆU Đ)", chartBranch);
             SetupCard(pnlCardNewMember, lblNewMemberTitle, "HỘI VIÊN MỚI THEO THÁNG", chartNewMember);
 
-            // Căn chỉnh khoảng cách sát thanh bar
-            pnlContent.Padding = new Padding(12, 8, 12, 10);
-            if (tblMain.RowStyles.Count > 0)
+            // =================================================================
+            // KHỞI TẠO CÁC MỤC THỐNG KÊ MỚI THEO YÊU CẦU NGƯỜI DÙNG:
+            // 1. TỶ TRỌNG GÓI TẬP (Doughnut Chart)
+            // 2. LỊCH ĐẶT PT GẦN NHẤT (Data Grid)
+            // 3. ĐƠN ĐĂNG KÝ GÓI TẬP / GIAO DỊCH GẦN NHẤT (Data Grid)
+            // =================================================================
+
+            // 1. Tỷ trọng gói tập
+            _chartPackageShare = new Chart
             {
-                tblMain.RowStyles[0] = new RowStyle(SizeType.Absolute, 46F);
-            }
+                BackColor = CardColor,
+                Dock = DockStyle.Fill
+            };
+            _pnlCardPackage = CreateDashboardCard("TỶ TRỌNG GÓI TẬP (PHÂN BỔ HỘI VIÊN)", _chartPackageShare);
+
+            // 2. Lịch đặt PT gần nhất
+            _gridRecentPT = BuildRecentPTGrid();
+            _pnlCardRecentPT = CreateDashboardCard("📅 LỊCH ĐẶT PT GẦN NHẤT", _gridRecentPT, "Xem tất cả lịch hẹn →", (s, e) =>
+            {
+                SetActiveNav(btnNavPTSchedule);
+                ShowPage(btnNavPTSchedule);
+            });
+
+            // 3. Đơn đăng ký gói tập / Giao dịch gần nhất
+            _gridRecentOrders = BuildRecentOrdersGrid();
+            _pnlCardRecentOrders = CreateDashboardCard("🛍️ ĐƠN ĐĂNG KÝ GÓI TẬP / GIAO DỊCH GẦN NHẤT", _gridRecentOrders, "Quản lý hợp đồng →", (s, e) =>
+            {
+                SetActiveNav(btnNavMember);
+                ShowPage(btnNavMember);
+            });
+
+            // Tổ chức lại bảng bố cục Row 4 (Lịch PT & Hết hạn) và Row 5 (Giao dịch gần nhất)
+            _tblRow4 = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                ColumnCount = 2,
+                RowCount = 1,
+                BackColor = Color.Transparent,
+                Margin = new Padding(0)
+            };
+            _tblRow4.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 52F));
+            _tblRow4.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 48F));
+
+            _tblRow5 = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                ColumnCount = 1,
+                RowCount = 1,
+                BackColor = Color.Transparent,
+                Margin = new Padding(0)
+            };
+            _tblRow5.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+
+            // Tái cấu trúc tblRow2: Bên trái là Doanh thu các tháng (60%), Bên phải là Tỷ trọng gói tập (40%)
+            tblRow2.Controls.Remove(pnlCardExpiring);
+            tblRow2.ColumnStyles.Clear();
+            tblRow2.ColumnCount = 2;
+            tblRow2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 60F));
+            tblRow2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40F));
+            tblRow2.Controls.Add(pnlCardRevenue, 0, 0);
+            tblRow2.Controls.Add(_pnlCardPackage, 1, 0);
+
+            // tblRow3 giữ nguyên: Doanh thu chi nhánh (50%) & Hội viên mới (50%)
+            tblRow3.ColumnStyles.Clear();
+            tblRow3.ColumnCount = 2;
+            tblRow3.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tblRow3.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+
+            // tblRow4: Lịch đặt PT (52%) & Hội viên sắp hết hạn (48%)
+            _tblRow4.Controls.Add(_pnlCardRecentPT, 0, 0);
+            _tblRow4.Controls.Add(pnlCardExpiring, 1, 0);
+
+            // tblRow5: Đơn hàng / Giao dịch gần nhất (100% full width)
+            _tblRow5.Controls.Add(_pnlCardRecentOrders, 0, 0);
+
+            // Tái cấu trúc tblMain với AutoScroll và các hàng tỷ lệ đẹp
+            pnlContent.AutoScroll = true;
+            pnlContent.Padding = new Padding(12, 8, 12, 16);
+
+            tblMain.Dock = DockStyle.Top;
+            tblMain.AutoSize = true;
+            tblMain.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            tblMain.Controls.Clear();
+            tblMain.RowStyles.Clear();
+            tblMain.RowCount = 6;
+
+            tblMain.RowStyles.Add(new RowStyle(SizeType.Absolute, 46F));  // Row 0: Title bar
+            tblMain.RowStyles.Add(new RowStyle(SizeType.Absolute, 105F)); // Row 1: KPI strip
+            tblMain.RowStyles.Add(new RowStyle(SizeType.Absolute, 310F)); // Row 2: Doanh thu tháng & Tỷ trọng gói tập
+            tblMain.RowStyles.Add(new RowStyle(SizeType.Absolute, 280F)); // Row 3: Doanh thu chi nhánh & Hội viên mới
+            tblMain.RowStyles.Add(new RowStyle(SizeType.Absolute, 280F)); // Row 4: Lịch đặt PT & Hội viên sắp hết hạn
+            tblMain.RowStyles.Add(new RowStyle(SizeType.Absolute, 260F)); // Row 5: Giao dịch gần nhất
+
+            tblMain.Controls.Add(pnlTitleBar, 0, 0);
+            tblMain.Controls.Add(tblKpi, 0, 1);
+            tblMain.Controls.Add(tblRow2, 0, 2);
+            tblMain.Controls.Add(tblRow3, 0, 3);
+            tblMain.Controls.Add(_tblRow4, 0, 4);
+            tblMain.Controls.Add(_tblRow5, 0, 5);
+
             pnlTitleBar.Padding = new Padding(4, 4, 8, 4);
 
             // Tương tác nhanh từ Dashboard sang Trang Quản lý Hội viên
@@ -326,6 +536,161 @@ namespace QuanLyGym.UI.Forms.Admin
                 ShowPage(btnNavMember);
                 _ucMember?.SetQuickFilter(1);
             };
+        }
+
+        private Panel CreateDashboardCard(string titleText, Control innerControl, string? actionText = null, EventHandler? onAction = null)
+        {
+            var pnl = new Panel
+            {
+                BackColor = CardColor,
+                Dock = DockStyle.Fill,
+                Margin = new Padding(5),
+                Padding = new Padding(12, 8, 12, 10)
+            };
+            pnl.Paint += Card_Paint;
+
+            var pnlHeader = new Panel
+            {
+                Dock = DockStyle.Top,
+                Height = 28,
+                BackColor = Color.Transparent
+            };
+
+            var lblTitle = new Label
+            {
+                Text = titleText,
+                Dock = DockStyle.Left,
+                AutoSize = true,
+                Font = new Font("Segoe UI", 8.5F, FontStyle.Bold),
+                ForeColor = MutedColor,
+                TextAlign = ContentAlignment.MiddleLeft
+            };
+            pnlHeader.Controls.Add(lblTitle);
+
+            if (!string.IsNullOrEmpty(actionText))
+            {
+                var lblAction = new Label
+                {
+                    Text = actionText,
+                    Dock = DockStyle.Right,
+                    AutoSize = true,
+                    Font = new Font("Segoe UI", 8F, FontStyle.Bold),
+                    ForeColor = Orange,
+                    Cursor = Cursors.Hand,
+                    TextAlign = ContentAlignment.MiddleRight
+                };
+                if (onAction != null) lblAction.Click += onAction;
+                pnlHeader.Controls.Add(lblAction);
+            }
+
+            innerControl.Dock = DockStyle.Fill;
+
+            pnl.Controls.Add(innerControl);
+            pnl.Controls.Add(pnlHeader);
+            return pnl;
+        }
+
+        private DataGridView BuildRecentPTGrid()
+        {
+            var grid = new DataGridView
+            {
+                Dock = DockStyle.Fill,
+                BackgroundColor = CardColor,
+                BorderStyle = BorderStyle.None,
+                CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal,
+                GridColor = Color.FromArgb(35, 35, 40),
+                EnableHeadersVisualStyles = false,
+                AllowUserToAddRows = false,
+                AllowUserToDeleteRows = false,
+                AllowUserToResizeRows = false,
+                ReadOnly = true,
+                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                MultiSelect = false,
+                RowHeadersVisible = false,
+                AutoGenerateColumns = false,
+                RowTemplate = { Height = 34 }
+            };
+
+            grid.ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
+            {
+                BackColor = Color.FromArgb(28, 28, 32),
+                ForeColor = MutedColor,
+                Font = new Font("Segoe UI", 8F, FontStyle.Bold),
+                Alignment = DataGridViewContentAlignment.MiddleLeft,
+                Padding = new Padding(6, 0, 0, 0)
+            };
+            grid.ColumnHeadersHeight = 28;
+            grid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+
+            grid.DefaultCellStyle = new DataGridViewCellStyle
+            {
+                BackColor = CardColor,
+                ForeColor = Color.FromArgb(244, 244, 245),
+                Font = new Font("Segoe UI", 8.5F),
+                SelectionBackColor = Color.FromArgb(39, 39, 42),
+                SelectionForeColor = Color.White,
+                Padding = new Padding(6, 0, 0, 0)
+            };
+
+            grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "Member", HeaderText = "HỘI VIÊN", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill });
+            grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "PT", HeaderText = "HLV / PT", Width = 135 });
+            grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "DateTime", HeaderText = "NGÀY & GIỜ", Width = 150 });
+            grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "Status", HeaderText = "TRẠNG THÁI", Width = 105 });
+
+            return grid;
+        }
+
+        private DataGridView BuildRecentOrdersGrid()
+        {
+            var grid = new DataGridView
+            {
+                Dock = DockStyle.Fill,
+                BackgroundColor = CardColor,
+                BorderStyle = BorderStyle.None,
+                CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal,
+                GridColor = Color.FromArgb(35, 35, 40),
+                EnableHeadersVisualStyles = false,
+                AllowUserToAddRows = false,
+                AllowUserToDeleteRows = false,
+                AllowUserToResizeRows = false,
+                ReadOnly = true,
+                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                MultiSelect = false,
+                RowHeadersVisible = false,
+                AutoGenerateColumns = false,
+                RowTemplate = { Height = 32 }
+            };
+
+            grid.ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
+            {
+                BackColor = Color.FromArgb(28, 28, 32),
+                ForeColor = MutedColor,
+                Font = new Font("Segoe UI", 8F, FontStyle.Bold),
+                Alignment = DataGridViewContentAlignment.MiddleLeft,
+                Padding = new Padding(8, 0, 0, 0)
+            };
+            grid.ColumnHeadersHeight = 28;
+            grid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+
+            grid.DefaultCellStyle = new DataGridViewCellStyle
+            {
+                BackColor = CardColor,
+                ForeColor = Color.FromArgb(244, 244, 245),
+                Font = new Font("Segoe UI", 8.5F),
+                SelectionBackColor = Color.FromArgb(39, 39, 42),
+                SelectionForeColor = Color.White,
+                Padding = new Padding(8, 0, 0, 0)
+            };
+
+            grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "Code", HeaderText = "MÃ ĐƠN", Width = 105 });
+            grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "Customer", HeaderText = "KHÁCH HÀNG", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill });
+            grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "Package", HeaderText = "GÓI TẬP / DỊCH VỤ", Width = 160 });
+            grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "Date", HeaderText = "NGÀY MUA", Width = 140 });
+            grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "Payment", HeaderText = "THANH TOÁN", Width = 110 });
+            grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "Amount", HeaderText = "TỔNG TIỀN", Width = 135 });
+            grid.Columns.Add(new DataGridViewTextBoxColumn { Name = "Status", HeaderText = "TRẠNG THÁI", Width = 110 });
+
+            return grid;
         }
 
         private void SetActiveNav(Button btn)
@@ -401,11 +766,11 @@ namespace QuanLyGym.UI.Forms.Admin
             }
         }
 
-        private void Card_Paint(object sender, PaintEventArgs e)
+        private void Card_Paint(object? sender, PaintEventArgs e)
         {
-            Control c = (Control)sender;
-            using (Pen pen = new Pen(BorderColor))
+            if (sender is Control c)
             {
+                using Pen pen = new Pen(BorderColor);
                 e.Graphics.DrawRectangle(pen, 0, 0, c.Width - 1, c.Height - 1);
             }
         }
@@ -498,6 +863,70 @@ namespace QuanLyGym.UI.Forms.Admin
         }
 
         /// <summary>
+        /// Vẽ biểu đồ tỷ trọng gói tập (Doughnut Chart) từ Database (bảng Packages & Memberships)
+        /// </summary>
+        private void DrawPackageDistributionChart()
+        {
+            try
+            {
+                var list = RevenueService.Instance.GetPackageDistribution();
+
+                _chartPackageShare.ChartAreas.Clear();
+                _chartPackageShare.Series.Clear();
+                _chartPackageShare.Legends.Clear();
+
+                ChartArea area = new ChartArea("main")
+                {
+                    BackColor = Color.Transparent
+                };
+                _chartPackageShare.ChartAreas.Add(area);
+
+                Legend legend = new Legend("main_legend")
+                {
+                    BackColor = Color.Transparent,
+                    ForeColor = MutedColor,
+                    Font = new Font("Segoe UI", 7.5F),
+                    Docking = Docking.Bottom,
+                    Alignment = StringAlignment.Center
+                };
+                _chartPackageShare.Legends.Add(legend);
+
+                Series s = new Series("Packages")
+                {
+                    ChartType = SeriesChartType.Doughnut,
+                    IsValueShownAsLabel = false,
+                    Font = new Font("Segoe UI", 8F, FontStyle.Bold)
+                };
+                s["DoughnutRadius"] = "55";
+                s["PieLabelStyle"] = "Disabled";
+
+                Color[] sliceColors = {
+                    Color.FromArgb(59, 130, 246),  // Xanh dương
+                    Color.FromArgb(34, 197, 94),   // Xanh lá
+                    Color.FromArgb(249, 115, 22),  // Cam
+                    Color.FromArgb(168, 85, 247),  // Tím
+                    Color.FromArgb(236, 72, 153)   // Hồng
+                };
+
+                int idx = 0;
+                foreach (var item in list)
+                {
+                    int ptIdx = s.Points.AddY(item.MemberCount);
+                    s.Points[ptIdx].Color = sliceColors[idx % sliceColors.Length];
+                    s.Points[ptIdx].LegendText = $"{item.PackageName} ({item.Percentage}%)";
+                    s.Points[ptIdx].ToolTip = $"{item.PackageName}\nSố lượng: {item.MemberCount} hội viên\nTỷ trọng: {item.Percentage}%";
+                    idx++;
+                }
+
+                _chartPackageShare.Series.Add(s);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[DrawPackageDistributionChart] Error: {ex.Message}");
+            }
+        }
+
+        /// <summary>
         /// Vẽ biểu đồ doanh thu theo từng chi nhánh từ Database (bảng Branches & Memberships, cột BranchID & PriceAtPurchase)
         /// </summary>
         private void DrawBranchChart()
@@ -566,6 +995,92 @@ namespace QuanLyGym.UI.Forms.Admin
             catch (Exception ex)
             {
                 Debug.WriteLine($"[DrawNewMemberChart] Error: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Nạp danh sách lịch đặt tập với PT gần nhất từ Database (bảng Schedules)
+        /// </summary>
+        private void LoadRecentPTSchedules()
+        {
+            try
+            {
+                _gridRecentPT.Rows.Clear();
+                var list = RevenueService.Instance.GetRecentPTSchedules(5);
+
+                foreach (var item in list)
+                {
+                    string timeStr = $"{item.TrainingDate:dd/MM/yyyy}  {item.StartTime:hh\\:mm}-{item.EndTime:hh\\:mm}";
+                    int rowIdx = _gridRecentPT.Rows.Add(item.MemberName, item.PTName, timeStr, item.StatusDisplay);
+
+                    var row = _gridRecentPT.Rows[rowIdx];
+                    row.Cells["Member"].Style.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+                    row.Cells["Member"].Style.ForeColor = Color.White;
+                    row.Cells["PT"].Style.ForeColor = Orange;
+
+                    if (item.Status == "Scheduled" || item.StatusDisplay == "Đã duyệt")
+                    {
+                        row.Cells["Status"].Style.ForeColor = Color.FromArgb(34, 197, 94);
+                    }
+                    else if (item.Status == "Pending" || item.StatusDisplay == "Chờ duyệt")
+                    {
+                        row.Cells["Status"].Style.ForeColor = Color.FromArgb(249, 115, 22);
+                    }
+                    else
+                    {
+                        row.Cells["Status"].Style.ForeColor = Color.FromArgb(59, 130, 246);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[LoadRecentPTSchedules] Error: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Nạp danh sách đơn đăng ký gói tập / giao dịch gần nhất từ Database (bảng Memberships)
+        /// </summary>
+        private void LoadRecentTransactions()
+        {
+            try
+            {
+                _gridRecentOrders.Rows.Clear();
+                var list = RevenueService.Instance.GetRecentTransactions(5);
+
+                foreach (var item in list)
+                {
+                    int rowIdx = _gridRecentOrders.Rows.Add(
+                        item.OrderCode,
+                        item.CustomerName,
+                        item.PackageName,
+                        item.PurchaseDate.ToString("dd/MM/yyyy HH:mm"),
+                        item.PaymentMethod,
+                        $"+{item.Amount:N0} ₫",
+                        item.Status
+                    );
+
+                    var row = _gridRecentOrders.Rows[rowIdx];
+                    row.Cells["Code"].Style.ForeColor = Color.FromArgb(59, 130, 246);
+                    row.Cells["Code"].Style.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+                    row.Cells["Customer"].Style.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+                    row.Cells["Customer"].Style.ForeColor = Color.White;
+                    row.Cells["Amount"].Style.ForeColor = Color.FromArgb(34, 197, 94);
+                    row.Cells["Amount"].Style.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+
+                    if (item.Status == "Hoàn thành")
+                    {
+                        row.Cells["Status"].Style.ForeColor = Color.FromArgb(34, 197, 94);
+                    }
+                    else
+                    {
+                        row.Cells["Status"].Style.ForeColor = Color.FromArgb(249, 115, 22);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[LoadRecentTransactions] Error: {ex.Message}");
             }
         }
 
@@ -799,7 +1314,12 @@ namespace QuanLyGym.UI.Forms.Admin
 
         private ucAdminStaff? _ucStaff;
         private ucAdminBranch? _ucBranch;
+        private ucAdminRoom? _ucRoom;
         private ucAdminMember? _ucMember;
+        private ucAdminEquipment? _ucEquipment;
+        private ucAdminMaintenance? _ucMaintenance;
+        private ucAdminPackage? _ucPackage;
+        private ucAdminPTSchedule? _ucPTSchedule;
         private ucAdminAccount? _ucAccount;
     }
 }
