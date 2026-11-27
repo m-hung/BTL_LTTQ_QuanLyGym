@@ -4,21 +4,11 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using QuanLyGym.BLL.DTOs.PT;
+using QuanLyGym.BLL.Services.PT;
 
 namespace QuanLyGym.UI.Forms.PT
 {
-    public class BookingRequestItem
-    {
-        public int ScheduleId { get; set; }
-        public string MemberCode { get; set; } = "";
-        public string MemberName { get; set; } = "";
-        public string Phone { get; set; } = "";
-        public string PackageName { get; set; } = "";
-        public string RequestedDateTime { get; set; } = "";
-        public string GoalNote { get; set; } = "";
-        public Color AvatarColor { get; set; } = PTUITheme.PrimaryLime;
-    }
-
     public partial class frmXacNhanLichModal : Form
     {
         // Win32 API hỗ trợ kéo di chuyển Form không viền mượt mà
@@ -29,7 +19,9 @@ namespace QuanLyGym.UI.Forms.PT
         private const int WM_NCLBUTTONDOWN = 0xA1;
         private const int HT_CAPTION = 0x2;
 
-        private List<BookingRequestItem> _requests = new List<BookingRequestItem>();
+        private readonly PTBookingApprovalService _bookingService = new PTBookingApprovalService();
+        private readonly int _ptId;
+        private List<BookingRequestDto> _requests = new List<BookingRequestDto>();
         private FlowLayoutPanel pnlList = null!;
         private Label lblHeaderSubtitle = null!;
         private Label lblFooterStatus = null!;
@@ -37,11 +29,15 @@ namespace QuanLyGym.UI.Forms.PT
 
         public event Action? OnBookingsChanged;
 
-        public frmXacNhanLichModal()
+        public frmXacNhanLichModal() : this(1)
         {
+        }
+
+        public frmXacNhanLichModal(int ptId)
+        {
+            _ptId = ptId > 0 ? ptId : 1;
             InitializeComponentManual();
-            LoadMockRequests();
-            RenderRequests();
+            ReloadRequests();
         }
 
         private void InitializeComponentManual()
@@ -205,47 +201,13 @@ namespace QuanLyGym.UI.Forms.PT
             }
         }
 
-        private void LoadMockRequests()
+        private void ReloadRequests()
         {
-            _requests = new List<BookingRequestItem>
-            {
-                new BookingRequestItem
-                {
-                    ScheduleId = 101,
-                    MemberCode = "HV001",
-                    MemberName = "Nguyễn Đức An",
-                    Phone = "0912.345.678",
-                    PackageName = "Tăng Cơ Hypertrophy",
-                    RequestedDateTime = "Thứ Hai, 09/11/2026 (08:30 – 10:00)",
-                    GoalNote = "Tập ngực & tay sau, test mức tạ Bench Press mới.",
-                    AvatarColor = PTUITheme.PrimaryLime
-                },
-                new BookingRequestItem
-                {
-                    ScheduleId = 102,
-                    MemberCode = "HV002",
-                    MemberName = "Phạm Mai Linh",
-                    Phone = "0988.765.432",
-                    PackageName = "Body Transformation Siết Mỡ",
-                    RequestedDateTime = "Thứ Ba, 10/11/2026 (14:00 – 15:30)",
-                    GoalNote = "Kiểm tra lại chỉ số InBody và cardio kháng lực cường độ cao.",
-                    AvatarColor = PTUITheme.Cyan
-                },
-                new BookingRequestItem
-                {
-                    ScheduleId = 103,
-                    MemberCode = "HV003",
-                    MemberName = "Lê Hoàng Nam",
-                    Phone = "0903.112.233",
-                    PackageName = "Sức Bền & Thể Lực",
-                    RequestedDateTime = "Thứ Tư, 11/11/2026 (09:00 – 10:30)",
-                    GoalNote = "Luyện bài tập chân và nhóm cơ core hỗ trợ chạy bán marathon.",
-                    AvatarColor = Color.FromArgb(251, 146, 60)
-                }
-            };
+            _requests = _bookingService.GetPendingRequests(_ptId, "all");
+            RenderRequests();
         }
 
-        public int PendingCount => _requests.Count;
+        public int PendingCount => _bookingService.GetPendingCount(_ptId);
 
         private void RenderRequests()
         {
@@ -254,9 +216,17 @@ namespace QuanLyGym.UI.Forms.PT
 
             if (lblFooterStatus != null)
             {
-                lblFooterStatus.Text = _requests.Count > 0
-                    ? $"Hiện có {_requests.Count} yêu cầu đang chờ phản hồi từ bạn"
-                    : "Không còn yêu cầu nào đang chờ xử lý";
+                int lateCount = _requests.FindAll(r => r.IsOverdue).Count;
+                if (_requests.Count > 0)
+                {
+                    lblFooterStatus.Text = lateCount > 0
+                        ? $"Hiện có {_requests.Count} yêu cầu đang chờ ({lateCount} yêu cầu đã quá giờ tập)"
+                        : $"Hiện có {_requests.Count} yêu cầu đang chờ phản hồi từ bạn";
+                }
+                else
+                {
+                    lblFooterStatus.Text = "Không còn yêu cầu nào đang chờ xử lý";
+                }
             }
 
             if (_requests.Count == 0)
@@ -292,8 +262,19 @@ namespace QuanLyGym.UI.Forms.PT
             pnlList.ResumeLayout(true);
         }
 
-        private Panel CreateRequestCard(BookingRequestItem req, int width)
+        private Panel CreateRequestCard(BookingRequestDto req, int width)
         {
+            Color[] avatarPalette =
+            {
+                PTUITheme.PrimaryLime,
+                PTUITheme.Cyan,
+                Color.FromArgb(251, 146, 60),
+                Color.FromArgb(168, 85, 247),
+                Color.FromArgb(56, 189, 248),
+                Color.FromArgb(244, 114, 182)
+            };
+            Color avatarColor = avatarPalette[req.ColorIndex % avatarPalette.Length];
+
             Panel card = new PTUITheme.DoubleBufferedPanel
             {
                 Width = width,
@@ -308,49 +289,52 @@ namespace QuanLyGym.UI.Forms.PT
                 g.SmoothingMode = SmoothingMode.AntiAlias;
                 Rectangle r = card.ClientRectangle;
 
+                Color borderColor = req.IsOverdue ? Color.FromArgb(120, 245, 158, 11) : Color.FromArgb(42, 50, 70);
                 PTUITheme.DrawCard(g, new Rectangle(r.X, r.Y, r.Width - 1, r.Height - 1), radius: 10,
-                    customBg: Color.FromArgb(22, 26, 36), customBorder: Color.FromArgb(42, 50, 70));
+                    customBg: Color.FromArgb(22, 26, 36), customBorder: borderColor);
 
                 // Avatar
                 Rectangle avRect = new Rectangle(18, 16, 46, 46);
-                using (SolidBrush bAv = new SolidBrush(Color.FromArgb(28, req.AvatarColor.R, req.AvatarColor.G, req.AvatarColor.B)))
+                using (SolidBrush bAv = new SolidBrush(Color.FromArgb(28, avatarColor.R, avatarColor.G, avatarColor.B)))
                 {
                     g.FillEllipse(bAv, avRect);
                 }
-                using (Pen pAv = new Pen(Color.FromArgb(100, req.AvatarColor.R, req.AvatarColor.G, req.AvatarColor.B), 1.5f))
+                using (Pen pAv = new Pen(Color.FromArgb(100, avatarColor.R, avatarColor.G, avatarColor.B), 1.5f))
                 {
                     g.DrawEllipse(pAv, avRect);
                 }
 
-                string initials = req.MemberName.Length >= 2 ? req.MemberName.Substring(0, 2).ToUpper() : "HV";
-                TextRenderer.DrawText(g, initials, PTUITheme.FontBold, avRect, req.AvatarColor,
-                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+                TextRenderer.DrawText(g, req.MemberInitials, PTUITheme.FontBold, avRect, avatarColor,
+                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
 
-                // 2. Họ tên và Mã Hội Viên
+                // Họ tên và Mã Hội Viên
                 int textStartX = 74;
                 int infoWidth = card.Width - textStartX - 240;
 
                 Rectangle nameRect = new Rectangle(textStartX, 16, infoWidth, 22);
                 TextRenderer.DrawText(g, $"{req.MemberName}  ({req.MemberCode})", PTUITheme.FontBold, nameRect, PTUITheme.TextWhite,
-                    TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+                    TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
 
                 // SĐT và Gói tập
                 Rectangle phoneRect = new Rectangle(textStartX, 40, infoWidth, 18);
                 TextRenderer.DrawText(g, $"SĐT: {req.Phone}   •   Gói: {req.PackageName}", PTUITheme.FontSmall, phoneRect, PTUITheme.TextMuted,
-                    TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+                    TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
 
-                // 3. Khung giờ yêu cầu
+                // Khung giờ yêu cầu
                 Rectangle dtRect = new Rectangle(18, 70, card.Width - 36, 32);
                 PTUITheme.DrawCard(g, dtRect, radius: 6, customBg: Color.FromArgb(28, 34, 48), customBorder: Color.FromArgb(48, 60, 84));
 
+                string timePrefix = req.IsOverdue ? "[QUÁ GIỜ TẬP]  " : "";
+                Color timeColor = req.IsOverdue ? Color.FromArgb(251, 191, 36) : PTUITheme.PrimaryLime;
                 Rectangle dtTextRect = new Rectangle(dtRect.X + 12, dtRect.Y, dtRect.Width - 24, dtRect.Height);
-                TextRenderer.DrawText(g, $"KHUNG GIỜ YÊU CẦU:  {req.RequestedDateTime}", PTUITheme.FontSmallBold, dtTextRect, PTUITheme.PrimaryLime,
-                    TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+                TextRenderer.DrawText(g, $"{timePrefix}KHUNG GIỜ YÊU CẦU:  {req.FullDateTimeText}", PTUITheme.FontSmallBold, dtTextRect, timeColor,
+                    TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
 
-                // 4. Mục tiêu buổi tập
+                // Mục tiêu buổi tập
                 Rectangle goalRect = new Rectangle(18, 110, card.Width - 36, 22);
-                TextRenderer.DrawText(g, $"Mục tiêu: \"{req.GoalNote}\"", PTUITheme.FontSmall, goalRect, Color.FromArgb(195, 205, 222),
-                    TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+                string noteDisplay = string.IsNullOrWhiteSpace(req.Notes) ? "Học viên không để lại ghi chú." : $"\"{req.Notes}\"";
+                TextRenderer.DrawText(g, $"Ghi chú: {noteDisplay}", PTUITheme.FontSmall, goalRect, Color.FromArgb(195, 205, 222),
+                    TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
             };
 
             // Nút Xác Nhận
@@ -371,11 +355,15 @@ namespace QuanLyGym.UI.Forms.PT
             btnConfirm.MouseLeave += (s, e) => btnConfirm.BackColor = PTUITheme.PrimaryLime;
             btnConfirm.Click += (s, e) =>
             {
-                MessageBox.Show($"Đã xác nhận lịch tập của hội viên {req.MemberName}!\nKhung giờ: {req.RequestedDateTime}\nLịch tập đã được đưa vào thời khóa biểu tuần của bạn.",
-                    "Xác Nhận Thành Công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                var res = _bookingService.ApproveRequest(req.ScheduleID, _ptId);
+                if (!res.Success)
+                {
+                    MessageBox.Show(res.Message, "Không Thể Duyệt Trùng Lịch", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
 
-                _requests.Remove(req);
-                RenderRequests();
+                MessageBox.Show(res.Message, "Xác Nhận Thành Công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                ReloadRequests();
                 OnBookingsChanged?.Invoke();
             };
 
@@ -403,8 +391,13 @@ namespace QuanLyGym.UI.Forms.PT
 
                 if (dialog == DialogResult.Yes)
                 {
-                    _requests.Remove(req);
-                    RenderRequests();
+                    var res = _bookingService.RejectRequest(req.ScheduleID, null, _ptId);
+                    if (!res.Success)
+                    {
+                        MessageBox.Show(res.Message, "Thông Báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+                    ReloadRequests();
                     OnBookingsChanged?.Invoke();
                 }
             };

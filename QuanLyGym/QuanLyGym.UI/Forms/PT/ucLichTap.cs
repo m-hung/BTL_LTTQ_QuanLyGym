@@ -1353,7 +1353,7 @@ namespace QuanLyGym.UI.Forms.PT
 
                     // Badge Trống
                     Rectangle freeBadge = new Rectangle(cardRect.Right - 130, cardRect.Y + (cardRect.Height - 26) / 2, 114, 26);
-                    PTUITheme.DrawBadge(g, "CA TRỐNG", freeBadge, Color.FromArgb(24, 28, 38), Color.FromArgb(120, 130, 150), PTUITheme.FontSmallBold, 6);
+                    PTUITheme.DrawBadge(g, "CA TRỐNG", freeBadge, Color.FromArgb(24, 28, 38), PTUITheme.TextMuted, PTUITheme.FontSmallBold, 6);
                 }
             }
         }
