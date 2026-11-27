@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using QuanLyGym.BLL.Models;
 using QuanLyGym.DAL;
 using QuanLyGym.DAL.Entities;
+using PTEntity = QuanLyGym.DAL.Entities.PT;
 
 namespace QuanLyGym.BLL.Services
 {
@@ -70,7 +71,7 @@ namespace QuanLyGym.BLL.Services
                         var acc = db.Accounts.FirstOrDefault(a => a.Role == "PT") ?? db.Accounts.FirstOrDefault();
                         int accId = acc?.AccountID ?? 1;
 
-                        pt = new PT
+                        pt = new PTEntity
                         {
                             AccountID = accId,
                             FullName = "Trần Minh Nhật",

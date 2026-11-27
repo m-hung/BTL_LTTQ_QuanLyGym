@@ -253,7 +253,7 @@ namespace QuanLyGym.UI.Forms.Admin
                 var branches = await _service.GetBranchesAsync();
                 if (IsDisposed) return;
                 _branch.Items.AddRange(branches.Cast<object>().ToArray());
-                if (branches.Count == 1) _branch.SelectedIndex = 0;
+                if (branches.Count > 0 && _branch.SelectedIndex < 0) _branch.SelectedIndex = 0;
                 if (branches.Count == 0) ShowError("Chưa có chi nhánh", "Không tìm thấy chi nhánh đang hoạt động.");
             }
             catch (Exception ex)

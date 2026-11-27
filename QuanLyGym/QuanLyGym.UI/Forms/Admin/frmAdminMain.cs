@@ -364,8 +364,8 @@ namespace QuanLyGym.UI.Forms.Admin
                 {
                     _ucQrCheckIn = new ucAdminQrCheckIn { Dock = DockStyle.Fill };
                     Controls.Add(_ucQrCheckIn);
-                    _ucQrCheckIn.BringToFront();
                 }
+                _ucQrCheckIn.BringToFront();
                 _ucQrCheckIn.Visible = true;
             }
             else if (_ucQrCheckIn != null)
@@ -379,9 +379,9 @@ namespace QuanLyGym.UI.Forms.Admin
             lblDateTime.Text = DateTime.Now.ToString("dd/MM/yyyy — HH:mm");
         }
 
-        private void btnNav_Click(object sender, EventArgs e)
+        private void btnNav_Click(object? sender, EventArgs e)
         {
-            Button btn = (Button)sender;
+            if (sender is not Button btn) return;
             SetActiveNav(btn);
             ShowPage(btn);
         }
@@ -393,21 +393,26 @@ namespace QuanLyGym.UI.Forms.Admin
 
         private void InitializeCustomControls()
         {
+            // Cho phép thanh điều hướng cuộn ngang nếu màn hình nhỏ
+            flpNav.AutoScroll = true;
+
             // Cấu hình các nút điều hướng
             ConfigureNavButton(btnNavOverview, "btnNavOverview", "▦  Tổng quan");
             ConfigureNavButton(btnNavBranch, "btnNavBranch", "⌂  Chi nhánh");
             ConfigureNavButton(btnNavRoom, "btnNavRoom", "🏢  Phòng tập");
             ConfigureNavButton(btnNavStaff, "btnNavStaff", "☺  Nhân viên");
             ConfigureNavButton(btnNavMember, "btnNavMember", "♙  Hội viên");
-            ConfigureNavButton(btnNavAccount, "btnNavAccount", "⚿  Tài khoản");
-            _btnNavQrCheckIn.TabIndex = btnNavAccount.TabIndex + 1;
-            ConfigureNavButton(_btnNavQrCheckIn, "btnNavQrCheckIn", "▣  Check-in QR");
-            flpNav.Controls.Add(_btnNavQrCheckIn);
             ConfigureNavButton(btnNavEquipment, "btnNavEquipment", "⚙  Thiết bị");
             ConfigureNavButton(btnNavMaintenance, "btnNavMaintenance", "🔧  Bảo trì");
             ConfigureNavButton(btnNavPackage, "btnNavPackage", "📦  Gói tập");
             ConfigureNavButton(btnNavPTSchedule, "btnNavPTSchedule", "📅  Lịch hẹn PT");
             ConfigureNavButton(btnNavAccount, "btnNavAccount", "🔑  Tài khoản");
+
+            // Nút Check-in QR
+            _btnNavQrCheckIn.TabIndex = btnNavAccount.TabIndex + 1;
+            ConfigureNavButton(_btnNavQrCheckIn, "btnNavQrCheckIn", "▣  Check-in QR");
+            _btnNavQrCheckIn.Click += btnNav_Click;
+            flpNav.Controls.Add(_btnNavQrCheckIn);
 
             // Nút Xuất báo cáo
             if (btnExportReport != null)
