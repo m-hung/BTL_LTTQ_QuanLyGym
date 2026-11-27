@@ -33,8 +33,13 @@ namespace QuanLyGym.UI.Forms.Admin
             flpNav = new FlowLayoutPanel();
             btnNavOverview = new Button();
             btnNavBranch = new Button();
+            btnNavRoom = new Button();
             btnNavStaff = new Button();
             btnNavMember = new Button();
+            btnNavEquipment = new Button();
+            btnNavMaintenance = new Button();
+            btnNavPackage = new Button();
+            btnNavPTSchedule = new Button();
             btnNavAccount = new Button();
             pnlContent = new Panel();
             tblMain = new TableLayoutPanel();
@@ -265,8 +270,13 @@ namespace QuanLyGym.UI.Forms.Admin
             flpNav.BackColor = Color.FromArgb(10, 10, 12);
             flpNav.Controls.Add(btnNavOverview);
             flpNav.Controls.Add(btnNavBranch);
+            flpNav.Controls.Add(btnNavRoom);
             flpNav.Controls.Add(btnNavStaff);
             flpNav.Controls.Add(btnNavMember);
+            flpNav.Controls.Add(btnNavEquipment);
+            flpNav.Controls.Add(btnNavMaintenance);
+            flpNav.Controls.Add(btnNavPackage);
+            flpNav.Controls.Add(btnNavPTSchedule);
             flpNav.Controls.Add(btnNavAccount);
             flpNav.Dock = DockStyle.Top;
             flpNav.Location = new Point(0, 86);
@@ -311,6 +321,23 @@ namespace QuanLyGym.UI.Forms.Admin
             btnNavBranch.UseVisualStyleBackColor = false;
             btnNavBranch.Click += btnNav_Click;
             // 
+            // btnNavRoom
+            // 
+            btnNavRoom.BackColor = Color.FromArgb(10, 10, 12);
+            btnNavRoom.Cursor = Cursors.Hand;
+            btnNavRoom.FlatAppearance.BorderSize = 0;
+            btnNavRoom.FlatStyle = FlatStyle.Flat;
+            btnNavRoom.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnNavRoom.ForeColor = Color.FromArgb(161, 161, 170);
+            btnNavRoom.Location = new Point(339, 3);
+            btnNavRoom.Margin = new Padding(0, 0, 4, 0);
+            btnNavRoom.Name = "btnNavRoom";
+            btnNavRoom.Size = new Size(160, 50);
+            btnNavRoom.TabIndex = 2;
+            btnNavRoom.Text = "🏢  Phòng tập";
+            btnNavRoom.UseVisualStyleBackColor = false;
+            btnNavRoom.Click += btnNav_Click;
+            // 
             // btnNavStaff
             // 
             btnNavStaff.BackColor = Color.FromArgb(10, 10, 12);
@@ -345,6 +372,74 @@ namespace QuanLyGym.UI.Forms.Admin
             btnNavMember.UseVisualStyleBackColor = false;
             btnNavMember.Click += btnNav_Click;
             // 
+            // btnNavEquipment
+            // 
+            btnNavEquipment.BackColor = Color.FromArgb(10, 10, 12);
+            btnNavEquipment.Cursor = Cursors.Hand;
+            btnNavEquipment.FlatAppearance.BorderSize = 0;
+            btnNavEquipment.FlatStyle = FlatStyle.Flat;
+            btnNavEquipment.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnNavEquipment.ForeColor = Color.FromArgb(161, 161, 170);
+            btnNavEquipment.Location = new Point(667, 3);
+            btnNavEquipment.Margin = new Padding(0, 0, 4, 0);
+            btnNavEquipment.Name = "btnNavEquipment";
+            btnNavEquipment.Size = new Size(160, 50);
+            btnNavEquipment.TabIndex = 4;
+            btnNavEquipment.Text = "⚙  Thiết bị";
+            btnNavEquipment.UseVisualStyleBackColor = false;
+            btnNavEquipment.Click += btnNav_Click;
+            // 
+            // btnNavMaintenance
+            // 
+            btnNavMaintenance.BackColor = Color.FromArgb(10, 10, 12);
+            btnNavMaintenance.Cursor = Cursors.Hand;
+            btnNavMaintenance.FlatAppearance.BorderSize = 0;
+            btnNavMaintenance.FlatStyle = FlatStyle.Flat;
+            btnNavMaintenance.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnNavMaintenance.ForeColor = Color.FromArgb(161, 161, 170);
+            btnNavMaintenance.Location = new Point(831, 3);
+            btnNavMaintenance.Margin = new Padding(0, 0, 4, 0);
+            btnNavMaintenance.Name = "btnNavMaintenance";
+            btnNavMaintenance.Size = new Size(160, 50);
+            btnNavMaintenance.TabIndex = 5;
+            btnNavMaintenance.Text = "🔧  Bảo trì";
+            btnNavMaintenance.UseVisualStyleBackColor = false;
+            btnNavMaintenance.Click += btnNav_Click;
+            // 
+            // btnNavPackage
+            // 
+            btnNavPackage.BackColor = Color.FromArgb(10, 10, 12);
+            btnNavPackage.Cursor = Cursors.Hand;
+            btnNavPackage.FlatAppearance.BorderSize = 0;
+            btnNavPackage.FlatStyle = FlatStyle.Flat;
+            btnNavPackage.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnNavPackage.ForeColor = Color.FromArgb(161, 161, 170);
+            btnNavPackage.Location = new Point(995, 3);
+            btnNavPackage.Margin = new Padding(0, 0, 4, 0);
+            btnNavPackage.Name = "btnNavPackage";
+            btnNavPackage.Size = new Size(160, 50);
+            btnNavPackage.TabIndex = 6;
+            btnNavPackage.Text = "📦  Gói tập";
+            btnNavPackage.UseVisualStyleBackColor = false;
+            btnNavPackage.Click += btnNav_Click;
+            // 
+            // btnNavPTSchedule
+            // 
+            btnNavPTSchedule.BackColor = Color.FromArgb(10, 10, 12);
+            btnNavPTSchedule.Cursor = Cursors.Hand;
+            btnNavPTSchedule.FlatAppearance.BorderSize = 0;
+            btnNavPTSchedule.FlatStyle = FlatStyle.Flat;
+            btnNavPTSchedule.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnNavPTSchedule.ForeColor = Color.FromArgb(161, 161, 170);
+            btnNavPTSchedule.Location = new Point(1159, 3);
+            btnNavPTSchedule.Margin = new Padding(0, 0, 4, 0);
+            btnNavPTSchedule.Name = "btnNavPTSchedule";
+            btnNavPTSchedule.Size = new Size(160, 50);
+            btnNavPTSchedule.TabIndex = 7;
+            btnNavPTSchedule.Text = "📅  Lịch hẹn PT";
+            btnNavPTSchedule.UseVisualStyleBackColor = false;
+            btnNavPTSchedule.Click += btnNav_Click;
+            // 
             // btnNavAccount
             // 
             btnNavAccount.BackColor = Color.FromArgb(10, 10, 12);
@@ -353,12 +448,12 @@ namespace QuanLyGym.UI.Forms.Admin
             btnNavAccount.FlatStyle = FlatStyle.Flat;
             btnNavAccount.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnNavAccount.ForeColor = Color.FromArgb(161, 161, 170);
-            btnNavAccount.Location = new Point(667, 3);
+            btnNavAccount.Location = new Point(1323, 3);
             btnNavAccount.Margin = new Padding(0, 0, 4, 0);
             btnNavAccount.Name = "btnNavAccount";
             btnNavAccount.Size = new Size(160, 50);
-            btnNavAccount.TabIndex = 4;
-            btnNavAccount.Text = "⚿  Tài khoản";
+            btnNavAccount.TabIndex = 8;
+            btnNavAccount.Text = "🔑  Tài khoản";
             btnNavAccount.UseVisualStyleBackColor = false;
             btnNavAccount.Click += btnNav_Click;
             // 
@@ -764,16 +859,16 @@ namespace QuanLyGym.UI.Forms.Admin
         {
             btn.Name = name;
             btn.Text = text;
-            btn.Size = new System.Drawing.Size(120, 40);
+            btn.Size = new System.Drawing.Size(136, 44);
             btn.BackColor = System.Drawing.Color.FromArgb(10, 10, 12);
             btn.Cursor = System.Windows.Forms.Cursors.Hand;
             btn.FlatAppearance.BorderSize = 0;
             btn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            btn.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            btn.Font = new System.Drawing.Font("Segoe UI Emoji", 9F, System.Drawing.FontStyle.Bold);
             btn.ForeColor = System.Drawing.Color.FromArgb(161, 161, 170);
             btn.Margin = new System.Windows.Forms.Padding(0, 0, 4, 0);
             btn.UseVisualStyleBackColor = false;
-            btn.Click += new System.EventHandler(this.btnNav_Click);
+            btn.UseCompatibleTextRendering = true;
         }
 
         private void SetupKpiPanel(Panel pnl, Label title, Label value, Label sub, string titleText, string valText, string subText, System.Drawing.Color valColor)
@@ -844,8 +939,13 @@ namespace QuanLyGym.UI.Forms.Admin
         private System.Windows.Forms.FlowLayoutPanel flpNav;
         private System.Windows.Forms.Button btnNavOverview;
         private System.Windows.Forms.Button btnNavBranch;
+        private System.Windows.Forms.Button btnNavRoom;
         private System.Windows.Forms.Button btnNavStaff;
         private System.Windows.Forms.Button btnNavMember;
+        private System.Windows.Forms.Button btnNavEquipment;
+        private System.Windows.Forms.Button btnNavMaintenance;
+        private System.Windows.Forms.Button btnNavPackage;
+        private System.Windows.Forms.Button btnNavPTSchedule;
         private System.Windows.Forms.Button btnNavAccount;
 
         private System.Windows.Forms.Panel pnlContent;
