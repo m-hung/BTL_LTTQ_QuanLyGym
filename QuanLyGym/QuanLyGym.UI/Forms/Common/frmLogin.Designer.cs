@@ -1,4 +1,4 @@
-﻿namespace QuanLyGym.UI.Forms.Common
+namespace QuanLyGym.UI.Forms.Common
 {
     partial class frmLogin
     {
@@ -38,6 +38,7 @@
             btnDangNhap = new Button();
             lblLoi = new Label();
             lnkQuenMatKhau = new LinkLabel();
+            lnkDangKy = new LinkLabel();
             chkHienMatKhau = new CheckBox();
             pnlMatKhauBorder = new Panel();
             pnlMatKhauInner = new Panel();
@@ -115,6 +116,7 @@
             //
             pnlRight.BackColor = Color.White;
             pnlRight.Controls.Add(lblFooter);
+            pnlRight.Controls.Add(lnkDangKy);
             pnlRight.Controls.Add(btnDangNhap);
             pnlRight.Controls.Add(lblLoi);
             pnlRight.Controls.Add(lnkQuenMatKhau);
@@ -291,6 +293,20 @@
             btnDangNhap.UseVisualStyleBackColor = false;
             btnDangNhap.Click += btnDangNhap_Click;
             //
+            // lnkDangKy
+            //
+            lnkDangKy.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            lnkDangKy.LinkBehavior = LinkBehavior.HoverUnderline;
+            lnkDangKy.LinkColor = Color.FromArgb(194, 65, 12);
+            lnkDangKy.Location = new Point(70, 407);
+            lnkDangKy.Name = "lnkDangKy";
+            lnkDangKy.Size = new Size(320, 25);
+            lnkDangKy.TabIndex = 10;
+            lnkDangKy.TabStop = true;
+            lnkDangKy.Text = "Đăng ký tài khoản hội viên";
+            lnkDangKy.TextAlign = ContentAlignment.MiddleCenter;
+            lnkDangKy.LinkClicked += lnkDangKy_LinkClicked;
+            //
             // lblFooter
             //
             lblFooter.Font = new Font("Segoe UI", 8.5F);
@@ -349,6 +365,7 @@
         private TextBox txtMatKhau;
         private CheckBox chkHienMatKhau;
         private LinkLabel lnkQuenMatKhau;
+        private LinkLabel lnkDangKy;
         private Label lblLoi;
         private Button btnDangNhap;
         private Label lblFooter;

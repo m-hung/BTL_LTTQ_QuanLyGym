@@ -1,4 +1,4 @@
-﻿using QuanLyGym.BLL.Services;
+using QuanLyGym.BLL.Services;
 using QuanLyGym.UI.Helpers;
 
 namespace QuanLyGym.UI.Forms.Common
@@ -17,7 +17,7 @@ namespace QuanLyGym.UI.Forms.Common
 
         private void frmLogin_Shown(object? sender, EventArgs e)
         {
-            txtTenDangNhap.Focus();
+            ActiveControl = string.IsNullOrEmpty(txtTenDangNhap.Text) ? txtTenDangNhap : txtMatKhau;
         }
 
         private void btnDangNhap_Click(object? sender, EventArgs e)
@@ -83,6 +83,7 @@ namespace QuanLyGym.UI.Forms.Common
 
         private void HienLoi(string thongBao, Control focusVao)
         {
+            lblLoi.ForeColor = Color.FromArgb(220, 38, 38);
             lblLoi.Text = "⚠ " + thongBao;
             focusVao.Focus();
         }
@@ -106,6 +107,19 @@ namespace QuanLyGym.UI.Forms.Common
                 txtMatKhau.Clear();
                 txtMatKhau.Focus();
             }
+        }
+
+        internal void SetRegisteredUsername(string username)
+        {
+            txtTenDangNhap.Text = username;
+            txtMatKhau.Clear();
+            lblLoi.ForeColor = Color.FromArgb(21, 128, 61);
+            lblLoi.Text = "Đăng ký thành công. Bạn có thể đăng nhập ngay.";
+        }
+
+        private void lnkDangKy_LinkClicked(object? sender, LinkLabelLinkClickedEventArgs e)
+        {
+            DialogResult = DialogResult.Retry;
         }
 
         // Đổi màu viền ô nhập khi đang gõ

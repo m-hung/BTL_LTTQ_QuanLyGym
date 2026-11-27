@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace QuanLyGym.DAL.Entities
@@ -20,6 +20,9 @@ namespace QuanLyGym.DAL.Entities
 
         [StringLength(20)]
         public string Status { get; set; } = "Pending";
+
+        [StringLength(24)]
+        public string? Method { get; set; }
 
         [StringLength(255)]
         public string Note { get; set; } = string.Empty;

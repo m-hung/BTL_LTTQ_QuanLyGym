@@ -39,7 +39,7 @@ namespace QuanLyGym.UI.Forms.Member.Views
                 BackColor = UITheme.Background
             };
             pnlRootLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
-            int topRowH = (int)Math.Round(280f * scale);
+            int topRowH = (int)Math.Round(320f * scale);
             pnlRootLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, topRowH)); // Hàng 0: Thẻ điện tử & Thông tin gói
             pnlRootLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));    // Hàng 1: Lịch sử giao dịch & Đặc quyền
 
@@ -102,9 +102,9 @@ namespace QuanLyGym.UI.Forms.Member.Views
             bool isClassic = MemberService.Instance.IsClassicMember();
             var activeMembership = MemberService.Instance.GetActiveMembership();
 
-            Color bgStart = isClassic ? Color.FromArgb(15, 23, 42) : Color.FromArgb(20, 24, 33);
-            Color bgEnd = isClassic ? Color.FromArgb(30, 41, 59) : Color.FromArgb(45, 55, 72);
-            Color borderColor = isClassic ? Color.FromArgb(56, 189, 248) : Color.FromArgb(245, 158, 11);
+            Color bgStart = isClassic ? Color.FromArgb(18, 29, 24) : Color.FromArgb(17, 28, 21);
+            Color bgEnd = isClassic ? Color.FromArgb(30, 44, 35) : Color.FromArgb(37, 48, 25);
+            Color borderColor = frmMemberQrPreview.Accent;
 
             RoundedPanel card = new RoundedPanel
             {
@@ -121,14 +121,14 @@ namespace QuanLyGym.UI.Forms.Member.Views
             {
                 Text = "⚡ TITAN FITNESS CLUB",
                 Font = new Font("Segoe UI", 12f, FontStyle.Bold),
-                ForeColor = isClassic ? Color.FromArgb(56, 189, 248) : Color.FromArgb(251, 191, 36),
+                ForeColor = borderColor,
                 AutoSize = true,
                 Location = new Point((int)(18 * scale), (int)(16 * scale)),
                 UseMnemonic = false
             };
 
-            string badgeText = isClassic ? "CLASSIC MEMBER" : (activeMembership?.Package?.PackageName.ToUpper() ?? "VIP DIAMOND");
-            Color badgeBg = isClassic ? Color.FromArgb(14, 165, 233) : Color.FromArgb(79, 70, 229);
+            string badgeText = activeMembership == null ? "CHƯA CÓ GÓI" : isClassic ? "CLASSIC PASS" : "VIP PASS";
+            Color badgeBg = Color.FromArgb(53, 68, 30);
 
             Label lblBadge = new Label
             {
@@ -148,18 +148,21 @@ namespace QuanLyGym.UI.Forms.Member.Views
                 Location = new Point((int)(20 * scale), (int)(56 * scale))
             };
 
-            string cardNumber = $"MB-2026 •••• •••• {UserSession.AccountID:D4}";
+            var member = MemberService.Instance.GetCurrentMember();
+            string? cardCode = member != null && member.QrCardId != Guid.Empty
+                ? QuanLyGym.BLL.Services.QrCheckInService.FormatCode(member.QrCardId) : null;
+            string cardNumber = cardCode ?? "Chưa tải được mã thẻ";
             Label lblCardNumber = new Label
             {
                 Text = cardNumber,
-                Font = new Font("Consolas", 13.5f, FontStyle.Bold),
+                Font = new Font("Consolas", 9f, FontStyle.Bold),
                 ForeColor = Color.FromArgb(241, 245, 249),
                 AutoSize = true,
-                Location = new Point((int)(18 * scale), (int)(110 * scale)),
+                Location = new Point((int)(18 * scale), (int)(165 * scale)),
                 UseMnemonic = false
             };
 
-            string memberName = MemberService.Instance.GetCurrentMember()?.FullName?.ToUpper() ?? (string.IsNullOrEmpty(UserSession.DisplayName) ? "HỘI VIÊN TITAN" : UserSession.DisplayName.ToUpper());
+            string memberName = member?.FullName?.ToUpper() ?? (string.IsNullOrEmpty(UserSession.DisplayName) ? "HỘI VIÊN TITAN" : UserSession.DisplayName.ToUpper());
             Label lblMemberName = new Label
             {
                 Text = memberName,
@@ -171,7 +174,7 @@ namespace QuanLyGym.UI.Forms.Member.Views
 
             string expiryText = activeMembership != null
                 ? $"HẠN DÙNG: {activeMembership.EndDate:dd/MM/yyyy}"
-                : "HẠN DÙNG: 30/11/2026";
+                : "CHƯA KÍCH HOẠT";
 
             Label lblExpiry = new Label
             {
@@ -182,17 +185,67 @@ namespace QuanLyGym.UI.Forms.Member.Views
                 UseMnemonic = false
             };
 
+            var qr = new QrPreviewControl(cardCode)
+            {
+                Size = new Size((int)(108 * scale), (int)(108 * scale)),
+                Cursor = Cursors.Hand
+            };
+            var enlargeQr = new Button
+            {
+                Text = "Phóng to mã QR",
+                AutoSize = true,
+                FlatStyle = FlatStyle.Flat,
+                ForeColor = Color.White,
+                BackColor = bgEnd,
+                Font = UITheme.FontSmallBold,
+                Cursor = Cursors.Hand
+            };
+            enlargeQr.Enabled = cardCode != null;
+            enlargeQr.FlatAppearance.BorderColor = borderColor;
+            void ShowQr(object? sender, EventArgs e)
+            {
+                if (cardCode == null) return;
+                using var preview = new frmMemberQrPreview(memberName, activeMembership?.Package?.PackageName ?? "Chưa đăng ký", cardCode);
+                preview.ShowDialog(this);
+            }
+            qr.Click += ShowQr;
+            enlargeQr.Click += ShowQr;
+            card.Controls.Add(qr);
+            card.Controls.Add(enlargeQr);
             card.Controls.Add(lblLogo);
             card.Controls.Add(lblBadge);
             card.Controls.Add(chip);
             card.Controls.Add(lblCardNumber);
             card.Controls.Add(lblMemberName);
             card.Controls.Add(lblExpiry);
+            var line = new Panel { Height = Math.Max(1, (int)scale), BackColor = Color.FromArgb(68, 84, 67) };
+            card.Controls.Add(line);
+            var package = new Label
+            {
+                Text = activeMembership?.Package?.PackageName ?? "Chưa đăng ký",
+                Font = UITheme.FontSmallBold, ForeColor = borderColor, AutoEllipsis = true, UseMnemonic = false
+            };
+            card.Controls.Add(package);
+            var codeCaption = new Label
+            {
+                Text = "MÃ THẺ HỘI VIÊN", ForeColor = Color.FromArgb(171, 183, 172),
+                AutoSize = true, Font = UITheme.FontSmallBold
+            };
+            card.Controls.Add(codeCaption);
 
             card.Resize += (s, e) =>
             {
+                qr.Location = new Point((card.ClientSize.Width - qr.Width) / 2, (int)(48 * scale));
+                enlargeQr.Location = new Point((card.ClientSize.Width - enlargeQr.PreferredSize.Width) / 2, qr.Bottom + (int)(5 * scale));
+                lblCardNumber.Location = new Point((card.ClientSize.Width - lblCardNumber.PreferredWidth) / 2, (int)(206 * scale));
                 lblBadge.Location = new Point(Math.Max(120, card.Width - lblBadge.Width - (int)(18 * scale)), (int)(16 * scale));
-                lblMemberName.Location = new Point((int)(18 * scale), Math.Max(120, card.Height - (int)(38 * scale)));
+                int inset = (int)(18 * scale);
+                codeCaption.Location = new Point((card.ClientSize.Width - codeCaption.PreferredWidth) / 2, (int)(230 * scale));
+                line.SetBounds(inset, card.Height - (int)(60 * scale), Math.Max(0, card.Width - 2 * inset), line.Height);
+                lblMemberName.AutoSize = false;
+                lblMemberName.AutoEllipsis = true;
+                lblMemberName.SetBounds(inset, card.Height - (int)(55 * scale), Math.Max(0, card.Width - lblExpiry.PreferredWidth - 3 * inset), (int)(24 * scale));
+                package.SetBounds(inset, card.Height - (int)(29 * scale), Math.Max(0, card.Width - lblExpiry.PreferredWidth - 3 * inset), (int)(20 * scale));
                 lblExpiry.Location = new Point(Math.Max(120, card.Width - lblExpiry.Width - (int)(18 * scale)), Math.Max(120, card.Height - (int)(38 * scale)));
             };
 

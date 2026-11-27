@@ -26,11 +26,8 @@ namespace QuanLyGym.UI
 
             while (true)
             {
-                using (var login = new frmLogin())
-                {
-                    if (login.ShowDialog() != DialogResult.OK)
-                        return;
-                }
+                if (!ShowLogin())
+                    return;
 
                 Form? mainForm = UserSession.Role switch
                 {
@@ -52,6 +49,34 @@ namespace QuanLyGym.UI
 
                 if (!UserSession.IsLoggingOut) return;
                 UserSession.Clear();
+            }
+        }
+
+        private static bool ShowLogin()
+        {
+            string? registeredUsername = null;
+            Rectangle loginBounds;
+
+            while (true)
+            {
+                using (var login = new frmLogin())
+                {
+                    if (registeredUsername != null)
+                        login.SetRegisteredUsername(registeredUsername);
+
+                    var result = login.ShowDialog();
+                    if (result != DialogResult.Retry)
+                        return result == DialogResult.OK;
+                    loginBounds = login.Bounds;
+                }
+
+                using var registration = new frmMemberRegistration();
+                registration.PerformAutoScale();
+                registration.StartPosition = FormStartPosition.Manual;
+                registration.Bounds = loginBounds;
+                registeredUsername = registration.ShowDialog() == DialogResult.OK
+                    ? registration.RegisteredUsername
+                    : null;
             }
         }
 

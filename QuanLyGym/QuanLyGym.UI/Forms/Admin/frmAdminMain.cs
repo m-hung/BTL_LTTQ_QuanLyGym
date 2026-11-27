@@ -24,6 +24,8 @@ namespace QuanLyGym.UI.Forms.Admin
         private static readonly Color Orange = Color.FromArgb(249, 115, 22);
         private static readonly Color Blue = Color.FromArgb(59, 130, 246);
 
+        private readonly Button _btnNavQrCheckIn = new();
+        private ucAdminQrCheckIn? _ucQrCheckIn;
         private Button? _activeNav;
         private ToolTip? _chartToolTip;
         private string _activeToolTipText = "";
@@ -113,10 +115,11 @@ namespace QuanLyGym.UI.Forms.Admin
             }
         }
 
-        private void frmAdminMain_Shown(object sender, EventArgs e)
+        private async void frmAdminMain_Shown(object sender, EventArgs e)
         {
             // Đảm bảo khi form hiển thị hoàn toàn thì nạp và render lại dữ liệu chuẩn kích thước
             LoadAllChartsAndData();
+            await QrCameraView.WarmUpAsync();
         }
 
         public void LoadAllChartsAndData()
@@ -243,6 +246,21 @@ namespace QuanLyGym.UI.Forms.Admin
             {
                 _ucAccount.Visible = false;
             }
+
+            if (btn == _btnNavQrCheckIn)
+            {
+                if (_ucQrCheckIn == null)
+                {
+                    _ucQrCheckIn = new ucAdminQrCheckIn { Dock = DockStyle.Fill };
+                    Controls.Add(_ucQrCheckIn);
+                    _ucQrCheckIn.BringToFront();
+                }
+                _ucQrCheckIn.Visible = true;
+            }
+            else if (_ucQrCheckIn != null)
+            {
+                _ucQrCheckIn.Visible = false;
+            }
         }
 
         private void tmrClock_Tick(object sender, EventArgs e)
@@ -270,6 +288,9 @@ namespace QuanLyGym.UI.Forms.Admin
             ConfigureNavButton(btnNavStaff, "btnNavStaff", "☺  Nhân viên");
             ConfigureNavButton(btnNavMember, "btnNavMember", "♙  Hội viên");
             ConfigureNavButton(btnNavAccount, "btnNavAccount", "⚿  Tài khoản");
+            _btnNavQrCheckIn.TabIndex = btnNavAccount.TabIndex + 1;
+            ConfigureNavButton(_btnNavQrCheckIn, "btnNavQrCheckIn", "▣  Check-in QR");
+            flpNav.Controls.Add(_btnNavQrCheckIn);
 
             // Nút Xuất báo cáo
             if (btnExportReport != null)

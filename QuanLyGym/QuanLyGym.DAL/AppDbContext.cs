@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using QuanLyGym.DAL.Entities;
 
 namespace QuanLyGym.DAL
@@ -118,6 +118,9 @@ namespace QuanLyGym.DAL
             modelBuilder.Entity<Staff>().HasOne(s => s.Branch).WithMany().HasForeignKey(s => s.BranchID).OnDelete(DeleteBehavior.Restrict);
 
             // 2. TỰ ĐỘNG NẠP TẤT CẢ SEED DATA TỪ THƯ MỤC CONFIGURATIONS
+            modelBuilder.Entity<Member>().Property(member => member.QrCardId).HasDefaultValueSql("NEWID()");
+            modelBuilder.Entity<Member>().HasIndex(member => member.QrCardId).IsUnique();
+
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
         }
     }

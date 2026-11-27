@@ -14,6 +14,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4370.26" />
+    <PackageReference Include="QRCoder" Version="1.9.0" />
     <PackageReference Include="WinForms.DataVisualization" Version="1.10.2" />
   </ItemGroup>
 
@@ -23,13 +25,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="QrCamera\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Folder Include="Forms\Member\" />
     <Folder Include="Forms\Common\" />
     <Folder Include="Forms\PT\" />
   </ItemGroup>
 
   <ItemGroup>
-    <!-- File cấu hình gửi mail (chứa mật khẩu, KHÔNG đưa lên git). Có file thì tự chép sang thư mục chạy. -->
     <None Update="mail.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
