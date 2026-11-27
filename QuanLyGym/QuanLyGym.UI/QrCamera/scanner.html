@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Camera check-in QR</title>
+<style>
+:root { color-scheme: dark; --card: #18181b; --inset: #141417; --border: #2d2d32; --text: #f4f4f5; --muted: #a1a1aa; --accent: #f97316; }
+* { box-sizing: border-box; }
+body { margin: 0; color: var(--text); background: var(--card); font: 14px "Segoe UI", sans-serif; }
+.toolbar { display: flex; gap: 8px; margin-bottom: 10px; }
+select, button { font: inherit; padding: 7px 10px; border-radius: 5px; }
+select { flex: 1; min-width: 0; border: 1px solid var(--border); background: var(--inset); color: var(--text); }
+button { background: var(--accent); color: var(--inset); border: 1px solid var(--accent); font-weight: 600; cursor: pointer; }
+select:focus-visible, button:focus-visible { outline: 2px solid #fdba74; outline-offset: 2px; }
+button:enabled:hover { background: #fb923c; }
+button:disabled { opacity: .6; cursor: wait; }
+.viewport { position: relative; display: flex; align-items: center; justify-content: center; height: clamp(125px, calc(100vh - 76px), 700px); overflow: hidden; border-radius: 8px; background: var(--inset); color: var(--text); border: 1px solid var(--border); }
+#reader { flex: none; width: min(100%, calc((100vh - 98px) * 1.33)); margin: 0 auto; }
+#placeholder { position: absolute; inset: 0; text-align: center; align-content: center; padding: 14px; }
+#placeholder[hidden] { display: none; }
+.brackets { color: var(--accent); font-size: 44px; line-height: 1; }
+h1 { font-size: 18px; margin: 9px 0 5px; }
+p { margin: 0; color: var(--muted); }
+#status { color: var(--muted); padding: 5px 0 0; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="toolbar">
+  <select id="devices" aria-label="Chọn camera" disabled><option value="">Camera mặc định</option></select>
+  <button id="start" type="button">Bật camera</button>
+</div>
+<div class="viewport">
+  <div id="reader"></div>
+  <div id="placeholder"><div class="brackets" aria-hidden="true">⌗</div><h1>Camera đang tắt</h1><p>Bật camera, rồi giữ mã QR thẳng trong khung.</p></div>
+</div>
+<p id="status" role="status"></p>
+<script src="html5-qrcode.min.js"></script>
+<script src="scanner.js"></script>
+</body>
+</html>

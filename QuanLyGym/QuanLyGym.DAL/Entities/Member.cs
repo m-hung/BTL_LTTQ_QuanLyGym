@@ -8,6 +8,8 @@ namespace QuanLyGym.DAL.Entities
         [Key]
         public int MemberID { get; set; }
 
+        public Guid QrCardId { get; set; }
+
         public int AccountID { get; set; }
         [ForeignKey("AccountID")]
         public Account? Account { get; set; }
